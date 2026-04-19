@@ -52,7 +52,13 @@
       <p class="text-teal-200 text-sm mt-1">Зуль-Кагда 1447</p>
     </div>
     <div class="flex flex-col items-end gap-2">
-      <div class="bg-teal-700/80 backdrop-blur px-3 py-1.5 rounded-full text-xs font-semibold" id="hijri-date">Загрузка...</div>
+      <div class="flex items-center gap-2">
+        <div class="bg-teal-700/80 backdrop-blur px-3 py-1.5 rounded-full text-xs font-semibold" id="hijri-date">Загрузка...</div>
+        <!-- КНОПКА ИНСТРУКЦИИ -->
+        <button onclick="openInstallModal()" class="bg-teal-700/80 w-8 h-8 flex items-center justify-center rounded-full text-sm hover:bg-teal-600 transition">
+          ℹ️
+        </button>
+      </div>
       <button onclick="shareApp()" class="flex items-center gap-1 text-xs bg-teal-900/50 hover:bg-teal-900 px-2 py-1 rounded transition active:scale-95">
         📤 Поделиться
       </button>
@@ -90,13 +96,13 @@
           <span class="absolute bottom-1 left-1/2 -translate-x-1/2 text-xs font-bold text-gray-400">Ю</span>
           <span class="absolute left-1 top-1/2 -translate-y-1/2 text-xs font-bold text-gray-400">З</span>
           <span class="absolute right-1 top-1/2 -translate-y-1/2 text-xs font-bold text-gray-400">В</span>
-        </div>
-      </div>
+        </div>      </div>
       
       <div class="compass-arrow" id="compass-arrow">
         <div class="absolute top-3 left-1/2 -translate-x-1/2 w-1 h-12 bg-gradient-to-t from-transparent to-emerald-600 rounded-full origin-bottom"></div>
         <div class="absolute top-2 left-1/2 -translate-x-1/2 w-3 h-3 bg-emerald-600 rotate-45"></div>
-      </div>      
+      </div>
+      
       <div class="compass-center"></div>
     </div>
     <div class="space-y-3">
@@ -139,13 +145,13 @@
       <div class="flex justify-center gap-8">
         <!-- Telegram -->
         <a href="https://t.me/Aslyamov74" target="_blank" class="flex flex-col items-center group">
-          <div class="w-12 h-12 bg-blue-50 rounded-full flex items-center justify-center group-hover:bg-blue-100 transition mb-2">
-            <span class="text-2xl">💬</span>
+          <div class="w-12 h-12 bg-blue-50 rounded-full flex items-center justify-center group-hover:bg-blue-100 transition mb-2">            <span class="text-2xl">💬</span>
           </div>
           <span class="text-blue-600 font-semibold">@Aslyamov74</span>
         </a>
         <!-- Телефон -->
-        <a href="tel:+79911745113" class="flex flex-col items-center group">          <div class="w-12 h-12 bg-green-50 rounded-full flex items-center justify-center group-hover:bg-green-100 transition mb-2">
+        <a href="tel:+79911745113" class="flex flex-col items-center group">
+          <div class="w-12 h-12 bg-green-50 rounded-full flex items-center justify-center group-hover:bg-green-100 transition mb-2">
             <span class="text-2xl">📞</span>
           </div>
           <span class="text-green-600 font-semibold">8 (991) 174-51-13</span>
@@ -154,6 +160,42 @@
     </div>
   </div>
 </main>
+
+<!-- МОДАЛЬНОЕ ОКНО ИНСТРУКЦИИ -->
+<div id="install-modal" class="fixed inset-0 z-[100] hidden">
+  <!-- Фон -->
+  <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" onclick="closeInstallModal()"></div>
+  <!-- Контент -->
+  <div class="absolute bottom-0 left-0 right-0 bg-white rounded-t-3xl p-6 animate-slide-up md:bottom-auto md:top-1/2 md:-translate-y-1/2 md:mx-auto md:max-w-sm md:rounded-2xl">
+    <div class="w-12 h-1.5 bg-gray-200 rounded-full mx-auto mb-6 md:hidden"></div>
+    
+    <div class="flex justify-between items-center mb-4">
+      <h3 class="text-lg font-bold text-gray-900">📲 Как установить приложение?</h3>
+      <button onclick="closeInstallModal()" class="text-gray-400 hover:text-gray-600 text-2xl leading-none">&times;</button>
+    </div>
+    
+    <div class="space-y-4 text-sm text-gray-700">
+      <div class="bg-blue-50 p-4 rounded-xl border border-blue-100">
+        <p class="font-semibold text-blue-800 mb-1">🤖 Android (Chrome)</p>
+        <ol class="list-decimal pl-4 space-y-1">
+          <li>Нажмите на меню (три точки <span class="font-bold">⋮</span> справа сверху)</li>
+          <li>Выберите <span class="font-bold text-blue-600">"Добавить на главный экран"</span></li>
+        </ol>
+      </div>
+      
+      <div class="bg-gray-50 p-4 rounded-xl border border-gray-100">
+        <p class="font-semibold text-gray-800 mb-1">🍎 iPhone (Safari)</p>
+        <ol class="list-decimal pl-4 space-y-1">
+          <li>Нажмите кнопку <span class="font-bold">"Поделиться"</span> (квадрат со стрелкой ⬆️)</li>
+          <li>Найдите в списке <span class="font-bold text-gray-600">"На экран «Домой»"</span></li>
+        </ol>
+      </div>
+    </div>
+    
+    <button onclick="closeInstallModal()" class="w-full mt-6 bg-teal-600 text-white font-semibold py-3 rounded-xl hover:bg-teal-700 transition active:scale-95">
+      Понятно, спасибо!
+    </button>  </div>
+</div>
 
 <script>
   // === ДАННЫЕ ===
@@ -194,14 +236,14 @@
   };
 
   const prayers = [
-    { key: 'suhur', name: 'Сухур', icon: '🌙', type: 'prep' },    { key: 'fajr', name: 'Фаджр', icon: '🌅', type: 'prayer' },
+    { key: 'suhur', name: 'Сухур', icon: '🌙', type: 'prep' },
+    { key: 'fajr', name: 'Фаджр', icon: '🌅', type: 'prayer' },
     { key: 'sunrise', name: 'Восход', icon: '☀️', type: 'info' },
     { key: 'dhuhr', name: 'Зухр', icon: '🕌', type: 'prayer' },
     { key: 'asr', name: 'Аср', icon: '🕐', type: 'prayer' },
     { key: 'maghrib', name: 'Магриб', icon: '🌆', type: 'prayer' },
     { key: 'isha', name: 'Иша', icon: '🌃', type: 'prayer' }
   ];
-
   const monthNames = ["янв", "фев", "мар", "апр", "май", "июн", "июл", "авг", "сен", "окт", "ноя", "дек"];
   let currentData = null;
 
@@ -243,14 +285,14 @@
             <div class="text-right">
               <p class="text-xl font-bold prayer-time ${isNext ? 'text-emerald-700' : 'text-teal-700'}">${currentData[prayer.key]}</p>
               ${isNext ? '<p class="text-xs text-emerald-600 font-semibold">Следующий</p>' : ''}
-            </div>          </div>`;
+            </div>
+          </div>`;
       }).join('');
 
       const nextPrayer = prayers.find(p => {
         const [h, m] = currentData[p.key].split(':').map(Number);
         return currentTime < h * 60 + m && p.type === 'prayer';
-      }) || prayers[1];
-      
+      }) || prayers[1];      
       updateCountdown(nextPrayer);
     }
 
@@ -292,14 +334,14 @@
 
       const reg = await navigator.serviceWorker.ready;
       const nextPrayer = prayers.find(p => {
-        const [h, m] = currentData[p.key].split(':').map(Number);        const now = new Date();
+        const [h, m] = currentData[p.key].split(':').map(Number);
+        const now = new Date();
         return (now.getHours() * 60 + now.getMinutes()) < h * 60 + m && p.type === 'prayer';
       }) || prayers[1];
 
       const [h, m] = currentData[nextPrayer.key].split(':').map(Number);
       let triggerTime = new Date();
-      triggerTime.setHours(h, m - 5, 0, 0);
-      
+      triggerTime.setHours(h, m - 5, 0, 0);      
       const delay = triggerTime - Date.now();
       if (delay > 0 && delay < 24 * 60 * 60 * 1000) {
         localStorage.setItem('prayer_notif', JSON.stringify({
@@ -341,14 +383,14 @@
   const ARROW = document.getElementById('compass-arrow');
   const RING = document.getElementById('compass-ring');
   const STATUS = document.getElementById('compass-status');
-  const BTN = document.getElementById('enable-compass-btn');  const QIBLA = 214;
+  const BTN = document.getElementById('enable-compass-btn');
+  const QIBLA = 214;
   let isCompassActive = false;
   let compassHandler = null;
 
   function enableCompass() {
     if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
-      DeviceOrientationEvent.requestPermission()
-        .then(res => res === 'granted' ? startCompass() : (STATUS.textContent = '⛔ Доступ запрещён'))
+      DeviceOrientationEvent.requestPermission()        .then(res => res === 'granted' ? startCompass() : (STATUS.textContent = '⛔ Доступ запрещён'))
         .catch(console.error);
     } else {
       startCompass();
@@ -381,6 +423,14 @@
     }
   }
 
+  // === МОДАЛЬНОЕ ОКНО ===
+  function openInstallModal() {
+    document.getElementById('install-modal').classList.remove('hidden');
+  }
+  function closeInstallModal() {
+    document.getElementById('install-modal').classList.add('hidden');
+  }
+
   // === УТИЛИТЫ ===
   const banner = document.getElementById('offline-banner');
   window.addEventListener('online', () => banner.classList.add('hidden'));
@@ -389,8 +439,8 @@
 
   function shareApp() {
     if (navigator.share) {
-      navigator.share({ title: 'Намаз Челябинск', text: 'Точное время намазов и Кибла для Челябинска 🕌', url: window.location.href }).catch(console.error);
-    } else {      navigator.clipboard.writeText(window.location.href).then(() => alert('Ссылка скопирована!')).catch(() => alert('Не удалось скопировать'));
+      navigator.share({ title: 'Намаз Челябинск', text: 'Точное время намазов и Кибла для Челябинска 🕌', url: window.location.href }).catch(console.error);    } else {
+      navigator.clipboard.writeText(window.location.href).then(() => alert('Ссылка скопирована!')).catch(() => alert('Не удалось скопировать'));
     }
   }
 
