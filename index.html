@@ -2,19 +2,19 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <meta name="theme-color" content="#0f766e">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="description" content="Время намазов для г. Челябинска. Точно, просто, всегда под рукой.">
   <title>Намаз Челябинск</title>
   
-  <!-- Favicon & PWA Icon (SVG, встроенный) -->
+  <!-- Favicon & Touch Icons -->
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect width='192' height='192' rx='40' fill='%230f766e'/><path d='M130 45c-30 10-50 35-50 65s20 55 50 65c15-20 25-40 25-65s-10-45-25-65z' fill='%23f59e0b'/><circle cx='145' cy='145' r='8' fill='%23f59e0b'/></svg>">
   <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect width='192' height='192' rx='40' fill='%230f766e'/><path d='M130 45c-30 10-50 35-50 65s20 55 50 65c15-20 25-40 25-65s-10-45-25-65z' fill='%23f59e0b'/><circle cx='145' cy='145' r='8' fill='%23f59e0b'/></svg>">
   
-  <!-- PWA Manifest (встроенный) -->
-  <link rel="manifest" href="data:application/json;base64,eyJuYW1lIjoiTmFtYXogU2hlbHlhYmluc2siLCJzaG9ydF9uYW1lIjoiTmFtYXoiLCJzdGFydF91cmwiOiIuIiwiZGlzcGxheSI6InN0YW5kYWxvbmUiLCJiYWNrZ3JvdW5kX2NvbG9yIjoiI2Y4ZmFmYyIsInRoZW1lX2NvbG9yIjoiIzBmNzY2ZSIsIm9yaWVudGF0aW9uIjoicG9ydHJhaXQiLCJpY29ucyI6W3sic3JjIjoiaHR0cHM6Ly9pY29uczguZ2l0aHViLmlvL2Jvb3RzdHJhcC1pY29ucy9pY29ucy9tb29uLXN0YXJzLmRhdGEuc3ZnIiwic2l6ZXMiOiIxOTJ4MTkyIiwidHlwZSI6ImltYWdlL3N2Zyt4bWwiLCJwdXJwb3NlIjoiYW55IG1hc2thYmxlIn1dfQ==">
+  <!-- PWA Manifest (Inline, Valid JSON) -->
+  <link rel="manifest" href="application/json;base64,eyJuYW1lIjoiTmFtYXogU2hlbHlhYmluc2siLCJzaG9ydF9uYW1lIjoiTmFtYXoiLCJzdGFydF91cmwiOiIuIiwiZGlzcGxheSI6InN0YW5kYWxvbmUiLCJiYWNrZ3JvdW5kX2NvbG9yIjoiI2Y4ZmFmYyIsInRoZW1lX2NvbG9yIjoiIzBmNzY2ZSIsIm9yaWVudGF0aW9uIjoicG9ydHJhaXQiLCJpY29ucyI6W3sic3JjIjoiZGF0YTppbWFnZS9zdmcreG1sLDxzdmcgeG1sbnM9J2h0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnJyB2aWV3Qm94PScwIDAgMTkyIDE5Mic+PHJlY3Qgd2lkdGg9JzE5MicgaGVpZ2h0PScxOTInIHJ4PSc0MCcgZmlsbD0nJTIzMGY3NjZlJy8+PHBhdGggZD0nTTEzMCA0NWMtMzAgMTAtNTAgMzUtNTAgNjVzMjAgNTUgNTAgNjVjMTUtMjAgMjUtNDAgMjUtNjVzLTEwLTQ1LTI1LTY1eicgZmlsbD0nJTIzZjU5ZTBiJy8+PGNpcmNsZSBjeD0nMTQ1JyBjeT0nMTQ1JyByPSc4JyBmaWxsPScjMjNmNTllMGInLz48L3N2Zz4iLCJzaXplcyI6IjE5MngxOTIiLCJ0eXBlIjoiaW1hZ2Uvc3ZnK3htbCJ9XX0=">
   
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
@@ -35,7 +35,6 @@
 </head>
 <body class="pb-8">
 
-<!-- Header -->
 <header class="bg-teal-800 text-white pt-8 pb-10 px-4 rounded-b-3xl shadow-lg">
   <div class="max-w-md mx-auto flex justify-between items-center">
     <div>
@@ -46,41 +45,28 @@
   </div>
 </header>
 
-<!-- Main Content -->
-<main class="max-w-md mx-auto px-4 -mt-6">  
-  <!-- Today Full Schedule -->
+<main class="max-w-md mx-auto px-4 -mt-6">
   <div class="card p-5 mb-4 fade-in">
-    <div class="flex justify-between items-center mb-4">
-      <div>
+    <div class="flex justify-between items-center mb-4">      <div>
         <h2 class="text-lg font-bold text-gray-900" id="today-full-date">Сегодня</h2>
         <p class="text-sm text-gray-500" id="today-hijri">1 Зуль-Кагда 1447</p>
       </div>
       <span class="text-teal-600 text-xs font-bold bg-teal-50 px-3 py-1 rounded-full" id="day-name">Сб</span>
     </div>
-
-    <!-- All Prayers -->
-    <div class="space-y-2" id="today-prayers">
-      <!-- Generated via JS -->
-    </div>
-
-    <!-- Countdown -->
+    <div class="space-y-2" id="today-prayers"></div>
     <div class="mt-4 p-3 bg-teal-50 rounded-xl text-center border border-teal-100">
       <p class="text-xs text-teal-600 mb-1">До следующего намаза</p>
       <p class="text-2xl font-bold text-teal-800 countdown-digit" id="countdown">--:--:--</p>
     </div>
   </div>
 
-  <!-- Monthly List -->
   <div class="card overflow-hidden mb-4">
     <div class="p-4 border-b border-gray-100 bg-gray-50">
       <h3 class="font-semibold text-gray-800">Расписание на месяц</h3>
     </div>
-    <div class="max-h-[40vh] overflow-y-auto" id="prayer-list">
-      <!-- Generated via JS -->
-    </div>
+    <div class="max-h-[40vh] overflow-y-auto" id="prayer-list"></div>
   </div>
 
-  <!-- Footer -->
   <div class="text-center text-xs text-gray-400 px-4 pb-4">
     <p>Данные: ЦДУМ России / РДУМ Челябинской обл.</p>
     <p class="mt-1">Обновляется автоматически в 00:00</p>
@@ -88,7 +74,7 @@
 </main>
 
 <script>
-  // 📅 ДАННЫЕ (Скинь фото → я верну обновлённый блок)
+  // 📅 ДАННЫЕ
   const PRAYER_DATA = {
     updated: "2026-04-19",
     monthName: "Зуль-Кагда",
@@ -96,7 +82,8 @@
       { d:1, date:"18 апр", day:"Сб", suhur:"03:45", fajr:"04:05", sunrise:"05:45", dhuhr:"13:20", asr:"18:24", maghrib:"20:04", isha:"21:44" },
       { d:2, date:"19 апр", day:"Вс", suhur:"03:43", fajr:"04:03", sunrise:"05:43", dhuhr:"13:20", asr:"18:26", maghrib:"20:06", isha:"21:46" },
       { d:3, date:"20 апр", day:"Пн", suhur:"03:40", fajr:"04:00", sunrise:"05:40", dhuhr:"13:20", asr:"18:28", maghrib:"20:08", isha:"21:48" },
-      { d:4, date:"21 апр", day:"Вт", suhur:"03:38", fajr:"03:58", sunrise:"05:38", dhuhr:"13:20", asr:"18:29", maghrib:"20:09", isha:"21:49" },      { d:5, date:"22 апр", day:"Ср", suhur:"03:36", fajr:"03:56", sunrise:"05:36", dhuhr:"13:20", asr:"18:31", maghrib:"20:11", isha:"21:51" },
+      { d:4, date:"21 апр", day:"Вт", suhur:"03:38", fajr:"03:58", sunrise:"05:38", dhuhr:"13:20", asr:"18:29", maghrib:"20:09", isha:"21:49" },
+      { d:5, date:"22 апр", day:"Ср", suhur:"03:36", fajr:"03:56", sunrise:"05:36", dhuhr:"13:20", asr:"18:31", maghrib:"20:11", isha:"21:51" },
       { d:6, date:"23 апр", day:"Чт", suhur:"03:33", fajr:"03:53", sunrise:"05:33", dhuhr:"13:20", asr:"18:33", maghrib:"20:13", isha:"21:53" },
       { d:7, date:"24 апр", day:"Пт", suhur:"03:31", fajr:"03:51", sunrise:"05:31", dhuhr:"13:20", asr:"18:35", maghrib:"20:15", isha:"21:55" },
       { d:8, date:"25 апр", day:"Сб", suhur:"03:29", fajr:"03:49", sunrise:"05:29", dhuhr:"13:20", asr:"18:37", maghrib:"20:17", isha:"21:57" },
@@ -109,8 +96,7 @@
       { d:15, date:"2 май", day:"Сб", suhur:"03:13", fajr:"03:33", sunrise:"05:13", dhuhr:"13:20", asr:"18:51", maghrib:"20:31", isha:"22:11" },
       { d:16, date:"3 май", day:"Вс", suhur:"03:11", fajr:"03:31", sunrise:"05:11", dhuhr:"13:20", asr:"18:53", maghrib:"20:33", isha:"22:13" },
       { d:17, date:"4 май", day:"Пн", suhur:"03:09", fajr:"03:29", sunrise:"05:09", dhuhr:"13:20", asr:"18:55", maghrib:"20:35", isha:"22:15" },
-      { d:18, date:"5 май", day:"Вт", suhur:"03:07", fajr:"03:27", sunrise:"05:07", dhuhr:"13:20", asr:"18:57", maghrib:"20:37", isha:"22:17" },
-      { d:19, date:"6 май", day:"Ср", suhur:"03:05", fajr:"03:25", sunrise:"05:05", dhuhr:"13:20", asr:"18:59", maghrib:"20:39", isha:"22:19" },
+      { d:18, date:"5 май", day:"Вт", suhur:"03:07", fajr:"03:27", sunrise:"05:07", dhuhr:"13:20", asr:"18:57", maghrib:"20:37", isha:"22:17" },      { d:19, date:"6 май", day:"Ср", suhur:"03:05", fajr:"03:25", sunrise:"05:05", dhuhr:"13:20", asr:"18:59", maghrib:"20:39", isha:"22:19" },
       { d:20, date:"7 май", day:"Чт", suhur:"03:03", fajr:"03:23", sunrise:"05:03", dhuhr:"13:20", asr:"19:01", maghrib:"20:41", isha:"22:21" },
       { d:21, date:"8 май", day:"Пт", suhur:"03:01", fajr:"03:21", sunrise:"05:01", dhuhr:"13:20", asr:"19:03", maghrib:"20:43", isha:"22:23" },
       { d:22, date:"9 май", day:"Сб", suhur:"02:59", fajr:"03:19", sunrise:"04:59", dhuhr:"13:20", asr:"19:05", maghrib:"20:45", isha:"22:25" },
@@ -125,7 +111,6 @@
     ]
   };
 
-  // 🔄 Logic
   const today = new Date();
   const dayIndex = today.getDate() - 18;
   const currentData = PRAYER_DATA.schedule[Math.max(0, Math.min(dayIndex, PRAYER_DATA.schedule.length - 1))];
@@ -144,20 +129,15 @@
     const container = document.getElementById('today-prayers');
     const now = new Date();
     const currentTime = now.getHours() * 60 + now.getMinutes();
-    
     let foundNext = false;
+
     container.innerHTML = prayers.map((prayer) => {
       const [h, m] = currentData[prayer.key].split(':').map(Number);
       const prayerTime = h * 60 + m;
       const isPassed = currentTime > prayerTime;
       const isNext = !foundNext && !isPassed && prayer.type === 'prayer';
-      
       if (isNext) foundNext = true;
-
-      let statusClass = '';
-      if (isNext) statusClass = 'next';
-      else if (isPassed) statusClass = 'passed';
-      
+      let statusClass = isNext ? 'next' : (isPassed ? 'passed' : '');
       return `
         <div class="prayer-card p-3 rounded-xl flex items-center justify-between ${statusClass}">
           <div class="flex items-center gap-3">
@@ -165,22 +145,19 @@
             <div>
               <p class="font-semibold text-sm ${isNext ? 'text-white' : 'text-gray-800'}">${prayer.name}</p>
               ${prayer.type === 'prep' ? '<p class="text-xs opacity-75">До рассвета</p>' : ''}
-              ${prayer.type === 'info' ? '<p class="text-xs opacity-75">Не намаз</p>' : ''}
-            </div>
+              ${prayer.type === 'info' ? '<p class="text-xs opacity-75">Не намаз</p>' : ''}            </div>
           </div>
           <div class="text-right">
             <p class="text-xl font-bold ${isNext ? 'text-white' : 'text-teal-700'}">${currentData[prayer.key]}</p>
             ${isNext ? '<p class="text-xs opacity-75">Следующий</p>' : ''}
           </div>
-        </div>
-      `;
+        </div>`;
     }).join('');
 
     const nextPrayer = prayers.find(p => {
       const [h, m] = currentData[p.key].split(':').map(Number);
       return currentTime < h * 60 + m && p.type === 'prayer';
     }) || prayers[1];
-    
     document.getElementById('hijri-date').textContent = `${currentData.d} ${PRAYER_DATA.monthName}`;
     updateCountdown(nextPrayer);
   }
@@ -191,63 +168,67 @@
     let target = new Date();
     target.setHours(h, m, 0, 0);
     if (target <= now) target.setDate(target.getDate() + 1);
-    
     const diff = target - now;
     const hrs = Math.floor(diff / 3600000);
-    const mins = Math.floor((diff % 3600000) / 60000);    const secs = Math.floor((diff % 60000) / 1000);
-    document.getElementById('countdown').textContent = 
-      `${String(hrs).padStart(2,'0')}:${String(mins).padStart(2,'0')}:${String(secs).padStart(2,'0')}`;
+    const mins = Math.floor((diff % 3600000) / 60000);
+    const secs = Math.floor((diff % 60000) / 1000);
+    document.getElementById('countdown').textContent = `${String(hrs).padStart(2,'0')}:${String(mins).padStart(2,'0')}:${String(secs).padStart(2,'0')}`;
   }
 
   function renderMonthlyList() {
     const listEl = document.getElementById('prayer-list');
     const todayDate = today.getDate();
-    
     listEl.innerHTML = PRAYER_DATA.schedule.map((item) => {
       const isToday = item.d === todayDate;
       return `
         <div class="flex justify-between items-center p-3 border-b border-gray-50 last:border-0 ${isToday ? 'bg-teal-50' : 'hover:bg-gray-50'} transition-colors">
           <div class="flex items-center gap-3">
             <span class="w-7 h-7 flex items-center justify-center rounded-full text-xs font-bold ${isToday ? 'bg-teal-600 text-white' : 'bg-gray-100 text-gray-600'}">${item.d}</span>
-            <div>
-              <p class="font-medium text-sm text-gray-800">${item.date} <span class="text-gray-400 font-normal">(${item.day})</span></p>
-            </div>
+            <div><p class="font-medium text-sm text-gray-800">${item.date} <span class="text-gray-400 font-normal">(${item.day})</span></p></div>
           </div>
           <div class="flex gap-3 text-xs text-gray-600">
-            <span>🌅 ${item.fajr}</span>
-            <span>🕌 ${item.dhuhr}</span>
-            <span>🌆 ${item.maghrib}</span>
+            <span>🌅 ${item.fajr}</span><span>🕌 ${item.dhuhr}</span><span>🌆 ${item.maghrib}</span>
           </div>
-        </div>
-      `;
+        </div>`;
     }).join('');
   }
 
-  // Init
   document.getElementById('today-full-date').textContent = `Сегодня, ${currentData.date}`;
-  document.getElementById('today-hijri').textContent = `${currentData.d} ${PRAYER_DATA.monthName} 1447`;
-  document.getElementById('day-name').textContent = currentData.day;
+  document.getElementById('today-hijri').textContent = `${currentData.d} ${PRAYER_DATA.monthName} 1447`;  document.getElementById('day-name').textContent = currentData.day;
 
   renderTodayPrayers();
   renderMonthlyList();
   setInterval(renderTodayPrayers, 1000);
-  
   const now = new Date();
   const tomorrow = new Date(now);
   tomorrow.setDate(tomorrow.getDate() + 1);
   tomorrow.setHours(0, 0, 0, 0);
   setTimeout(() => location.reload(), tomorrow - now);
 
-  // PWA Install
+  // ✅ PWA SERVICE WORKER (Inline, Registers Properly)
+  if ('serviceWorker' in navigator) {
+    const swCode = `
+      self.addEventListener('install', e => self.skipWaiting());
+      self.addEventListener('activate', e => e.waitUntil(self.clients.claim()));
+      self.addEventListener('fetch', e => {
+        e.respondWith(fetch(e.request).catch(() => new Response('Offline')));
+      });
+    `;
+    const blob = new Blob([swCode], { type: 'application/javascript' });
+    navigator.serviceWorker.register(URL.createObjectURL(blob));
+  }
+
+  // ✅ INSTALL PROMPT (Android)
   let deferredPrompt;
   window.addEventListener('beforeinstallprompt', (e) => {
     e.preventDefault();
     deferredPrompt = e;
-    setTimeout(() => {      if(deferredPrompt) {
+    setTimeout(() => {
+      if (deferredPrompt) {
         deferredPrompt.prompt();
         deferredPrompt = null;
       }
-    }, 3000);
+    }, 2000);
   });
 </script>
 </body>
