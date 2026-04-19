@@ -1,5 +1,4 @@
-// sw.js - Service Worker для PWA "Намаз Челябинск"
-const CACHE_NAME = 'namaz-chelyabinsk-v6'; // Версия обновлена
+const CACHE_NAME = 'namaz-chelyabinsk-v6';
 const ASSETS = ['/', '/index.html', '/manifest.json', '/icon.png'];
 
 self.addEventListener('install', (e) => {
@@ -20,7 +19,6 @@ self.addEventListener('fetch', (e) => {
   }
 });
 
-// Обработка клика по уведомлению
 self.addEventListener('notificationclick', (e) => {
   e.notification.close();
   e.waitUntil(clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientsList) => {
