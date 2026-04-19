@@ -432,73 +432,67 @@
 
   // ===== КОМПАС КИБЛЫ =====
   const QIBLA_ANGLE = 229; // градусов от севера для Челябинска
-  let compassActive = false;
-  let lastAlpha = null;
 
-  // Сглаживание показаний компаса (фильтр низких частот)
   let smoothAlpha = null;
-  const SMOOTH_FACTOR = 0.2;
+  const SMOOTH = 0.15; // коэффициент сглаживания (чем меньше — тем плавнее)
+  let sensorUsed = ''; // 'absolute' | 'orientation'
 
   function setStatus(type, text) {
-    const statusEl = document.getElementById('compass-status');
-    const dotEl = statusEl.querySelector('.status-dot');
-    const textEl = document.getElementById('status-text');
-    dotEl.className = `status-dot ${type}`;
-    textEl.textContent = text;
+    const dot = document.querySelector('#compass-status .status-dot');
+    dot.className = `status-dot ${type}`;
+    document.getElementById('status-text').textContent = text;
   }
 
-  function updateCompass(alpha) {
-    // Сглаживание — убирает дёргание стрелки
-    if (smoothAlpha === null) {
-      smoothAlpha = alpha;
-    } else {
-      // Обработка перехода через 0/360
-      let diff = alpha - smoothAlpha;
-      if (diff > 180) diff -= 360;
-      if (diff < -180) diff += 360;
-      smoothAlpha = smoothAlpha + diff * SMOOTH_FACTOR;
-      if (smoothAlpha < 0) smoothAlpha += 360;
-      if (smoothAlpha >= 360) smoothAlpha -= 360;
-    }
+  // Сглаживание с учётом перехода через 0/360
+  function smooth(current, newVal) {
+    if (current === null) return newVal;
+    let diff = newVal - current;
+    if (diff > 180) diff -= 360;
+    if (diff < -180) diff += 360;
+    let result = current + diff * SMOOTH;
+    if (result < 0) result += 360;
+    if (result >= 360) result -= 360;
+    return result;
+  }
 
-    // Стрелка компаса (красная) всегда показывает на север
-    // Если устройство повёрнуто на alpha градусов, стрелка должна компенсировать
-    const needleRotation = -smoothAlpha;
-    document.getElementById('compass-needle').style.transform = `rotate(${needleRotation}deg)`;
+  function applyCompass(heading) {
+    // heading = градусы от магнитного севера (0–360, по часовой стрелке)
+    smoothAlpha = smooth(smoothAlpha, heading);
 
-    // Стрелка Киблы — фиксирована в пространстве на QIBLA_ANGLE от севера
-    const qiblaRotation = QIBLA_ANGLE - smoothAlpha;
-    document.getElementById('qibla-arrow').style.transform = `rotate(${qiblaRotation}deg)`;
+    // Красная стрелка компаса — всегда на север (против вращения телефона)
+    document.getElementById('compass-needle').style.transform = `rotate(${-smoothAlpha}deg)`;
 
-    // Точность совпадения (насколько телефон направлен на Киблу)
-    let angleDiff = Math.abs(smoothAlpha - QIBLA_ANGLE);
-    if (angleDiff > 180) angleDiff = 360 - angleDiff;
-    const accuracy = Math.max(0, Math.round((1 - angleDiff / 90) * 100));
-    const clampedAccuracy = Math.max(0, Math.min(100, accuracy));
-    
-    document.getElementById('accuracy-fill').style.width = clampedAccuracy + '%';
-    document.getElementById('accuracy-text').textContent = clampedAccuracy + '%';
+    // Зелёная стрелка Киблы — фиксирована в пространстве
+    document.getElementById('qibla-arrow').style.transform = `rotate(${QIBLA_ANGLE - smoothAlpha}deg)`;
+
+    // Точность: насколько телефон направлен на Киблу
+    let diff = Math.abs(smoothAlpha - QIBLA_ANGLE);
+    if (diff > 180) diff = 360 - diff;
+    const pct = Math.max(0, Math.min(100, Math.round((1 - diff / 90) * 100)));
+    document.getElementById('accuracy-fill').style.width = pct + '%';
+    document.getElementById('accuracy-text').textContent = pct + '%';
     document.getElementById('accuracy-section').style.display = 'block';
   }
 
-  function handleOrientation(event) {
-    // webkitCompassHeading — iOS (уже учитывает магнитное склонение)
-    // alpha — Android (0 = Север при правильной калибровке)
-    let alpha;
-    
-    if (event.webkitCompassHeading !== undefined && event.webkitCompassHeading !== null) {
-      // iOS — webkitCompassHeading уже показывает градусы от севера (по часовой)
-      alpha = event.webkitCompassHeading;
-    } else if (event.alpha !== null) {
-      // Android — alpha это азимут, но отсчёт обратный
-      // Нужно инвертировать: компасный курс = 360 - alpha
-      alpha = 360 - event.alpha;
-      if (alpha >= 360) alpha -= 360;
-    } else {
-      return;
-    }
+  // --- Обработчик для deviceorientationabsolute (Android Chrome — самый точный) ---
+  function handleAbsolute(e) {
+    if (e.alpha === null) return;
+    // deviceorientationabsolute: alpha = 0 когда верх телефона смотрит на север
+    // Компасный курс = 360 - alpha (т.к. alpha растёт против часовой)
+    let heading = (360 - e.alpha) % 360;
+    applyCompass(heading);
+  }
 
-    updateCompass(alpha);
+  // --- Обработчик для обычного deviceorientation (фоллбэк) ---
+  function handleOrientation(e) {
+    if (e.webkitCompassHeading != null) {
+      // iOS Safari — webkitCompassHeading уже правильный азимут
+      applyCompass(e.webkitCompassHeading);
+    } else if (e.alpha !== null) {
+      // Android фоллбэк (не абсолютный) — может дрейфовать, но лучше чем ничего
+      let heading = (360 - e.alpha) % 360;
+      applyCompass(heading);
+    }
   }
 
   async function startCompass() {
@@ -506,41 +500,72 @@
     btn.disabled = true;
     btn.textContent = '⏳ Запускаем...';
 
-    // iOS 13+ требует явного разрешения
-    if (typeof DeviceOrientationEvent !== 'undefined' && 
+    // iOS 13+ — нужно разрешение
+    if (typeof DeviceOrientationEvent !== 'undefined' &&
         typeof DeviceOrientationEvent.requestPermission === 'function') {
       try {
-        const permission = await DeviceOrientationEvent.requestPermission();
-        if (permission === 'granted') {
+        const perm = await DeviceOrientationEvent.requestPermission();
+        if (perm === 'granted') {
           activateCompass();
         } else {
-          showFallback('Разрешение отклонено. Попробуйте вручную в настройках Safari.');
+          showFallback('Разрешение отклонено. Разрешите в настройках Safari.');
         }
       } catch (err) {
-        showFallback('Ошибка запроса разрешения: ' + err.message);
+        showFallback('Ошибка: ' + err.message);
       }
-    } else if (typeof DeviceOrientationEvent !== 'undefined') {
-      // Android и старые iOS — разрешение не нужно
-      activateCompass();
-    } else {
-      showFallback('Датчик ориентации не поддерживается браузером.');
+      return;
     }
+
+    // Android Chrome — пробуем сначала deviceorientationabsolute (точнее)
+    if ('ondeviceorientationabsolute' in window) {
+      window.addEventListener('deviceorientationabsolute', handleAbsolute, true);
+      sensorUsed = 'absolute';
+      
+      // Проверяем что absolute реально даёт данные
+      let gotData = false;
+      const checkAbsolute = (e) => { if (e.alpha !== null) gotData = true; };
+      window.addEventListener('deviceorientationabsolute', checkAbsolute, { once: true });
+      
+      setTimeout(() => {
+        if (!gotData) {
+          // absolute не работает — падаем на обычный
+          window.removeEventListener('deviceorientationabsolute', handleAbsolute, true);
+          window.addEventListener('deviceorientation', handleOrientation, true);
+          sensorUsed = 'orientation';
+          setStatus('yellow', '⚠️ Режим совместимости. Калибруйте восьмёркой.');
+        } else {
+          setStatus('green', '✅ Компас активен (абсолютный режим)');
+        }
+      }, 800);
+
+      activateUI();
+    } else if (typeof DeviceOrientationEvent !== 'undefined') {
+      window.addEventListener('deviceorientation', handleOrientation, true);
+      sensorUsed = 'orientation';
+      activateUI();
+      setStatus('yellow', '⚠️ Базовый режим. Откалибруйте телефон восьмёркой.');
+    } else {
+      showFallback('Датчик ориентации не поддерживается.');
+    }
+  }
+
+  function activateUI() {
+    document.getElementById('compass-btn-wrap').style.display = 'none';
+    document.getElementById('compass-hint').style.display = 'block';
+    if (!sensorUsed) setStatus('green', '✅ Компас активен — держите горизонтально');
+
+    // Если через 3 сек данных нет — предупредить
+    setTimeout(() => {
+      if (smoothAlpha === null) {
+        setStatus('yellow', '⚠️ Нет данных. Потрясите телефон или перезапустите.');
+      }
+    }, 3000);
   }
 
   function activateCompass() {
     window.addEventListener('deviceorientation', handleOrientation, true);
-    compassActive = true;
-    
+    activateUI();
     setStatus('green', '✅ Компас активен — держите горизонтально');
-    document.getElementById('compass-btn-wrap').style.display = 'none';
-    document.getElementById('compass-hint').style.display = 'block';
-
-    // Проверяем что данные реально приходят через 2 секунды
-    setTimeout(() => {
-      if (smoothAlpha === null) {
-        setStatus('yellow', '⚠️ Данные не поступают. Попробуйте потрясти телефон.');
-      }
-    }, 2000);
   }
 
   function showFallback(msg) {
@@ -550,9 +575,8 @@
   }
 
   function openQiblaFinder() {
-    // Открываем в новой вкладке браузера, а не внутри PWA
     const a = document.createElement('a');
-    a.href = 'https://qiblafinder.withgoogle.com';
+    a.href = 'https://qiblafinder.withgoogle.com/intl/ru/finder/ar';
     a.target = '_blank';
     a.rel = 'noopener';
     document.body.appendChild(a);
