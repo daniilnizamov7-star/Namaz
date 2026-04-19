@@ -1,4 +1,4 @@
-const CACHE_NAME = 'namaz-chelyabinsk-v1';
+const CACHE_NAME = 'namaz-v1';
 self.addEventListener('install', (e) => {
   self.skipWaiting();
 });
@@ -8,7 +8,7 @@ self.addEventListener('activate', (e) => {
 self.addEventListener('fetch', (e) => {
   e.respondWith(
     fetch(e.request).catch(() => {
-      return new Response('Оффлайн режим');
+      return new Response('Offline');
     })
   );
 });
