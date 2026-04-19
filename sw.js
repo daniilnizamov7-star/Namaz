@@ -1,4 +1,4 @@
-const CACHE_NAME = 'namaz-v3';
+const CACHE_NAME = 'namaz-chelyabinsk-v4'; // <-- Изменено с v3 на v4
 const ASSETS = ['/', '/index.html', '/manifest.json', '/icon.png'];
 
 self.addEventListener('install', e => {
