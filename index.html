@@ -32,19 +32,14 @@
     @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
     .countdown-digit { font-variant-numeric: tabular-nums; }
     
-    /* Компас стили */
     .compass-wrapper { position: relative; width: 150px; height: 150px; margin: 0 auto 12px; }
     .compass-ring { position: absolute; inset: 0; transition: transform 0.1s linear; }
     .compass-arrow { position: absolute; inset: 0; transition: transform 0.1s linear; }
     .compass-center { position: absolute; top: 50%; left: 50%; width: 10px; height: 10px; background: #374151; border-radius: 50%; transform: translate(-50%, -50%); z-index: 10; }
-    
-    /* Офлайн баннер */
-    #offline-banner { transition: all 0.3s; }
   </style>
 </head>
 <body class="pb-8">
 
-<!-- Офлайн индикатор -->
 <div id="offline-banner" class="hidden bg-yellow-500 text-white text-center text-xs py-1.5 font-medium sticky top-0 z-50 shadow-sm">
   📶 Офлайн-режим. Данные из кэша.
 </div>
@@ -52,12 +47,11 @@
 <header class="bg-teal-800 text-white pt-8 pb-10 px-4 rounded-b-3xl shadow-lg">
   <div class="max-w-md mx-auto flex justify-between items-center">
     <div>
-      <h1 class="text-2xl font-bold tracking-tight">Намаз Челябинск</h1>
-      <p class="text-teal-200 text-sm mt-1">Зуль-Кагда 1447</p>
+      <h1 class="text-2xl font-bold tracking-tight">Намаз Челябинск</h1>      <p class="text-teal-200 text-sm mt-1">Зуль-Кагда 1447</p>
     </div>
     <div class="flex flex-col items-end gap-2">
-      <div class="bg-teal-700/80 backdrop-blur px-3 py-1.5 rounded-full text-xs font-semibold" id="hijri-date">...</div>
-      <button onclick="shareApp()" class="flex items-center gap-1 text-xs bg-teal-900/50 hover:bg-teal-900 px-2 py-1 rounded transition active:scale-95" aria-label="Поделиться приложением">
+      <div class="bg-teal-700/80 backdrop-blur px-3 py-1.5 rounded-full text-xs font-semibold" id="hijri-date">Загрузка...</div>
+      <button onclick="shareApp()" class="flex items-center gap-1 text-xs bg-teal-900/50 hover:bg-teal-900 px-2 py-1 rounded transition active:scale-95">
         📤 Поделиться
       </button>
     </div>
@@ -66,7 +60,6 @@
 
 <main class="max-w-md mx-auto px-4 -mt-6">
   
-  <!-- 1. Карточка намазов -->
   <div class="card p-5 mb-4 fade-in">
     <div class="flex justify-between items-center mb-4">
       <div>
@@ -82,12 +75,10 @@
     </div>
   </div>
 
-  <!-- 2. Карточка Киблы -->
   <div class="card p-5 mb-4 fade-in text-center">
     <h3 class="font-semibold text-gray-800 mb-1">🕋 Направление Киблы</h3>
     <p class="text-xs text-gray-500 mb-4">Для Челябинска (229°)</p>
     
-    <!-- Компас -->
     <div class="compass-wrapper">
       <div class="compass-ring" id="compass-ring">
         <div class="absolute inset-0 rounded-full border-4 border-gray-200 bg-white shadow-inner">
@@ -105,8 +96,6 @@
       
       <div class="compass-center"></div>
     </div>
-
-    <!-- Статус и кнопки ВЫНЕСЕНЫ из компас-контейнера -->
     <div class="space-y-3">
       <p class="text-xs text-gray-500 font-medium min-h-[20px]" id="compass-status">Нажмите кнопку ниже</p>
       
@@ -126,7 +115,6 @@
     </div>
   </div>
 
-  <!-- 3. Расписание на месяц -->
   <div class="card overflow-hidden mb-4">
     <div class="p-4 border-b border-gray-100 bg-gray-50">
       <h3 class="font-semibold text-gray-800">Расписание на месяц</h3>
@@ -134,7 +122,6 @@
     <div class="max-h-[40vh] overflow-y-auto" id="prayer-list"></div>
   </div>
 
-  <!-- 4. Футер + Дисклеймер -->
   <div class="text-center text-xs text-gray-400 px-4 pb-4">
     <p>Данные: ЦДУМ России / РДУМ Челябинской обл.</p>
     <p class="mt-2 text-gray-300 leading-tight">
@@ -145,9 +132,6 @@
 </main>
 
 <script>
-  // ==========================================
-  // 1. ДАННЫЕ НАМАЗОВ
-  // ==========================================
   const PRAYER_DATA = {
     monthName: "Зуль-Кагда",
     schedule: [
@@ -161,8 +145,7 @@
       { d:8, date:"25 апр", day:"Сб", suhur:"03:29", fajr:"03:49", sunrise:"05:29", dhuhr:"13:20", asr:"18:37", maghrib:"20:17", isha:"21:57" },
       { d:9, date:"26 апр", day:"Вс", suhur:"03:26", fajr:"03:46", sunrise:"05:26", dhuhr:"13:20", asr:"18:39", maghrib:"20:19", isha:"21:59" },
       { d:10, date:"27 апр", day:"Пн", suhur:"03:24", fajr:"03:44", sunrise:"05:24", dhuhr:"13:20", asr:"18:41", maghrib:"20:21", isha:"22:01" },
-      { d:11, date:"28 апр", day:"Вт", suhur:"03:22", fajr:"03:42", sunrise:"05:22", dhuhr:"13:20", asr:"18:43", maghrib:"20:23", isha:"22:03" },
-      { d:12, date:"29 апр", day:"Ср", suhur:"03:20", fajr:"03:40", sunrise:"05:20", dhuhr:"13:20", asr:"18:45", maghrib:"20:25", isha:"22:05" },
+      { d:11, date:"28 апр", day:"Вт", suhur:"03:22", fajr:"03:42", sunrise:"05:22", dhuhr:"13:20", asr:"18:43", maghrib:"20:23", isha:"22:03" },      { d:12, date:"29 апр", day:"Ср", suhur:"03:20", fajr:"03:40", sunrise:"05:20", dhuhr:"13:20", asr:"18:45", maghrib:"20:25", isha:"22:05" },
       { d:13, date:"30 апр", day:"Чт", suhur:"03:17", fajr:"03:37", sunrise:"05:17", dhuhr:"13:20", asr:"18:47", maghrib:"20:27", isha:"22:07" },
       { d:14, date:"1 май", day:"Пт", suhur:"03:15", fajr:"03:35", sunrise:"05:15", dhuhr:"13:20", asr:"18:49", maghrib:"20:29", isha:"22:09" },
       { d:15, date:"2 май", day:"Сб", suhur:"03:13", fajr:"03:33", sunrise:"05:13", dhuhr:"13:20", asr:"18:51", maghrib:"20:31", isha:"22:11" },
@@ -194,22 +177,24 @@
     { key: 'isha', name: 'Иша', icon: '🌃', type: 'prayer' }
   ];
 
-  // ==========================================
-// 2. ЛОГИКА НАМАЗОВ (ИСПРАВЛЕНО)
-// ==========================================
-const today = new Date();
-const months = ['янв', 'фев', 'мар', 'апр', 'май', 'июн', 'июл', 'авг', 'сен', 'окт', 'ноя', 'дек'];
-const todayStr = `${today.getDate()} ${months[today.getMonth()]}`;
+  const monthNames = ["янв", "фев", "мар", "апр", "май", "июн", "июл", "авг", "сен", "окт", "ноя", "дек"];
 
-// Ищем по точной строке даты ("19 апр"), а не по числу
-let currentData = PRAYER_DATA.schedule.find(item => item.date === todayStr);
-if (!currentData) currentData = PRAYER_DATA.schedule[0]; // Fallback, если дата вышла за рамки расписания
+  try {
+    const today = new Date();
+    const todayDate = today.getDate();
+    const todayMonth = monthNames[today.getMonth()];
+    const todayStr = `${todayDate} ${todayMonth}`;
+    
+    let currentData = PRAYER_DATA.schedule.find(item => item.date === todayStr);
+    if (!currentData) {
+      console.log('Дата не найдена:', todayStr, 'Используем первый день');
+      currentData = PRAYER_DATA.schedule[0];
+    }
 
-document.getElementById('today-full-date').textContent = `Сегодня, ${currentData.date}`;
-document.getElementById('today-hijri').textContent = `${currentData.d} ${PRAYER_DATA.monthName} 1447`;
-document.getElementById('day-name').textContent = currentData.day;
-document.getElementById('hijri-date').textContent = `${currentData.d} ${PRAYER_DATA.monthName}`;
-
+    document.getElementById('today-full-date').textContent = `Сегодня, ${currentData.date}`;
+    document.getElementById('today-hijri').textContent = `${currentData.d} ${PRAYER_DATA.monthName} 1447`;
+    document.getElementById('day-name').textContent = currentData.day;
+    document.getElementById('hijri-date').textContent = `${currentData.d} ${PRAYER_DATA.monthName}`;
     function renderPrayers() {
       const container = document.getElementById('today-prayers');
       const now = new Date();
@@ -258,15 +243,14 @@ document.getElementById('hijri-date').textContent = `${currentData.d} ${PRAYER_D
       
       const diff = target - now;
       const hrs = Math.floor(diff / 3600000);
-      const mins = Math.floor((diff % 3600000) / 60000);
-      const secs = Math.floor((diff % 60000) / 1000);
+      const mins = Math.floor((diff % 3600000) / 60000);      const secs = Math.floor((diff % 60000) / 1000);
       document.getElementById('countdown').textContent = `${String(hrs).padStart(2,'0')}:${String(mins).padStart(2,'0')}:${String(secs).padStart(2,'0')}`;
     }
 
     function renderMonthlyList() {
       const listEl = document.getElementById('prayer-list');
       listEl.innerHTML = PRAYER_DATA.schedule.map((item) => {
-        const isToday = item.d === todayDate;
+        const isToday = item.date === todayStr;
         return `
           <div class="flex justify-between items-center p-3 border-b border-gray-50 last:border-0 ${isToday ? 'bg-teal-50' : 'hover:bg-gray-50'} transition-colors">
             <div class="flex items-center gap-3">
@@ -289,9 +273,6 @@ document.getElementById('hijri-date').textContent = `${currentData.d} ${PRAYER_D
     document.getElementById('today-full-date').textContent = 'Ошибка';
   }
 
-  // ==========================================
-  // 3. КОМПАС
-  // ==========================================
   const ARROW = document.getElementById('compass-arrow');
   const RING = document.getElementById('compass-ring');
   const STATUS = document.getElementById('compass-status');
@@ -311,8 +292,7 @@ document.getElementById('hijri-date').textContent = `${currentData.d} ${PRAYER_D
             STATUS.textContent = '⛔ Доступ запрещён';
           }
         })
-        .catch(console.error);
-    } else {
+        .catch(console.error);    } else {
       startCompass();
     }
   }
@@ -359,13 +339,9 @@ document.getElementById('hijri-date').textContent = `${currentData.d} ${PRAYER_D
     }
   }, { once: true });
 
-  // ==========================================
-  // 4. ФУНКЦИИ
-  // ==========================================
   const banner = document.getElementById('offline-banner');
   window.addEventListener('online', () => banner.classList.add('hidden'));
-  window.addEventListener('offline', () => banner.classList.remove('hidden'));
-  if (!navigator.onLine) banner.classList.remove('hidden');
+  window.addEventListener('offline', () => banner.classList.remove('hidden'));  if (!navigator.onLine) banner.classList.remove('hidden');
 
   function shareApp() {
     if (navigator.share) {
@@ -376,8 +352,8 @@ document.getElementById('hijri-date').textContent = `${currentData.d} ${PRAYER_D
       }).catch(console.error);
     } else {
       navigator.clipboard.writeText(window.location.href)
-        .then(() => alert('Ссылка скопирована в буфер обмена!'))
-        .catch(() => alert('Не удалось скопировать ссылку'));
+        .then(() => alert('Ссылка скопирована!'))
+        .catch(() => alert('Не удалось скопировать'));
     }
   }
 
@@ -387,4 +363,3 @@ document.getElementById('hijri-date').textContent = `${currentData.d} ${PRAYER_D
 </script>
 </body>
 </html>
-
