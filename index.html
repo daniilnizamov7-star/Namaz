@@ -195,17 +195,21 @@
   ];
 
   // ==========================================
-  // 2. ЛОГИКА НАМАЗОВ
-  // ==========================================
-  try {
-    const today = new Date();
-    const todayDate = today.getDate();
-    let currentData = PRAYER_DATA.schedule.find(item => item.d === todayDate) || PRAYER_DATA.schedule[0];
+// 2. ЛОГИКА НАМАЗОВ (ИСПРАВЛЕНО)
+// ==========================================
+const today = new Date();
+const months = ['янв', 'фев', 'мар', 'апр', 'май', 'июн', 'июл', 'авг', 'сен', 'окт', 'ноя', 'дек'];
+const todayStr = `${today.getDate()} ${months[today.getMonth()]}`;
 
-    document.getElementById('today-full-date').textContent = `Сегодня, ${currentData.date}`;
-    document.getElementById('today-hijri').textContent = `${currentData.d} ${PRAYER_DATA.monthName} 1447`;
-    document.getElementById('day-name').textContent = currentData.day;
-    document.getElementById('hijri-date').textContent = `${currentData.d} ${PRAYER_DATA.monthName}`;
+// Ищем по точной строке даты ("19 апр"), а не по числу
+let currentData = PRAYER_DATA.schedule.find(item => item.date === todayStr);
+if (!currentData) currentData = PRAYER_DATA.schedule[0]; // Fallback, если дата вышла за рамки расписания
+
+document.getElementById('today-full-date').textContent = `Сегодня, ${currentData.date}`;
+document.getElementById('today-hijri').textContent = `${currentData.d} ${PRAYER_DATA.monthName} 1447`;
+document.getElementById('day-name').textContent = currentData.day;
+document.getElementById('hijri-date').textContent = `${currentData.d} ${PRAYER_DATA.monthName}`;
+// ==========================================
 
     function renderPrayers() {
       const container = document.getElementById('today-prayers');
