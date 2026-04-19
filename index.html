@@ -47,7 +47,8 @@
 <header class="bg-teal-800 text-white pt-8 pb-10 px-4 rounded-b-3xl shadow-lg">
   <div class="max-w-md mx-auto flex justify-between items-center">
     <div>
-      <h1 class="text-2xl font-bold tracking-tight">Намаз Челябинск</h1>      <p class="text-teal-200 text-sm mt-1">Зуль-Кагда 1447</p>    </div>
+      <h1 class="text-2xl font-bold tracking-tight">Намаз Челябинск</h1>      <p class="text-teal-200 text-sm mt-1">Зуль-Кагда 1447</p>
+    </div>
     <div class="flex flex-col items-end gap-2">
       <div class="bg-teal-700/80 backdrop-blur px-3 py-1.5 rounded-full text-xs font-semibold" id="hijri-date">Загрузка...</div>
       <button onclick="shareApp()" class="flex items-center gap-1 text-xs bg-teal-900/50 hover:bg-teal-900 px-2 py-1 rounded transition active:scale-95">
@@ -95,8 +96,8 @@
       
       <div class="compass-center"></div>
     </div>
-    <div class="space-y-3">
-      <p class="text-xs text-gray-500 font-medium min-h-[20px]" id="compass-status">Нажмите кнопку ниже</p>      
+    <div class="space-y-3">      <p class="text-xs text-gray-500 font-medium min-h-[20px]" id="compass-status">Нажмите кнопку ниже</p>
+      
       <button id="enable-compass-btn" onclick="enableCompass()" class="w-full px-4 py-2.5 bg-blue-600 text-white text-sm font-semibold rounded-lg shadow hover:bg-blue-700 active:scale-95 transition">
         📡 Включить компас
       </button>
@@ -143,9 +144,10 @@
       { d:8, date:"25 апр", day:"Сб", suhur:"03:29", fajr:"03:49", sunrise:"05:29", dhuhr:"13:20", asr:"18:37", maghrib:"20:17", isha:"21:57" },
       { d:9, date:"26 апр", day:"Вс", suhur:"03:26", fajr:"03:46", sunrise:"05:26", dhuhr:"13:20", asr:"18:39", maghrib:"20:19", isha:"21:59" },
       { d:10, date:"27 апр", day:"Пн", suhur:"03:24", fajr:"03:44", sunrise:"05:24", dhuhr:"13:20", asr:"18:41", maghrib:"20:21", isha:"22:01" },
-      { d:11, date:"28 апр", day:"Вт", suhur:"03:22", fajr:"03:42", sunrise:"05:22", dhuhr:"13:20", asr:"18:43", maghrib:"20:23", isha:"22:03" },      { d:12, date:"29 апр", day:"Ср", suhur:"03:20", fajr:"03:40", sunrise:"05:20", dhuhr:"13:20", asr:"18:45", maghrib:"20:25", isha:"22:05" },
-      { d:13, date:"30 апр", day:"Чт", suhur:"03:17", fajr:"03:37", sunrise:"05:17", dhuhr:"13:20", asr:"18:47", maghrib:"20:27", isha:"22:07" },
-      { d:14, date:"1 май", day:"Пт", suhur:"03:15", fajr:"03:35", sunrise:"05:15", dhuhr:"13:20", asr:"18:49", maghrib:"20:29", isha:"22:09" },      { d:15, date:"2 май", day:"Сб", suhur:"03:13", fajr:"03:33", sunrise:"05:13", dhuhr:"13:20", asr:"18:51", maghrib:"20:31", isha:"22:11" },
+      { d:11, date:"28 апр", day:"Вт", suhur:"03:22", fajr:"03:42", sunrise:"05:22", dhuhr:"13:20", asr:"18:43", maghrib:"20:23", isha:"22:03" },
+      { d:12, date:"29 апр", day:"Ср", suhur:"03:20", fajr:"03:40", sunrise:"05:20", dhuhr:"13:20", asr:"18:45", maghrib:"20:25", isha:"22:05" },      { d:13, date:"30 апр", day:"Чт", suhur:"03:17", fajr:"03:37", sunrise:"05:17", dhuhr:"13:20", asr:"18:47", maghrib:"20:27", isha:"22:07" },
+      { d:14, date:"1 май", day:"Пт", suhur:"03:15", fajr:"03:35", sunrise:"05:15", dhuhr:"13:20", asr:"18:49", maghrib:"20:29", isha:"22:09" },
+      { d:15, date:"2 май", day:"Сб", suhur:"03:13", fajr:"03:33", sunrise:"05:13", dhuhr:"13:20", asr:"18:51", maghrib:"20:31", isha:"22:11" },
       { d:16, date:"3 май", day:"Вс", suhur:"03:11", fajr:"03:31", sunrise:"05:11", dhuhr:"13:20", asr:"18:53", maghrib:"20:33", isha:"22:13" },
       { d:17, date:"4 май", day:"Пн", suhur:"03:09", fajr:"03:29", sunrise:"05:09", dhuhr:"13:20", asr:"18:55", maghrib:"20:35", isha:"22:15" },
       { d:18, date:"5 май", day:"Вт", suhur:"03:07", fajr:"03:27", sunrise:"05:07", dhuhr:"13:20", asr:"18:57", maghrib:"20:37", isha:"22:17" },
@@ -175,18 +177,14 @@
   ];
 
   const monthNames = ["янв", "фев", "мар", "апр", "май", "июн", "июл", "авг", "сен", "окт", "ноя", "дек"];
+  let currentData = null;
+  let compassHandler = null;
 
   try {
     const today = new Date();
-    const todayDate = today.getDate();
-    const todayMonth = monthNames[today.getMonth()];
-    const todayStr = `${todayDate} ${todayMonth}`;
+    const todayStr = `${today.getDate()} ${monthNames[today.getMonth()]}`;
     
-    let currentData = PRAYER_DATA.schedule.find(item => item.date === todayStr);
-    if (!currentData) {
-      console.log('Дата не найдена:', todayStr, 'Используем первый день');
-      currentData = PRAYER_DATA.schedule[0];
-    }
+    currentData = PRAYER_DATA.schedule.find(item => item.date === todayStr) || PRAYER_DATA.schedule[0];
 
     document.getElementById('today-full-date').textContent = `Сегодня, ${currentData.date}`;
     document.getElementById('today-hijri').textContent = `${currentData.d} ${PRAYER_DATA.monthName} 1447`;
@@ -194,9 +192,9 @@
     document.getElementById('hijri-date').textContent = `${currentData.d} ${PRAYER_DATA.monthName}`;
     
     function renderPrayers() {
-      const container = document.getElementById('today-prayers');      const now = new Date();
-      const currentTime = now.getHours() * 60 + now.getMinutes();
-      let foundNext = false;
+      const container = document.getElementById('today-prayers');
+      const now = new Date();
+      const currentTime = now.getHours() * 60 + now.getMinutes();      let foundNext = false;
 
       container.innerHTML = prayers.map((prayer) => {
         const [h, m] = currentData[prayer.key].split(':').map(Number);
@@ -229,7 +227,6 @@
       }) || prayers[1];
       
       updateCountdown(nextPrayer);
-      scheduleNotification(nextPrayer); // ← УВЕДОМЛЕНИЕ
     }
 
     function updateCountdown(prayer) {
@@ -243,58 +240,10 @@
       const hrs = Math.floor(diff / 3600000);
       const mins = Math.floor((diff % 3600000) / 60000);
       const secs = Math.floor((diff % 60000) / 1000);
-      document.getElementById('countdown').textContent = `${String(hrs).padStart(2,'0')}:${String(mins).padStart(2,'0')}:${String(secs).padStart(2,'0')}`;    }
-
-    // === УВЕДОМЛЕНИЯ ===
-    function scheduleNotification(prayer) {
-      if (!('Notification' in window) || !('serviceWorker' in navigator)) return;
-      if (Notification.permission !== 'granted') return;
-
-      const [h, m] = currentData[prayer.key].split(':').map(Number);
-      let triggerTime = new Date();
-      triggerTime.setHours(h, m - 5, 0, 0); // за 5 минут до
-      
-      const delay = triggerTime - Date.now();
-      if (delay > 0 && delay < 24 * 60 * 60 * 1000) {
-        localStorage.setItem('prayer_notif', JSON.stringify({
-          name: prayer.name,
-          time: currentData[prayer.key],
-          at: triggerTime.getTime(),
-          key: prayer.key
-        }));
-        setTimeout(async () => {
-          const reg = await navigator.serviceWorker.ready;
-          await reg.showNotification(`⏰ ${prayer.name} через 5 мин`, {
-            body: `Челябинск • ${currentData[prayer.key]}`,
-            icon: '/icon.png',
-            tag: prayer.key,
-            requireInteraction: false
-          });
-          localStorage.removeItem('prayer_notif');
-        }, delay);
-      }
-      // Восстановление после перезагрузки
-      const saved = localStorage.getItem('prayer_notif');
-      if (saved) {
-        const data = JSON.parse(saved);
-        const d = data.at - Date.now();
-        if (d > 0) {
-          setTimeout(async () => {
-            const reg = await navigator.serviceWorker.ready;
-            await reg.showNotification(`⏰ ${data.name} через 5 мин`, {
-              body: `Челябинск • ${data.time}`,
-              tag: data.key,
-              requireInteraction: false
-            });
-            localStorage.removeItem('prayer_notif');
-          }, d);
-        } else {
-          localStorage.removeItem('prayer_notif');
-        }
-      }
+      document.getElementById('countdown').textContent = `${String(hrs).padStart(2,'0')}:${String(mins).padStart(2,'0')}:${String(secs).padStart(2,'0')}`;
     }
-    function renderMonthlyList() {
-      const listEl = document.getElementById('prayer-list');
+
+    function renderMonthlyList() {      const listEl = document.getElementById('prayer-list');
       listEl.innerHTML = PRAYER_DATA.schedule.map((item) => {
         const isToday = item.date === todayStr;
         return `
@@ -310,8 +259,51 @@
       }).join('');
     }
 
+    // === УВЕДОМЛЕНИЯ (запускается 1 раз) ===
+    async function setupNotifications() {
+      if (!('Notification' in window) || !('serviceWorker' in navigator)) return;
+      if (Notification.permission !== 'granted') return;
+
+      const reg = await navigator.serviceWorker.ready;
+      const nextPrayer = prayers.find(p => {
+        const [h, m] = currentData[p.key].split(':').map(Number);
+        const now = new Date();
+        return (now.getHours() * 60 + now.getMinutes()) < h * 60 + m && p.type === 'prayer';
+      }) || prayers[1];
+
+      const [h, m] = currentData[nextPrayer.key].split(':').map(Number);
+      let triggerTime = new Date();
+      triggerTime.setHours(h, m - 5, 0, 0);
+      
+      const delay = triggerTime - Date.now();
+      if (delay > 0 && delay < 24 * 60 * 60 * 1000) {
+        localStorage.setItem('prayer_notif', JSON.stringify({
+          name: nextPrayer.name, time: currentData[nextPrayer.key], at: triggerTime.getTime(), key: nextPrayer.key
+        }));
+        setTimeout(async () => {
+          await reg.showNotification(`⏰ ${nextPrayer.name} через 5 мин`, {
+            body: `Челябинск • ${currentData[nextPrayer.key]}`, icon: '/icon.png', tag: nextPrayer.key, requireInteraction: false
+          });
+          localStorage.removeItem('prayer_notif');
+        }, delay);
+      }
+      // Восстановление
+      const saved = localStorage.getItem('prayer_notif');
+      if (saved) {
+        const data = JSON.parse(saved);
+        const d = data.at - Date.now();
+        if (d > 0) {          setTimeout(async () => {
+            const r = await navigator.serviceWorker.ready;
+            await r.showNotification(`⏰ ${data.name} через 5 мин`, { body: `Челябинск • ${data.time}`, tag: data.key, requireInteraction: false });
+            localStorage.removeItem('prayer_notif');
+          }, d);
+        } else localStorage.removeItem('prayer_notif');
+      }
+    }
+
     renderPrayers();
     renderMonthlyList();
+    setupNotifications();
     setInterval(renderPrayers, 1000);
 
   } catch (error) {
@@ -319,18 +311,18 @@
     document.getElementById('today-full-date').textContent = 'Ошибка';
   }
 
-  // === КОМПАС ===
+  // === КОМПАС (плавный) ===
   const ARROW = document.getElementById('compass-arrow');
   const RING = document.getElementById('compass-ring');
   const STATUS = document.getElementById('compass-status');
   const BTN = document.getElementById('enable-compass-btn');
-  const QIBLA_MAGNETIC_BEARING = 214;
+  const QIBLA = 214;
   let isCompassActive = false;
 
   function enableCompass() {
     if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
       DeviceOrientationEvent.requestPermission()
-        .then(response => response === 'granted' ? startCompass() : (STATUS.textContent = '⛔ Доступ запрещён'))
+        .then(res => res === 'granted' ? startCompass() : (STATUS.textContent = '⛔ Доступ запрещён'))
         .catch(console.error);
     } else {
       startCompass();
@@ -338,21 +330,31 @@
   }
 
   function startCompass() {
+    if (isCompassActive) return;
     isCompassActive = true;
     BTN.classList.add('hidden');
-    STATUS.textContent = '🔄 Определение севера...';
-    const handler = (event) => {      let heading = event.webkitCompassHeading !== undefined ? event.webkitCompassHeading : (event.alpha !== null ? (360 - event.alpha) % 360 : null);
-      if (heading !== null) {
-        RING.style.transform = `rotate(${-heading}deg)`;
-        ARROW.style.transform = `rotate(${QIBLA_MAGNETIC_BEARING - heading}deg)`;
-        if (STATUS.textContent.includes('Определение')) STATUS.textContent = '✅ Компас работает';
+    STATUS.textContent = '🔄 Калибровка...';
+    
+    let hist = [];
+    const smooth = (v) => { hist.push(v); if(hist.length>3) hist.shift(); return hist.reduce((a,b)=>a+b,0)/hist.length; };
+
+    compassHandler = (e) => {
+      let h = e.webkitCompassHeading !== undefined ? e.webkitCompassHeading : (e.alpha !== null ? (360 - e.alpha) % 360 : null);
+      if (h !== null) {
+        const s = smooth(h);        RING.style.transform = `rotate(${-s}deg)`;
+        ARROW.style.transform = `rotate(${QIBLA - s}deg)`;
+        if (STATUS.textContent.includes('Калибровка')) STATUS.textContent = '✅ Компас работает';
       }
     };
-    window.addEventListener('deviceorientationabsolute', handler);
-    window.addEventListener('deviceorientation', handler);
+
+    if ('ondeviceorientationabsolute' in window) {
+      window.addEventListener('deviceorientationabsolute', compassHandler, { passive: true });
+    } else {
+      window.addEventListener('deviceorientation', compassHandler, { passive: true });
+    }
   }
 
-  // === ОФЛАЙН / ШЕРИНГ / ЗАПРОС УВЕДОМЛЕНИЙ ===
+  // === ОФЛАЙН / ШЕРИНГ / SW ===
   const banner = document.getElementById('offline-banner');
   window.addEventListener('online', () => banner.classList.add('hidden'));
   window.addEventListener('offline', () => banner.classList.remove('hidden'));
@@ -366,14 +368,8 @@
     }
   }
 
-  // Запрос разрешения на уведомления при первом запуске
-  if ('Notification' in window && Notification.permission === 'default') {
-    Notification.requestPermission();
-  }
-
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('/sw.js').catch(err => console.log('SW error:', err));
-  }
+  if ('Notification' in window && Notification.permission === 'default') Notification.requestPermission();
+  if ('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js').catch(console.error);
 </script>
 </body>
 </html>
