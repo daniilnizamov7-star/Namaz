@@ -9,16 +9,19 @@
   <meta name="description" content="Время намазов и Кибла для г. Челябинска.">
   <title>Намаз Челябинск</title>
   
+  <!-- PWA Files -->
   <link rel="manifest" href="/manifest.json">
   <link rel="icon" type="image/png" href="/icon.png">
   <link rel="apple-touch-icon" href="/icon.png">
   
+  <!-- Tailwind & Fonts -->
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
     body { font-family: 'Inter', sans-serif; background: #f8fafc; overscroll-behavior: none; }
     .card { background: white; border-radius: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.06); }
     
+    /* Styles for Prayer Cards */
     .prayer-card { transition: all 0.3s; }
     .prayer-card.passed { opacity: 0.4; background: #f8fafc; }
     .prayer-card.next { 
@@ -30,29 +33,31 @@
     .prayer-card.next .prayer-name { color: #047857; font-weight: 800; }
     .prayer-card.next .prayer-time { color: #047857; font-weight: 800; }
 
+    /* Animations */
     .fade-in { animation: fadeIn 0.4s ease; }
     @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
     .countdown-digit { font-variant-numeric: tabular-nums; }
     
-    /* Компас */
-    .compass-needle { transition: transform 0.1s ease-out; }
-    .compass-ring { transition: transform 0.5s ease-out; }
+    /* Compass Styles */
+    .compass-needle { transition: transform 0.1s linear; }
   </style>
 </head>
 <body class="pb-8">
 
+<!-- Header -->
 <header class="bg-teal-800 text-white pt-8 pb-10 px-4 rounded-b-3xl shadow-lg">
   <div class="max-w-md mx-auto flex justify-between items-center">
-    <div>
-      <h1 class="text-2xl font-bold tracking-tight">Намаз Челябинск</h1>
+    <div>      <h1 class="text-2xl font-bold tracking-tight">Намаз Челябинск</h1>
       <p class="text-teal-200 text-sm mt-1">Зуль-Кагда 1447</p>
     </div>
-    <div class="bg-teal-700/80 backdrop-blur px-3 py-1.5 rounded-full text-xs font-semibold" id="hijri-date">...</div>  </div>
+    <div class="bg-teal-700/80 backdrop-blur px-3 py-1.5 rounded-full text-xs font-semibold" id="hijri-date">...</div>
+  </div>
 </header>
 
+<!-- Main Content -->
 <main class="max-w-md mx-auto px-4 -mt-6">
   
-  <!-- Карточка намазов -->
+  <!-- Card: Today's Prayers -->
   <div class="card p-5 mb-4 fade-in">
     <div class="flex justify-between items-center mb-4">
       <div>
@@ -61,21 +66,25 @@
       </div>
       <span class="text-teal-600 text-xs font-bold bg-teal-50 px-3 py-1 rounded-full" id="day-name">...</span>
     </div>
+    
+    <!-- Prayer List Container -->
     <div class="space-y-2" id="today-prayers"></div>
+    
+    <!-- Countdown -->
     <div class="mt-4 p-3 bg-teal-50 rounded-xl text-center border border-teal-100">
       <p class="text-xs text-teal-600 mb-1">До следующего намаза</p>
       <p class="text-2xl font-bold text-teal-800 countdown-digit" id="countdown">--:--:--</p>
     </div>
   </div>
 
-  <!-- Карточка КИБЛЫ (Живой компас) -->
+  <!-- Card: Qibla Compass -->
   <div class="card p-5 mb-4 fade-in text-center">
-    <h3 class="font-semibold text-gray-800 mb-2">🕋 Направление Киблы</h3>
-    <p class="text-xs text-gray-500 mb-4">Челябинск (229°)</p>
+    <h3 class="font-semibold text-gray-800 mb-1">🕋 Направление Киблы</h3>
+    <p class="text-xs text-gray-500 mb-4">Для Челябинска (229°)</p>
     
-    <!-- Сам компас -->
+    <!-- Compass UI -->
     <div class="relative w-40 h-40 mx-auto mb-4">
-      <!-- Круг с буквами -->
+      <!-- Ring with N/S/E/W -->
       <div class="absolute inset-0 rounded-full border-4 border-gray-200 bg-white shadow-inner">
         <span class="absolute top-2 left-1/2 -translate-x-1/2 text-xs font-bold text-gray-400">С</span>
         <span class="absolute bottom-2 left-1/2 -translate-x-1/2 text-xs font-bold text-gray-400">Ю</span>
@@ -83,35 +92,45 @@
         <span class="absolute right-2 top-1/2 -translate-y-1/2 text-xs font-bold text-gray-400">В</span>
       </div>
       
-      <!-- Стрелка (Вращается через JS) -->
-      <div id="compass-arrow" class="absolute inset-0 flex items-center justify-center compass-needle">
+      <!-- Rotating Arrow -->
+      <div id="compass-arrow" class="absolute inset-0 flex items-center justify-center compass-needle" style="transform: rotate(0deg);">
         <div class="w-1 h-16 bg-gradient-to-t from-transparent to-emerald-600 rounded-full origin-bottom translate-y-[-20px]"></div>
         <div class="absolute top-4 w-4 h-4 bg-emerald-600 rotate-45 transform -translate-x-2"></div>
-      </div>
-      
-      <!-- Центр -->
+      </div>      
+      <!-- Center Dot -->
       <div class="absolute inset-0 flex items-center justify-center">
         <div class="w-3 h-3 bg-gray-800 rounded-full z-10"></div>
       </div>
     </div>
     
-    <!-- Кнопка включения (для iPhone) -->
-    <button id="enable-compass" onclick="enableCompass()" class="hidden px-4 py-2 bg-blue-600 text-white text-sm rounded-lg font-medium mb-2">       Разрешить компас
-    </button>
-    <p class="text-xs text-gray-400" id="compass-status">Наведите верх телефона в сторону стрелки</p>
+    <!-- Status / Button -->
+    <div class="space-y-2">
+      <button id="enable-compass" onclick="enableCompass()" class="hidden px-4 py-2 bg-blue-600 text-white text-sm rounded-lg font-medium">
+        🔓 Разрешить доступ к компасу
+      </button>
+      <p class="text-xs text-gray-400" id="compass-status">Наведите верх телефона на стрелку</p>
+    </div>
   </div>
 
-  <!-- Список на месяц -->
+  <!-- Card: Monthly List -->
   <div class="card overflow-hidden mb-4">
     <div class="p-4 border-b border-gray-100 bg-gray-50">
       <h3 class="font-semibold text-gray-800">Расписание на месяц</h3>
     </div>
     <div class="max-h-[40vh] overflow-y-auto" id="prayer-list"></div>
   </div>
+
+  <!-- Footer -->
+  <div class="text-center text-xs text-gray-400 px-4 pb-4">
+    <p>Данные: ЦДУМ России / РДУМ Челябинской обл.</p>
+    <p class="mt-1">Обновляется автоматически в 00:00</p>
+  </div>
 </main>
 
 <script>
-  // --- ДАННЫЕ НАМАЗОВ ---
+  // ==========================================
+  // 1. ДАННЫЕ (РАСПИСАНИЕ НАМАЗОВ)
+  // ==========================================
   const PRAYER_DATA = {
     monthName: "Зуль-Кагда",
     schedule: [
@@ -126,8 +145,7 @@
       { d:9, date:"26 апр", day:"Вс", suhur:"03:26", fajr:"03:46", sunrise:"05:26", dhuhr:"13:20", asr:"18:39", maghrib:"20:19", isha:"21:59" },
       { d:10, date:"27 апр", day:"Пн", suhur:"03:24", fajr:"03:44", sunrise:"05:24", dhuhr:"13:20", asr:"18:41", maghrib:"20:21", isha:"22:01" },
       { d:11, date:"28 апр", day:"Вт", suhur:"03:22", fajr:"03:42", sunrise:"05:22", dhuhr:"13:20", asr:"18:43", maghrib:"20:23", isha:"22:03" },
-      { d:12, date:"29 апр", day:"Ср", suhur:"03:20", fajr:"03:40", sunrise:"05:20", dhuhr:"13:20", asr:"18:45", maghrib:"20:25", isha:"22:05" },
-      { d:13, date:"30 апр", day:"Чт", suhur:"03:17", fajr:"03:37", sunrise:"05:17", dhuhr:"13:20", asr:"18:47", maghrib:"20:27", isha:"22:07" },
+      { d:12, date:"29 апр", day:"Ср", suhur:"03:20", fajr:"03:40", sunrise:"05:20", dhuhr:"13:20", asr:"18:45", maghrib:"20:25", isha:"22:05" },      { d:13, date:"30 апр", day:"Чт", suhur:"03:17", fajr:"03:37", sunrise:"05:17", dhuhr:"13:20", asr:"18:47", maghrib:"20:27", isha:"22:07" },
       { d:14, date:"1 май", day:"Пт", suhur:"03:15", fajr:"03:35", sunrise:"05:15", dhuhr:"13:20", asr:"18:49", maghrib:"20:29", isha:"22:09" },
       { d:15, date:"2 май", day:"Сб", suhur:"03:13", fajr:"03:33", sunrise:"05:13", dhuhr:"13:20", asr:"18:51", maghrib:"20:31", isha:"22:11" },
       { d:16, date:"3 май", day:"Вс", suhur:"03:11", fajr:"03:31", sunrise:"05:11", dhuhr:"13:20", asr:"18:53", maghrib:"20:33", isha:"22:13" },
@@ -145,10 +163,14 @@
       { d:28, date:"15 май", day:"Пт", suhur:"02:47", fajr:"03:07", sunrise:"04:47", dhuhr:"13:20", asr:"19:16", maghrib:"20:56", isha:"22:36" },
       { d:29, date:"16 май", day:"Сб", suhur:"02:46", fajr:"03:06", sunrise:"04:46", dhuhr:"13:20", asr:"19:17", maghrib:"20:57", isha:"22:37" },
       { d:30, date:"17 май", day:"Вс", suhur:"02:44", fajr:"03:04", sunrise:"04:44", dhuhr:"13:20", asr:"19:19", maghrib:"20:59", isha:"22:39" }
-    ]  };
+    ]
+  };
 
-  // --- ЛОГИКА ---
+  // ==========================================
+  // 2. ЛОГИКА РАСПИСАНИЯ
+  // ==========================================
   const today = new Date();
+  // 18 апреля = индекс 0. Если дата меньше 18, берем 0, если больше 17 мая - берем последний.
   const dayIndex = today.getDate() - 18;
   const currentData = PRAYER_DATA.schedule[Math.max(0, Math.min(dayIndex, PRAYER_DATA.schedule.length - 1))];
 
@@ -162,7 +184,6 @@
     { key: 'isha', name: 'Иша', icon: '🌃', type: 'prayer' }
   ];
 
-  // --- ФУНКЦИИ РЕНДЕРА ---
   function renderTodayPrayers() {
     const container = document.getElementById('today-prayers');
     const now = new Date();
@@ -173,9 +194,10 @@
       const [h, m] = currentData[prayer.key].split(':').map(Number);
       const prayerTime = h * 60 + m;
       const isPassed = currentTime > prayerTime;
-      const isNext = !foundNext && !isPassed && prayer.type === 'prayer';
+      const isNext = !foundNext && !isPassed && prayer.type === 'prayer';      
       if (isNext) foundNext = true;
       let statusClass = isNext ? 'next' : (isPassed ? 'passed' : '');
+      
       return `
         <div class="prayer-card p-3 rounded-xl flex items-center justify-between ${statusClass}">
           <div class="flex items-center gap-3">
@@ -193,11 +215,15 @@
         </div>`;
     }).join('');
 
-    const nextPrayer = prayers.find(p => {
-      const [h, m] = currentData[p.key].split(':').map(Number);      return currentTime < h * 60 + m && p.type === 'prayer';
-    }) || prayers[1];
-    
+    // Обновляем заголовок и дату
     document.getElementById('hijri-date').textContent = `${currentData.d} ${PRAYER_DATA.monthName}`;
+    
+    // Находим следующий намаз для таймера
+    const nextPrayer = prayers.find(p => {
+      const [h, m] = currentData[p.key].split(':').map(Number);
+      return currentTime < h * 60 + m && p.type === 'prayer';
+    }) || prayers[1]; // Если все прошли, показываем Фаджр
+    
     updateCountdown(nextPrayer);
   }
 
@@ -207,6 +233,7 @@
     let target = new Date();
     target.setHours(h, m, 0, 0);
     if (target <= now) target.setDate(target.getDate() + 1);
+    
     const diff = target - now;
     const hrs = Math.floor(diff / 3600000);
     const mins = Math.floor((diff % 3600000) / 60000);
@@ -216,8 +243,7 @@
 
   function renderMonthlyList() {
     const listEl = document.getElementById('prayer-list');
-    const todayDate = today.getDate();
-    listEl.innerHTML = PRAYER_DATA.schedule.map((item) => {
+    const todayDate = today.getDate();    listEl.innerHTML = PRAYER_DATA.schedule.map((item) => {
       const isToday = item.d === todayDate;
       return `
         <div class="flex justify-between items-center p-3 border-b border-gray-50 last:border-0 ${isToday ? 'bg-teal-50' : 'hover:bg-gray-50'} transition-colors">
@@ -232,67 +258,116 @@
     }).join('');
   }
 
+  // Init UI Texts
   document.getElementById('today-full-date').textContent = `Сегодня, ${currentData.date}`;
   document.getElementById('today-hijri').textContent = `${currentData.d} ${PRAYER_DATA.monthName} 1447`;
   document.getElementById('day-name').textContent = currentData.day;
 
+  // Initial Render & Loop
   renderTodayPrayers();
   renderMonthlyList();
   setInterval(renderTodayPrayers, 1000);
 
-  // --- КОМПАС ЛОГИКА ---
+  // ==========================================
+  // 3. ЛОГИКА КОМПАСА (С МАГНИТНЫМ СКЛОНЕНИЕМ)
+  // ==========================================
   const ARROW = document.getElementById('compass-arrow');
   const ENABLE_BTN = document.getElementById('enable-compass');
-  const STATUS = document.getElementById('compass-status');  const MECCA_ANGLE = 229; // Для Челябинска
+  const STATUS = document.getElementById('compass-status');
+  
+  // Направление на Каабу (Истинный Север) для Челябинска
+  const QIBLA_ANGLE = 229; 
+  // Магнитное склонение (Челябинск ~ +15° к Востоку)
+  const DECLINATION = 15; 
+  
+  // Эффективный угол для компаса (Магнитный) = 229 - 15 = 214
+  const TARGET_MAGNETIC_ANGLE = 214; 
+
+  let currentRotation = 0;
+  let targetRotation = 0;
+  let isCompassActive = false;
 
   function enableCompass() {
-    // Для iOS нужно запрашивать разрешение явно
     if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
       DeviceOrientationEvent.requestPermission()
         .then(response => {
           if (response === 'granted') {
-            window.addEventListener('deviceorientation', handleOrientation);
-            ENABLE_BTN.classList.add('hidden');
+            activateCompassEvents();            ENABLE_BTN.classList.add('hidden');
             STATUS.innerText = "Компас активен";
+          } else {
+            STATUS.innerText = "⛔ Доступ запрещен";
           }
         })
         .catch(console.error);
     } else {
-      // Android и старые iOS
-      window.addEventListener('deviceorientation', handleOrientation);
+      activateCompassEvents();
       ENABLE_BTN.classList.add('hidden');
       STATUS.innerText = "Компас активен";
     }
   }
 
-  // Пробуем запустить сразу (для Android)
-  window.addEventListener('deviceorientation', handleOrientation);
+  function activateCompassEvents() {
+    isCompassActive = true;
+    // iOS требует точного события, Android обычного
+    window.addEventListener('deviceorientation', handleOrientation, true);
+  }
 
-  // Если событие не сработало (iOS 13+), показываем кнопку
+  // Запускаем слушатель сразу (для Android)
+  window.addEventListener('deviceorientation', (e) => {
+    if(!isCompassActive && e.alpha !== null) {
+      activateCompassEvents();
+    }
+  }, { once: true });
+
+  // Если iOS - показываем кнопку
   if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
     ENABLE_BTN.classList.remove('hidden');
-    STATUS.innerText = "Нажмите кнопку ниже для компаса";
+    STATUS.innerText = "Нажмите кнопку для запуска";
   }
 
   function handleOrientation(event) {
-    let compassHeading;
+    let magneticHeading;
     
-    // Webkit (Safari/iOS)
+    // iOS (WebKit) - самый точный
     if (event.webkitCompassHeading) {
-      compassHeading = event.webkitCompassHeading;
+      magneticHeading = event.webkitCompassHeading;
     } 
-    // Android (Absolute)
-    else if (event.alpha) {
-      compassHeading = 360 - event.alpha;
+    // Android - используем alpha, если он absolute (реальный)
+    else if (event.absolute && event.alpha !== null) {
+      magneticHeading = 360 - event.alpha;
+    } 
+    // Android fallback (относительный)
+    else if (event.alpha !== null) {
+       magneticHeading = 360 - event.alpha; 
+       // Примечание: на Android без GPS часто показывает "откуда взяли телефон", это баг браузера
+       STATUS.innerText = "⚠️ Двигайте телефоном «восьмеркой»";
     }
-
-    if (compassHeading !== undefined) {
-      // Вращаем стрелку: Направление на Мекку МИНУС куда смотрит телефон
-      const rotation = MECCA_ANGLE - compassHeading;
-      ARROW.style.transform = `rotate(${rotation}deg)`;
+    if (magneticHeading !== undefined) {
+      // Вычисляем поворот: Куда указывает Мекка МИНУС Куда смотрит телефон
+      targetRotation = TARGET_MAGNETIC_ANGLE - magneticHeading;
+      
+      // Запускаем плавную анимацию
+      requestAnimationFrame(smoothCompass);
+      STATUS.innerText = "Компас работает";
     }
   }
-  // SW
+
+  function smoothCompass() {
+    // Интерполяция для плавности (Lerp)
+    const smoothing = 0.1;
+    currentRotation += (targetRotation - currentRotation) * smoothing;
+    
+    ARROW.style.transform = `rotate(${currentRotation}deg)`;
+    
+    // Продолжаем анимацию, если есть разница
+    if (Math.abs(targetRotation - currentRotation) > 0.05) {
+      requestAnimationFrame(smoothCompass);
+    }
+  }
+
+  // ==========================================
+  // 4. SERVICE WORKER
+  // ==========================================
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('/sw.js');
   }
