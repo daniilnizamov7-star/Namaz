@@ -9,7 +9,6 @@
   <meta name="description" content="Время намазов для г. Челябинска.">
   <title>Намаз Челябинск</title>
   
-  <!-- Ссылка на реальный манифест -->
   <link rel="manifest" href="/manifest.json">
   <link rel="icon" type="image/svg+xml" href="/icon.svg">
   <link rel="apple-touch-icon" href="/icon.svg">
@@ -19,11 +18,23 @@
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
     body { font-family: 'Inter', sans-serif; background: #f8fafc; overscroll-behavior: none; }
     .card { background: white; border-radius: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.06); }
-    .prayer-card { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
-    .prayer-card.current { background: linear-gradient(135deg, #0f766e 0%, #14b8a6 100%); color: white; transform: scale(1.02); box-shadow: 0 8px 20px -5px rgba(15, 118, 110, 0.4); }
+    
+    /* Карточки намазов */
+    .prayer-card { transition: all 0.3s; }
+    
+    /* ПРОШЕДШИЙ НАМАЗ */
     .prayer-card.passed { opacity: 0.4; background: #f8fafc; }
-    .prayer-card.next { border: 2px solid #10b981; animation: pulse 2s infinite; }
-    @keyframes pulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4); } 50% { box-shadow: 0 0 0 8px rgba(16, 185, 129, 0); } }
+    
+    /* СЛЕДУЮЩИЙ НАМАЗ (Исправлено: теперь есть фон и яркий текст) */
+    .prayer-card.next { 
+      background: #ecfdf5; 
+      border: 2px solid #10b981; 
+      transform: scale(1.03);
+      box-shadow: 0 4px 15px rgba(16, 185, 129, 0.2);
+    }
+    .prayer-card.next .prayer-name { color: #047857; font-weight: 800; }
+    .prayer-card.next .prayer-time { color: #047857; font-weight: 800; }
+
     .fade-in { animation: fadeIn 0.4s ease; }
     @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
     .countdown-digit { font-variant-numeric: tabular-nums; }
@@ -36,8 +47,7 @@
     <div>
       <h1 class="text-2xl font-bold tracking-tight">Намаз Челябинск</h1>
       <p class="text-teal-200 text-sm mt-1">Зуль-Кагда 1447</p>
-    </div>
-    <div class="bg-teal-700/80 backdrop-blur px-3 py-1.5 rounded-full text-xs font-semibold" id="hijri-date">...</div>
+    </div>    <div class="bg-teal-700/80 backdrop-blur px-3 py-1.5 rounded-full text-xs font-semibold" id="hijri-date">...</div>
   </div>
 </header>
 
@@ -47,9 +57,12 @@
       <div>
         <h2 class="text-lg font-bold text-gray-900" id="today-full-date">Загрузка...</h2>
         <p class="text-sm text-gray-500" id="today-hijri">...</p>
-      </div>      <span class="text-teal-600 text-xs font-bold bg-teal-50 px-3 py-1 rounded-full" id="day-name">...</span>
+      </div>
+      <span class="text-teal-600 text-xs font-bold bg-teal-50 px-3 py-1 rounded-full" id="day-name">...</span>
     </div>
     <div class="space-y-2" id="today-prayers"></div>
+    
+    <!-- Таймер -->
     <div class="mt-4 p-3 bg-teal-50 rounded-xl text-center border border-teal-100">
       <p class="text-xs text-teal-600 mb-1">До следующего намаза</p>
       <p class="text-2xl font-bold text-teal-800 countdown-digit" id="countdown">--:--:--</p>
@@ -65,6 +78,7 @@
 </main>
 
 <script>
+  // ДАННЫЕ
   const PRAYER_DATA = {
     monthName: "Зуль-Кагда",
     schedule: [
@@ -82,8 +96,7 @@
       { d:12, date:"29 апр", day:"Ср", suhur:"03:20", fajr:"03:40", sunrise:"05:20", dhuhr:"13:20", asr:"18:45", maghrib:"20:25", isha:"22:05" },
       { d:13, date:"30 апр", day:"Чт", suhur:"03:17", fajr:"03:37", sunrise:"05:17", dhuhr:"13:20", asr:"18:47", maghrib:"20:27", isha:"22:07" },
       { d:14, date:"1 май", day:"Пт", suhur:"03:15", fajr:"03:35", sunrise:"05:15", dhuhr:"13:20", asr:"18:49", maghrib:"20:29", isha:"22:09" },
-      { d:15, date:"2 май", day:"Сб", suhur:"03:13", fajr:"03:33", sunrise:"05:13", dhuhr:"13:20", asr:"18:51", maghrib:"20:31", isha:"22:11" },
-      { d:16, date:"3 май", day:"Вс", suhur:"03:11", fajr:"03:31", sunrise:"05:11", dhuhr:"13:20", asr:"18:53", maghrib:"20:33", isha:"22:13" },
+      { d:15, date:"2 май", day:"Сб", suhur:"03:13", fajr:"03:33", sunrise:"05:13", dhuhr:"13:20", asr:"18:51", maghrib:"20:31", isha:"22:11" },      { d:16, date:"3 май", day:"Вс", suhur:"03:11", fajr:"03:31", sunrise:"05:11", dhuhr:"13:20", asr:"18:53", maghrib:"20:33", isha:"22:13" },
       { d:17, date:"4 май", day:"Пн", suhur:"03:09", fajr:"03:29", sunrise:"05:09", dhuhr:"13:20", asr:"18:55", maghrib:"20:35", isha:"22:15" },
       { d:18, date:"5 май", day:"Вт", suhur:"03:07", fajr:"03:27", sunrise:"05:07", dhuhr:"13:20", asr:"18:57", maghrib:"20:37", isha:"22:17" },
       { d:19, date:"6 май", day:"Ср", suhur:"03:05", fajr:"03:25", sunrise:"05:05", dhuhr:"13:20", asr:"18:59", maghrib:"20:39", isha:"22:19" },
@@ -96,7 +109,8 @@
       { d:26, date:"13 май", day:"Ср", suhur:"02:51", fajr:"03:11", sunrise:"04:51", dhuhr:"13:20", asr:"19:12", maghrib:"20:52", isha:"22:32" },
       { d:27, date:"14 май", day:"Чт", suhur:"02:49", fajr:"03:09", sunrise:"04:49", dhuhr:"13:20", asr:"19:14", maghrib:"20:54", isha:"22:34" },
       { d:28, date:"15 май", day:"Пт", suhur:"02:47", fajr:"03:07", sunrise:"04:47", dhuhr:"13:20", asr:"19:16", maghrib:"20:56", isha:"22:36" },
-      { d:29, date:"16 май", day:"Сб", suhur:"02:46", fajr:"03:06", sunrise:"04:46", dhuhr:"13:20", asr:"19:17", maghrib:"20:57", isha:"22:37" },      { d:30, date:"17 май", day:"Вс", suhur:"02:44", fajr:"03:04", sunrise:"04:44", dhuhr:"13:20", asr:"19:19", maghrib:"20:59", isha:"22:39" }
+      { d:29, date:"16 май", day:"Сб", suhur:"02:46", fajr:"03:06", sunrise:"04:46", dhuhr:"13:20", asr:"19:17", maghrib:"20:57", isha:"22:37" },
+      { d:30, date:"17 май", day:"Вс", suhur:"02:44", fajr:"03:04", sunrise:"04:44", dhuhr:"13:20", asr:"19:19", maghrib:"20:59", isha:"22:39" }
     ]
   };
 
@@ -124,29 +138,36 @@
       const [h, m] = currentData[prayer.key].split(':').map(Number);
       const prayerTime = h * 60 + m;
       const isPassed = currentTime > prayerTime;
+      // Следующий намаз = тот, который ещё не прошёл и является типом 'prayer'
       const isNext = !foundNext && !isPassed && prayer.type === 'prayer';
+      
       if (isNext) foundNext = true;
-      let statusClass = isNext ? 'next' : (isPassed ? 'passed' : '');
+      
+      let statusClass = '';
+      if (isNext) statusClass = 'next';
+      else if (isPassed) statusClass = 'passed';      
       return `
         <div class="prayer-card p-3 rounded-xl flex items-center justify-between ${statusClass}">
           <div class="flex items-center gap-3">
             <span class="text-2xl">${prayer.icon}</span>
             <div>
-              <p class="font-semibold text-sm ${isNext ? 'text-white' : 'text-gray-800'}">${prayer.name}</p>
+              <p class="font-semibold text-sm prayer-name ${isNext ? 'text-emerald-800' : 'text-gray-800'}">${prayer.name}</p>
               ${prayer.type === 'prep' ? '<p class="text-xs opacity-75">До рассвета</p>' : ''}
               ${prayer.type === 'info' ? '<p class="text-xs opacity-75">Не намаз</p>' : ''}
             </div>
           </div>
           <div class="text-right">
-            <p class="text-xl font-bold ${isNext ? 'text-white' : 'text-teal-700'}">${currentData[prayer.key]}</p>
-            ${isNext ? '<p class="text-xs opacity-75">Следующий</p>' : ''}
+            <p class="text-xl font-bold prayer-time ${isNext ? 'text-emerald-700' : 'text-teal-700'}">${currentData[prayer.key]}</p>
+            ${isNext ? '<p class="text-xs text-emerald-600 font-semibold">Следующий</p>' : ''}
           </div>
         </div>`;
     }).join('');
 
     const nextPrayer = prayers.find(p => {
-      const [h, m] = currentData[p.key].split(':').map(Number);      return currentTime < h * 60 + m && p.type === 'prayer';
+      const [h, m] = currentData[p.key].split(':').map(Number);
+      return currentTime < h * 60 + m && p.type === 'prayer';
     }) || prayers[1];
+    
     document.getElementById('hijri-date').textContent = `${currentData.d} ${PRAYER_DATA.monthName}`;
     updateCountdown(nextPrayer);
   }
@@ -173,8 +194,7 @@
         <div class="flex justify-between items-center p-3 border-b border-gray-50 last:border-0 ${isToday ? 'bg-teal-50' : 'hover:bg-gray-50'} transition-colors">
           <div class="flex items-center gap-3">
             <span class="w-7 h-7 flex items-center justify-center rounded-full text-xs font-bold ${isToday ? 'bg-teal-600 text-white' : 'bg-gray-100 text-gray-600'}">${item.d}</span>
-            <div><p class="font-medium text-sm text-gray-800">${item.date} <span class="text-gray-400 font-normal">(${item.day})</span></p></div>
-          </div>
+            <div><p class="font-medium text-sm text-gray-800">${item.date} <span class="text-gray-400 font-normal">(${item.day})</span></p></div>          </div>
           <div class="flex gap-3 text-xs text-gray-600">
             <span>🌅 ${item.fajr}</span><span>🕌 ${item.dhuhr}</span><span>🌆 ${item.maghrib}</span>
           </div>
@@ -194,4 +214,5 @@
     navigator.serviceWorker.register('/sw.js');
   }
 </script>
-</body></html>
+</body>
+</html>
