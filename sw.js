@@ -1,29 +1,63 @@
-const CACHE_NAME = 'namaz-chelyabinsk-v4'; // <-- Изменено с v3 на v4
-const ASSETS = ['/', '/index.html', '/manifest.json', '/icon.png'];
+// sw.js - Service Worker для PWA "Намаз Челябинск"
 
-self.addEventListener('install', e => {
-  e.waitUntil(caches.open(CACHE_NAME).then(c => c.addAll(ASSETS)));
-  self.skipWaiting();
+const CACHE_NAME = 'namaz-chelyabinsk-v5'; // <-- Версия обновлена для сброса старого кэша
+
+// Файлы, которые мы кэшируем для работы без интернета
+const ASSETS = [
+  '/',
+  '/index.html',
+  '/manifest.json',
+  '/icon.png'
+];
+
+// 1. УСТАНОВКА: Скачиваем и сохраняем файлы
+self.addEventListener('install', (e) => {
+  e.waitUntil(
+    caches.open(CACHE_NAME).then((cache) => {
+      console.log('[ServiceWorker] Кэширование файлов приложения...');
+      return cache.addAll(ASSETS);
+    })
+  );
+  self.skipWaiting(); // Активируем новую версию сразу
 });
 
-self.addEventListener('activate', e => {
-  e.waitUntil(caches.keys().then(keys => 
-    Promise.all(keys.filter(k => k !== CACHE_NAME).map(k => caches.delete(k)))
-  ));
-  self.clients.claim();
+// 2. АКТИВАЦИЯ: Удаляем старые версии кэша, чтобы не занимать память
+self.addEventListener('activate', (e) => {
+  e.waitUntil(
+    caches.keys().then((keyList) => {
+      return Promise.all(keyList.map((key) => {
+        if (key !== CACHE_NAME) {
+          console.log('[ServiceWorker] Удаление старого кэша:', key);
+          return caches.delete(key);
+        }
+      }));
+    })
+  );
+  self.clients.claim(); // Берем управление страницей сразу
 });
 
-self.addEventListener('fetch', e => {
+// 3. ОБРАБОТКА ЗАПРОСОВ: Сначала сеть, если нет — кэш
+self.addEventListener('fetch', (e) => {
+  // Для HTML-документов всегда пытаемся скачать свежее
   if (e.request.mode === 'navigate') {
     e.respondWith(
-      fetch(e.request).then(res => {
-        return caches.open(CACHE_NAME).then(c => {
-          c.put(e.request, res.clone());
-          return res;
+      fetch(e.request).then((networkResponse) => {
+        // Если скачали успешно — обновляем кэш
+        return caches.open(CACHE_NAME).then((cache) => {
+          cache.put(e.request, networkResponse.clone());
+          return networkResponse;
         });
-      }).catch(() => caches.match(e.request))
+      }).catch(() => {
+        // Если интернета нет — берем из кэша
+        console.log('[ServiceWorker] Нет сети, используем кэш');
+        return caches.match(e.request);
+      })
     );
-  } else {
-    e.respondWith(fetch(e.request).catch(() => caches.match(e.request)));
+  } 
+  // Для остальных ресурсов (картинки, манифест)
+  else {
+    e.respondWith(
+      fetch(e.request).catch(() => caches.match(e.request))
+    );
   }
 });
