@@ -56,7 +56,7 @@
 <body>
   <header>
     <h1>Намаз Челябинск</h1>
-    <div class="date" id="islamicDate">Зуль-Кагда 1447</div>
+    <div class="date">Зуль-Кагда 1447</div>
     <div id="offlineStatus" class="offline-badge" style="display:none;">📶 Офлайн-режим. Данные из кэша.</div>
   </header>
 
@@ -69,7 +69,7 @@
     <div class="qibla-box">
       <div class="qibla-title">🕋 Направление Киблы</div>
       <div class="qibla-deg">Для Челябинска (229°) СЮЗВ</div>
-      <div class="compass-container" id="compass">
+      <div class="compass-container">
         <span class="compass-n">С</span>
         <div class="compass-kaaba">🕋</div>
         <div class="compass-needle" id="needle"></div>
@@ -82,7 +82,7 @@
 
     <div class="schedule-box">
       <div class="schedule-header">
-        <span class="schedule-title">Расписание на сегодня</span>
+        <span class="schedule-title">Расписание на месяц</span>
         <button class="share-btn" onclick="shareSchedule()">📤 Поделиться</button>
       </div>
       <div id="prayerList">Загрузка...</div>
@@ -154,7 +154,7 @@
     // === КОМПАС ===
     const compassBtn = document.getElementById('compassBtn');
     const needle = document.getElementById('needle');
-    const QIBLA_DEG = 229; // Для Челябинска
+    const QIBLA_DEG = 229;
 
     compassBtn.addEventListener('click', async () => {
       if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
@@ -163,7 +163,7 @@
       }
       window.addEventListener('deviceorientation', (e) => {
         let heading = e.alpha;
-        if (e.webkitCompassHeading) heading = e.webkitCompassHeading; // iOS
+        if (e.webkitCompassHeading) heading = e.webkitCompassHeading;
         if (heading === null) return;
         const rotation = heading + QIBLA_DEG;
         needle.style.transform = `translate(-50%, -100%) rotate(${rotation}deg)`;
@@ -196,7 +196,7 @@
         const perm = await Notification.requestPermission();
         if (perm !== 'granted') return;      }
       const reg = await navigator.serviceWorker.ready;
-      if (typeof PRAYERS === 'undefined' || !nextPrayerObj) return;
+      if (!nextPrayerObj) return;
 
       const triggerMs = nextPrayerObj.date.getTime() - 5 * 60 * 1000;
       const delay = triggerMs - Date.now();
@@ -232,7 +232,7 @@
       }
     })();
 
-    // ЗАПУСК ВСЕГО ПРИ ЗАГРУЗКЕ
+    // ЗАПУСК
     document.addEventListener('DOMContentLoaded', () => {
       renderList(); 
       startCountdown(); 
