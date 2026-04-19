@@ -19,5 +19,19 @@
       "type": "image/png",
       "purpose": "any maskable"
     }
+  ],
+  "shortcuts": [
+    {
+      "name": "⏱ До следующего намаза",
+      "url": "/?action=countdown",
+      "description": "Открыть обратный отсчёт",
+      "icons": [{ "src": "/icon.png", "sizes": "96x96", "type": "image/png" }]
+    },
+    {
+      "name": "🕋 Направление Киблы",
+      "url": "/?action=qibla",
+      "description": "Открыть компас и направление",
+      "icons": [{ "src": "/icon.png", "sizes": "96x96", "type": "image/png" }]
+    }
   ]
 }
