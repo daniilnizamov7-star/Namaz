@@ -26,7 +26,10 @@
     .qibla-title { font-weight: 600; margin-bottom: 8px; }
     .qibla-deg { font-size: 1.5rem; color: var(--primary); }
     .qibla-hint { font-size: 0.85rem; color: var(--muted); margin-top: 4px; }
-    .qibla-btn { display: inline-block; margin-top: 12px; padding: 10px 16px; background: var(--primary); color: white; border-radius: 10px; text-decoration: none; font-weight: 500; border: none; cursor: pointer; }
+    .compass-container { width: 200px; height: 200px; margin: 12px auto; position: relative; border: 2px solid #e2e8f0; border-radius: 50%; background: #f1f5f9; }
+    .compass-needle { position: absolute; top: 50%; left: 50%; width: 4px; height: 80px; background: #ef4444; transform-origin: bottom center; transform: translate(-50%, -100%) rotate(0deg); border-radius: 2px; }
+    .compass-kaaba { position: absolute; top: 15px; left: 50%; width: 24px; height: 24px; background: var(--primary); border-radius: 4px; transform: translateX(-50%); display: flex; align-items: center; justify-content: center; color: white; font-size: 12px; }
+    .compass-btn { display: inline-block; margin-top: 12px; padding: 10px 16px; background: var(--primary); color: white; border-radius: 10px; text-decoration: none; font-weight: 500; border: none; cursor: pointer; }
     .schedule-box { background: var(--card); padding: 16px; border-radius: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); margin-bottom: 16px; border: 1px solid #e2e8f0; }
     .schedule-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
     .schedule-title { font-weight: 600; }
@@ -44,10 +47,11 @@
     @media (prefers-color-scheme: dark) {
       :root { --bg: #0f172a; --card: #1e293b; --text: #f8fafc; --muted: #94a3b8; }
       .offline-badge { background: rgba(255,255,255,0.1); }
-      .disclaimer { background: #451a03; color: #fde68a; }
+      .disclaimer { background: #451a03; color: #fde68a; }      .compass-container { background: #334155; border-color: #475569; }
     }
   </style>
-</head><body>
+</head>
+<body>
   <header>
     <h1>Намаз Челябинск</h1>
     <div class="date" id="islamicDate">Загрузка...</div>
@@ -62,9 +66,14 @@
 
     <div class="qibla-box">
       <div class="qibla-title">🕋 Направление Киблы</div>
-      <div class="qibla-deg">Для Челябинска: 229° (СЮЗВ)</div>
-      <div class="qibla-hint">Держите телефон горизонтально.</div>
-      <a href="https://qiblafinder.withgoogle.com" target="_blank" class="qibla-btn">🌍 Открыть точный Qibla Finder</a>
+      <div class="qibla-deg">Для Челябинска (229°) • СЮЗВ</div>
+      <div class="compass-container" id="compass">
+        <div class="compass-kaaba">🕋</div>
+        <div class="compass-needle" id="needle"></div>
+      </div>
+      <div class="qibla-hint">Держите телефон горизонтально. Красная С = Север. Зелёная стрелка = Кааба.</div>
+      <button class="compass-btn" id="compassBtn">📡 Включить компас</button>
+      <a href="https://qiblafinder.withgoogle.com" target="_blank" class="compass-btn" style="background:#3b82f6; margin-left:8px;">🌍 Точный Qibla Finder</a>
     </div>
 
     <div class="schedule-box">
@@ -84,11 +93,10 @@
   <footer>Данные: ЦДУМ России / РДУМ Челябинской обл.</footer>
 
   <script>
-    // === РАСПИСАНИЕ (Обновляй здесь при изменении времени) ===
+    // === РАСПИСАНИЕ ===
     const PRAYERS = [
       { key: 'fajr', name: 'Фаджр', time: '04:32' },
-      { key: 'sunrise', name: 'Шурук', time: '06:15' },
-      { key: 'dhuhr', name: 'Зухр', time: '12:18' },
+      { key: 'sunrise', name: 'Шурук', time: '06:15' },      { key: 'dhuhr', name: 'Зухр', time: '12:18' },
       { key: 'asr', name: 'Аср', time: '16:45' },
       { key: 'maghrib', name: 'Магриб', time: '18:20' },
       { key: 'isha', name: 'Иша', time: '19:45' }
@@ -96,10 +104,8 @@
 
     let nextPrayerObj = null;
 
-    function getIslamicDate() {      // Упрощённо. Для точной даты подключи библиотеку hijri-converter
-      const now = new Date();
-      const months = ['Мухаррам','Сафар','Раби аль-Авваль','Раби ас-Сани','Джумада аль-Уля','Джумада ас-Сания','Раджаб','Шаабан','Рамадан','Шавваль','Зуль-Каада','Зуль-Хиджа'];
-      document.getElementById('islamicDate').textContent = `Зуль-Каада 1447`;
+    function getIslamicDate() {
+      document.getElementById('islamicDate').textContent = 'Зуль-Каада 1447';
     }
 
     function findNextPrayer() {
@@ -109,7 +115,6 @@
         const d = new Date(); d.setHours(h, m, 0, 0);
         if (d > now) return { ...p, date: d };
       }
-      // Если все намазы прошли, берём Фаджр завтра
       const [h, m] = PRAYERS[0].time.split(':');
       const d = new Date(); d.setDate(d.getDate() + 1); d.setHours(h, m, 0, 0);
       return { ...PRAYERS[0], date: d };
@@ -140,13 +145,34 @@
       setInterval(() => {
         if (!nextPrayerObj) return;
         const diff = nextPrayerObj.date - new Date();
-        const hh = String(Math.floor(diff / 3600000)).padStart(2, '0');
-        const mm = String(Math.floor((diff % 3600000) / 60000)).padStart(2, '0');
+        const hh = String(Math.floor(diff / 3600000)).padStart(2, '0');        const mm = String(Math.floor((diff % 3600000) / 60000)).padStart(2, '0');
         const ss = String(Math.floor((diff % 60000) / 1000)).padStart(2, '0');
         el.textContent = `${hh}:${mm}:${ss}`;
       }, 1000);
     }
-    // === УВЕДОМЛЕНИЯ ===
+
+    // === КОМПАС ===
+    const compassBtn = document.getElementById('compassBtn');
+    const needle = document.getElementById('needle');
+    const QIBLA_DEG = 229; // Для Челябинска
+
+    compassBtn.addEventListener('click', async () => {
+      if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
+        const perm = await DeviceOrientationEvent.requestPermission();
+        if (perm !== 'granted') return alert('Разрешение на компас отклонено');
+      }
+      window.addEventListener('deviceorientation', (e) => {
+        let heading = e.alpha;
+        if (e.webkitCompassHeading) heading = e.webkitCompassHeading; // iOS
+        if (heading === null) return;
+        const rotation = heading + QIBLA_DEG;
+        needle.style.transform = `translate(-50%, -100%) rotate(${rotation}deg)`;
+        compassBtn.textContent = '✅ Компас активен';
+        compassBtn.disabled = true;
+      });
+    });
+
+    // === УВЕДОМЛЕНИЯ (встроены аккуратно) ===
     async function initPrayerNotifications() {
       if (!('Notification' in window) || !('serviceWorker' in navigator)) return;
       const permission = Notification.permission === 'granted' ? 'granted' : await Notification.requestPermission();
@@ -168,7 +194,6 @@
       }
       restorePending(reg);
     }
-
     function restorePending(reg) {
       const raw = localStorage.getItem('pending_notif');
       if (!raw) return;
@@ -194,12 +219,19 @@
     function setupAutoUpdate() { setInterval(() => { const n = new Date(); if (n.getHours()===0 && n.getMinutes()===0 && n.getSeconds()<5) location.reload(); }, 10000); }
 
     async function shareSchedule() {
-      const txt = `🕌 Намазы (Челябинск)\n${PRAYERS.map(p=>`${p.name}: ${p.time}`).join('\n')}\n📲 PWA Намаз Челябинск`;      if (navigator.share) await navigator.share({ title: 'Намаз Челябинск', text: txt });
+      const txt = `🕌 Намазы (Челябинск)\n${PRAYERS.map(p=>`${p.name}: ${p.time}`).join('\n')}\n📲 PWA Намаз Челябинск`;
+      if (navigator.share) await navigator.share({ title: 'Намаз Челябинск', text: txt });
       else { navigator.clipboard.writeText(txt); alert('📋 Скопировано'); }
     }
 
     document.addEventListener('DOMContentLoaded', () => {
-      getIslamicDate(); renderList(); startCountdown(); initPrayerNotifications(); checkOnline(); registerSW(); setupAutoUpdate();
+      getIslamicDate(); 
+      renderList(); 
+      startCountdown(); 
+      initPrayerNotifications(); 
+      checkOnline(); 
+      registerSW(); 
+      setupAutoUpdate();
     });
   </script>
 </body>
