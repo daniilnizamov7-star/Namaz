@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#0f766e">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="description" content="Время намазов для г. Челябинска.">
+  <meta name="description" content="Время намазов и Кибла для г. Челябинска.">
   <title>Намаз Челябинск</title>
   
   <link rel="manifest" href="/manifest.json">
@@ -31,154 +31,20 @@
     .fade-in { animation: fadeIn 0.4s ease; }
     @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
     .countdown-digit { font-variant-numeric: tabular-nums; }
-
-    /* ===== COMPASS STYLES ===== */
-    .compass-wrap {
-      position: relative;
-      width: 200px;
-      height: 200px;
-      margin: 0 auto;
-    }
-    /* Внешнее кольцо с градусами */
-    .compass-ring {
-      position: absolute;
-      inset: 0;
-      border-radius: 50%;
-      background: conic-gradient(
-        from 0deg,
-        #e2e8f0 0deg,
-        #cbd5e1 90deg,
-        #e2e8f0 180deg,
-        #cbd5e1 270deg,
-        #e2e8f0 360deg
-      );
-      box-shadow: 0 4px 20px rgba(0,0,0,0.15), inset 0 2px 8px rgba(0,0,0,0.1);
-    }
-    .compass-inner {
-      position: absolute;
-      inset: 14px;
-      border-radius: 50%;
-      background: radial-gradient(circle at 35% 35%, #ffffff, #f1f5f9);
-      box-shadow: inset 0 2px 8px rgba(0,0,0,0.12);
-    }
-    /* Стрелка компаса */
-    .compass-needle {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      width: 6px;
-      height: 80px;
-      margin-left: -3px;
-      margin-top: -70px;
-      transform-origin: bottom center;
-      transition: transform 0.15s ease-out;
-      z-index: 10;
-    }
-    .needle-north {
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      height: 55%;
-      background: linear-gradient(to bottom, #ef4444, #dc2626);
-      border-radius: 3px 3px 0 0;
-    }
-    .needle-south {
-      position: absolute;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      height: 45%;
-      background: linear-gradient(to top, #94a3b8, #64748b);
-      border-radius: 0 0 3px 3px;
-    }
-    /* Центральная точка */
-    .compass-dot {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      width: 12px;
-      height: 12px;
-      margin: -6px 0 0 -6px;
-      background: #1e293b;
-      border-radius: 50%;
-      border: 2px solid white;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.3);
-      z-index: 11;
-    }
-    /* Стрелка Киблы (зелёная) */
-    .qibla-arrow {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      width: 4px;
-      height: 72px;
-      margin-left: -2px;
-      margin-top: -68px;
-      transform-origin: bottom center;
-      transition: transform 0.15s ease-out;
-      z-index: 9;
-    }
-    .qibla-arrow::before {
-      content: '🕋';
-      position: absolute;
-      top: -4px;
-      left: 50%;
-      transform: translateX(-50%);
-      font-size: 20px;
-      line-height: 1;
-    }
-    .qibla-arrow::after {
-      content: '';
-      position: absolute;
-      top: 18px;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: linear-gradient(to bottom, #10b981, #059669);
-      border-radius: 2px;
-      opacity: 0.7;
-    }
-    /* Буквы сторон света */
-    .compass-label {
-      position: absolute;
-      font-size: 11px;
-      font-weight: 800;
-      color: #475569;
-      line-height: 1;
-    }
-    .label-n { top: 18px; left: 50%; transform: translateX(-50%); color: #ef4444; }
-    .label-s { bottom: 18px; left: 50%; transform: translateX(-50%); }
-    .label-e { right: 18px; top: 50%; transform: translateY(-50%); }
-    .label-w { left: 18px; top: 50%; transform: translateY(-50%); }
-
-    /* Статус компаса */
-    #compass-status {
-      transition: all 0.3s;
-    }
-    .status-dot {
-      width: 8px; height: 8px; border-radius: 50%; display: inline-block; margin-right: 6px; vertical-align: middle;
-    }
-    .status-dot.green { background: #10b981; box-shadow: 0 0 6px #10b981; }
-    .status-dot.yellow { background: #f59e0b; }
-    .status-dot.red { background: #ef4444; }
-
-    /* Угол совпадения */
-    .accuracy-bar {
-      height: 6px;
-      border-radius: 3px;
-      background: #e2e8f0;
-      overflow: hidden;
-    }
-    .accuracy-fill {
-      height: 100%;
-      border-radius: 3px;
-      background: linear-gradient(to right, #ef4444, #f59e0b, #10b981);
-      transition: width 0.3s;
-    }
+    
+    /* Компас стили */
+    .compass-container { position: relative; width: 150px; height: 150px; margin: 0 auto; }
+    .compass-ring { position: absolute; inset: 0; transition: transform 0.1s linear; }
+    .compass-arrow { position: absolute; inset: 0; transition: transform 0.1s linear; }
+    .compass-center { position: absolute; top: 50%; left: 50%; width: 10px; height: 10px; background: #374151; border-radius: 50%; transform: translate(-50%, -50%); z-index: 10; }
   </style>
 </head>
 <body class="pb-8">
+
+<!-- Индикатор офлайна -->
+<div id="offline-banner" class="hidden bg-yellow-500 text-white text-center text-xs py-1 font-medium sticky top-0 z-50">
+  📶 Офлайн-режим. Данные из кэша.
+</div>
 
 <header class="bg-teal-800 text-white pt-8 pb-10 px-4 rounded-b-3xl shadow-lg">
   <div class="max-w-md mx-auto flex justify-between items-center">
@@ -186,13 +52,19 @@
       <h1 class="text-2xl font-bold tracking-tight">Намаз Челябинск</h1>
       <p class="text-teal-200 text-sm mt-1">Зуль-Кагда 1447</p>
     </div>
-    <div class="bg-teal-700/80 backdrop-blur px-3 py-1.5 rounded-full text-xs font-semibold" id="hijri-date">...</div>
+    <div class="flex flex-col items-end gap-2">
+      <div class="bg-teal-700/80 backdrop-blur px-3 py-1.5 rounded-full text-xs font-semibold" id="hijri-date">...</div>
+      <!-- Кнопка Поделиться -->
+      <button onclick="shareApp()" class="flex items-center gap-1 text-xs bg-teal-900/50 hover:bg-teal-900 px-2 py-1 rounded transition active:scale-95">
+        📤 Поделиться
+      </button>
+    </div>
   </div>
 </header>
 
 <main class="max-w-md mx-auto px-4 -mt-6">
   
-  <!-- Карточка намазов -->
+  <!-- 1. Карточка намазов -->
   <div class="card p-5 mb-4 fade-in">
     <div class="flex justify-between items-center mb-4">
       <div>
@@ -208,78 +80,53 @@
     </div>
   </div>
 
-  <!-- Компас Киблы -->
-  <div class="card p-5 mb-4 fade-in">
+  <!-- 2. Карточка Киблы (с исправленным компасом) -->
+  <div class="card p-5 mb-4 fade-in text-center">
     <h3 class="font-semibold text-gray-800 mb-1">🕋 Направление Киблы</h3>
-    <p class="text-xs text-gray-500 mb-4">Для Челябинска: <b>229° от севера</b> (Юго-Запад)</p>
-
-    <!-- Статус -->
-    <div id="compass-status" class="text-xs text-gray-500 mb-4 flex items-center">
-      <span class="status-dot yellow"></span>
-      <span id="status-text">Нажмите кнопку для запуска компаса</span>
-    </div>
-
-    <!-- Компас -->
-    <div class="compass-wrap mb-4">
-      <div class="compass-ring"></div>
-      <div class="compass-inner"></div>
+    <p class="text-xs text-gray-500 mb-4">Для Челябинска (229°)</p>
+    
+    <div class="compass-container mb-4">
+      <!-- Кольцо с буквами -->
+      <div class="compass-ring" id="compass-ring">
+        <div class="absolute inset-0 rounded-full border-4 border-gray-200 bg-white shadow-inner">
+          <span class="absolute top-1 left-1/2 -translate-x-1/2 text-xs font-bold text-red-500">С</span>
+          <span class="absolute bottom-1 left-1/2 -translate-x-1/2 text-xs font-bold text-gray-400">Ю</span>
+          <span class="absolute left-1 top-1/2 -translate-y-1/2 text-xs font-bold text-gray-400">З</span>
+          <span class="absolute right-1 top-1/2 -translate-y-1/2 text-xs font-bold text-gray-400">В</span>
+        </div>
+      </div>
       
-      <!-- Буквы сторон света -->
-      <span class="compass-label label-n">С</span>
-      <span class="compass-label label-s">Ю</span>
-      <span class="compass-label label-e">В</span>
-      <span class="compass-label label-w">З</span>
-
-      <!-- Стрелка Киблы (зелёная) -->
-      <div class="qibla-arrow" id="qibla-arrow" style="transform: rotate(229deg)"></div>
-
-      <!-- Стрелка компаса -->
-      <div class="compass-needle" id="compass-needle">
-        <div class="needle-north"></div>
-        <div class="needle-south"></div>
+      <!-- Стрелка на Каабу -->
+      <div class="compass-arrow" id="compass-arrow">
+        <div class="absolute top-3 left-1/2 -translate-x-1/2 w-1 h-12 bg-gradient-to-t from-transparent to-emerald-600 rounded-full origin-bottom"></div>
+        <div class="absolute top-2 left-1/2 -translate-x-1/2 w-3 h-3 bg-emerald-600 rotate-45"></div>
       </div>
-      <div class="compass-dot"></div>
+      
+      <!-- Центр -->
+      <div class="compass-center"></div>
+      
+      <!-- Статус -->
+      <p class="text-xs text-gray-500 mt-2 font-medium" id="compass-status">Нажмите кнопку ниже</p>
     </div>
 
-    <!-- Точность -->
-    <div class="mb-4" id="accuracy-section" style="display:none">
-      <div class="flex justify-between text-xs text-gray-500 mb-1">
-        <span>Совпадение с Киблой</span>
-        <span id="accuracy-text">0%</span>
-      </div>
-      <div class="accuracy-bar">
-        <div class="accuracy-fill" id="accuracy-fill" style="width:0%"></div>
-      </div>
-    </div>
-
-    <!-- Кнопка запуска -->
-    <div id="compass-btn-wrap">
-      <button onclick="startCompass()" id="compass-btn"
-        class="w-full py-2.5 bg-teal-600 text-white text-sm font-semibold rounded-xl shadow hover:bg-teal-700 active:scale-95 transition">
+    <div class="space-y-3">
+      <button id="enable-compass-btn" onclick="enableCompass()" class="w-full px-4 py-2.5 bg-blue-600 text-white text-sm font-semibold rounded-lg shadow hover:bg-blue-700 active:scale-95 transition">
         📡 Включить компас
       </button>
-      <p class="text-[10px] text-gray-400 text-center mt-2">
-        Требуется разрешение на датчик движения (iOS 13+)
+      
+      <p class="text-[10px] text-gray-400">
+        Держите телефон горизонтально. Красная С = Север. Зелёная стрелка = Кааба.
       </p>
-    </div>
-
-    <!-- Подсказка -->
-    <div id="compass-hint" class="mt-3 p-3 bg-amber-50 border border-amber-200 rounded-xl text-xs text-amber-700" style="display:none">
-      💡 Держите телефон горизонтально. Зелёная стрелка 🕋 — Кибла. Красная стрелка — Север.
-    </div>
-
-    <!-- Ошибка / фоллбэк -->
-    <div id="compass-fallback" style="display:none" class="mt-3">
-      <div class="bg-blue-50 border border-blue-200 rounded-xl p-3 text-center">
-        <p class="text-xs text-blue-700 mb-2">Компас недоступен на этом устройстве</p>
-        <button onclick="openQiblaFinder()" class="w-full px-4 py-2 bg-blue-600 text-white text-xs font-semibold rounded-lg">
-          🌍 Открыть Qibla Finder в браузере
-        </button>
+      
+      <div class="pt-2 border-t border-gray-100">
+        <a href="https://qiblafinder.withgoogle.com" target="_blank" rel="noopener noreferrer" class="text-xs text-blue-600 hover:underline font-medium">
+          🌍 Открыть точный Qibla Finder в браузере
+        </a>
       </div>
     </div>
   </div>
 
-  <!-- Расписание на месяц -->
+  <!-- 3. Расписание на месяц -->
   <div class="card overflow-hidden mb-4">
     <div class="p-4 border-b border-gray-100 bg-gray-50">
       <h3 class="font-semibold text-gray-800">Расписание на месяц</h3>
@@ -287,14 +134,20 @@
     <div class="max-h-[40vh] overflow-y-auto" id="prayer-list"></div>
   </div>
 
+  <!-- 4. Футер + Дисклеймер -->
   <div class="text-center text-xs text-gray-400 px-4 pb-4">
     <p>Данные: ЦДУМ России / РДУМ Челябинской обл.</p>
-    <p class="mt-1">Обновляется автоматически в 00:00</p>
+    <p class="mt-2 text-gray-300 leading-tight">
+      ⚠️ Время намазов указано справочно. Для обязательств сверяйтесь с расписанием местной мечети.
+    </p>
+    <p class="mt-2">Обновляется автоматически в 00:00</p>
   </div>
 </main>
 
 <script>
-  // ===== ДАННЫЕ НАМАЗОВ =====
+  // ==========================================
+  // 1. ДАННЫЕ НАМАЗОВ
+  // ==========================================
   const PRAYER_DATA = {
     monthName: "Зуль-Кагда",
     schedule: [
@@ -341,6 +194,9 @@
     { key: 'isha', name: 'Иша', icon: '🌃', type: 'prayer' }
   ];
 
+  // ==========================================
+  // 2. ЛОГИКА НАМАЗОВ
+  // ==========================================
   try {
     const today = new Date();
     const todayDate = today.getDate();
@@ -430,158 +286,101 @@
     document.getElementById('today-full-date').textContent = 'Ошибка';
   }
 
-  // ===== КОМПАС КИБЛЫ =====
-  const QIBLA_ANGLE = 229; // градусов от севера для Челябинска
+  // ==========================================
+  // 3. КОМПАС (deviceorientationabsolute)
+  // ==========================================
+  const ARROW = document.getElementById('compass-arrow');
+  const RING = document.getElementById('compass-ring');
+  const STATUS = document.getElementById('compass-status');
+  const BTN = document.getElementById('enable-compass-btn');
+  
+  const QIBLA_MAGNETIC_BEARING = 214; 
+  let isCompassActive = false;
+  let currentHeading = 0;
 
-  let smoothAlpha = null;
-  const SMOOTH = 0.15; // коэффициент сглаживания (чем меньше — тем плавнее)
-  let sensorUsed = ''; // 'absolute' | 'orientation'
-
-  function setStatus(type, text) {
-    const dot = document.querySelector('#compass-status .status-dot');
-    dot.className = `status-dot ${type}`;
-    document.getElementById('status-text').textContent = text;
-  }
-
-  // Сглаживание с учётом перехода через 0/360
-  function smooth(current, newVal) {
-    if (current === null) return newVal;
-    let diff = newVal - current;
-    if (diff > 180) diff -= 360;
-    if (diff < -180) diff += 360;
-    let result = current + diff * SMOOTH;
-    if (result < 0) result += 360;
-    if (result >= 360) result -= 360;
-    return result;
-  }
-
-  function applyCompass(heading) {
-    // heading = градусы от магнитного севера (0–360, по часовой стрелке)
-    smoothAlpha = smooth(smoothAlpha, heading);
-
-    // Красная стрелка компаса — всегда на север (против вращения телефона)
-    document.getElementById('compass-needle').style.transform = `rotate(${-smoothAlpha}deg)`;
-
-    // Зелёная стрелка Киблы — фиксирована в пространстве
-    document.getElementById('qibla-arrow').style.transform = `rotate(${QIBLA_ANGLE - smoothAlpha}deg)`;
-
-    // Точность: насколько телефон направлен на Киблу
-    let diff = Math.abs(smoothAlpha - QIBLA_ANGLE);
-    if (diff > 180) diff = 360 - diff;
-    const pct = Math.max(0, Math.min(100, Math.round((1 - diff / 90) * 100)));
-    document.getElementById('accuracy-fill').style.width = pct + '%';
-    document.getElementById('accuracy-text').textContent = pct + '%';
-    document.getElementById('accuracy-section').style.display = 'block';
-  }
-
-  // --- Обработчик для deviceorientationabsolute (Android Chrome — самый точный) ---
-  function handleAbsolute(e) {
-    if (e.alpha === null) return;
-    // deviceorientationabsolute: alpha = 0 когда верх телефона смотрит на север
-    // Компасный курс = 360 - alpha (т.к. alpha растёт против часовой)
-    let heading = (360 - e.alpha) % 360;
-    applyCompass(heading);
-  }
-
-  // --- Обработчик для обычного deviceorientation (фоллбэк) ---
-  function handleOrientation(e) {
-    if (e.webkitCompassHeading != null) {
-      // iOS Safari — webkitCompassHeading уже правильный азимут
-      applyCompass(e.webkitCompassHeading);
-    } else if (e.alpha !== null) {
-      // Android фоллбэк (не абсолютный) — может дрейфовать, но лучше чем ничего
-      let heading = (360 - e.alpha) % 360;
-      applyCompass(heading);
-    }
-  }
-
-  async function startCompass() {
-    const btn = document.getElementById('compass-btn');
-    btn.disabled = true;
-    btn.textContent = '⏳ Запускаем...';
-
-    // iOS 13+ — нужно разрешение
-    if (typeof DeviceOrientationEvent !== 'undefined' &&
-        typeof DeviceOrientationEvent.requestPermission === 'function') {
-      try {
-        const perm = await DeviceOrientationEvent.requestPermission();
-        if (perm === 'granted') {
-          activateCompass();
-        } else {
-          showFallback('Разрешение отклонено. Разрешите в настройках Safari.');
-        }
-      } catch (err) {
-        showFallback('Ошибка: ' + err.message);
-      }
-      return;
-    }
-
-    // Android Chrome — пробуем сначала deviceorientationabsolute (точнее)
-    if ('ondeviceorientationabsolute' in window) {
-      window.addEventListener('deviceorientationabsolute', handleAbsolute, true);
-      sensorUsed = 'absolute';
-      
-      // Проверяем что absolute реально даёт данные
-      let gotData = false;
-      const checkAbsolute = (e) => { if (e.alpha !== null) gotData = true; };
-      window.addEventListener('deviceorientationabsolute', checkAbsolute, { once: true });
-      
-      setTimeout(() => {
-        if (!gotData) {
-          // absolute не работает — падаем на обычный
-          window.removeEventListener('deviceorientationabsolute', handleAbsolute, true);
-          window.addEventListener('deviceorientation', handleOrientation, true);
-          sensorUsed = 'orientation';
-          setStatus('yellow', '⚠️ Режим совместимости. Калибруйте восьмёркой.');
-        } else {
-          setStatus('green', '✅ Компас активен (абсолютный режим)');
-        }
-      }, 800);
-
-      activateUI();
-    } else if (typeof DeviceOrientationEvent !== 'undefined') {
-      window.addEventListener('deviceorientation', handleOrientation, true);
-      sensorUsed = 'orientation';
-      activateUI();
-      setStatus('yellow', '⚠️ Базовый режим. Откалибруйте телефон восьмёркой.');
+  function enableCompass() {
+    if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
+      DeviceOrientationEvent.requestPermission()
+        .then(response => {
+          if (response === 'granted') {
+            startCompass();
+          } else {
+            STATUS.textContent = '⛔ Доступ запрещён';
+          }
+        })
+        .catch(console.error);
     } else {
-      showFallback('Датчик ориентации не поддерживается.');
+      startCompass();
     }
   }
 
-  function activateUI() {
-    document.getElementById('compass-btn-wrap').style.display = 'none';
-    document.getElementById('compass-hint').style.display = 'block';
-    if (!sensorUsed) setStatus('green', '✅ Компас активен — держите горизонтально');
+  function startCompass() {
+    isCompassActive = true;
+    BTN.classList.add('hidden');
+    STATUS.textContent = '🔄 Определение севера...';
+    
+    if ('ondeviceorientationabsolute' in window) {
+      window.addEventListener('deviceorientationabsolute', handleOrientation);
+      console.log('🧭 Используем absolute');
+    } else {
+      window.addEventListener('deviceorientation', handleOrientation);
+      console.log('🧭 Используем fallback');
+    }
+  }
 
-    // Если через 3 сек данных нет — предупредить
-    setTimeout(() => {
-      if (smoothAlpha === null) {
-        setStatus('yellow', '⚠️ Нет данных. Потрясите телефон или перезапустите.');
+  function handleOrientation(event) {
+    let heading;
+    if (event.webkitCompassHeading !== undefined) {
+      heading = event.webkitCompassHeading;
+    } else if (event.alpha !== null) {
+      heading = (360 - event.alpha) % 360;
+    }
+
+    if (heading !== undefined) {
+      currentHeading = heading;
+      updateCompass();
+      if (STATUS.textContent.includes('Определение')) {
+        STATUS.textContent = '✅ Компас работает';
       }
-    }, 3000);
+    }
   }
 
-  function activateCompass() {
-    window.addEventListener('deviceorientation', handleOrientation, true);
-    activateUI();
-    setStatus('green', '✅ Компас активен — держите горизонтально');
+  function updateCompass() {
+    const ringRotation = -currentHeading;
+    const arrowRotation = QIBLA_MAGNETIC_BEARING - currentHeading;
+    RING.style.transform = `rotate(${ringRotation}deg)`;
+    ARROW.style.transform = `rotate(${arrowRotation}deg)`;
   }
 
-  function showFallback(msg) {
-    setStatus('red', msg || 'Компас недоступен');
-    document.getElementById('compass-btn-wrap').style.display = 'none';
-    document.getElementById('compass-fallback').style.display = 'block';
-  }
+  window.addEventListener('deviceorientation', (e) => {
+    if (!isCompassActive && e.alpha !== null) {
+      startCompass();
+    }
+  }, { once: true });
 
-  function openQiblaFinder() {
-    const a = document.createElement('a');
-    a.href = 'https://qiblafinder.withgoogle.com/intl/ru/finder/ar';
-    a.target = '_blank';
-    a.rel = 'noopener';
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
+  // ==========================================
+  // 4. ФУНКЦИИ (Офлайн + Поделиться)
+  // ==========================================
+  
+  // Проверка офлайна
+  const banner = document.getElementById('offline-banner');
+  window.addEventListener('online', () => banner.classList.add('hidden'));
+  window.addEventListener('offline', () => banner.classList.remove('hidden'));
+  if (!navigator.onLine) banner.classList.remove('hidden');
+
+  // Кнопка поделиться
+  function shareApp() {
+    if (navigator.share) {
+      navigator.share({
+        title: 'Намаз Челябинск',
+        text: 'Точное время намазов и Кибла для Челябинска 🕌',
+        url: window.location.href
+      }).catch(console.error);
+    } else {
+      navigator.clipboard.writeText(window.location.href)
+        .then(() => alert('Ссылка скопирована в буфер обмена!'))
+        .catch(() => alert('Не удалось скопировать ссылку'));
+    }
   }
 
   // Service Worker
@@ -591,3 +390,4 @@
 </script>
 </body>
 </html>
+
