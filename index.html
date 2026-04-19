@@ -2,10 +2,12 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <meta name="theme-color" content="#3b82f6">
-  <meta name="description" content="Lesso — CRM для репетиторов. Уроки, слова, ученики.">
-  <title>Lesso</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#0f766e">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="description" content="Время намазов для г. Челябинска.">
+  <title>Намаз Челябинск</title>
   
   <link rel="manifest" href="/manifest.json">
   <link rel="icon" type="image/png" href="/icon.png">
@@ -14,419 +16,186 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
-    body { font-family: 'Inter', sans-serif; background: #f8fafc; }
-    .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 50; align-items: center; justify-content: center; }
-    .modal.active { display: flex; }
-    .tab-content { display: none; }
-    .tab-content.active { display: block; }
-    .nav-btn.active { border-bottom-color: #3b82f6; color: #3b82f6; }
-    .status-new { background: #e5e7eb; color: #374151; }
-    .status-learning { background: #dbeafe; color: #1e40af; }
-    .status-almost { background: #fef3c7; color: #b45309; }
-    .status-known { background: #d1fae5; color: #065f46; }
+    body { font-family: 'Inter', sans-serif; background: #f8fafc; overscroll-behavior: none; }
+    .card { background: white; border-radius: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.06); }
+    .prayer-card { transition: all 0.3s; }
+    .prayer-card.passed { opacity: 0.4; background: #f8fafc; }
+    .prayer-card.next { 
+      background: #ecfdf5; 
+      border: 2px solid #10b981; 
+      transform: scale(1.03);
+      box-shadow: 0 4px 15px rgba(16, 185, 129, 0.2);
+    }
+    .prayer-card.next .prayer-name { color: #047857; font-weight: 800; }
+    .prayer-card.next .prayer-time { color: #047857; font-weight: 800; }
+    .fade-in { animation: fadeIn 0.4s ease; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    .countdown-digit { font-variant-numeric: tabular-nums; }
   </style>
 </head>
-<body class="pb-20">
+<body class="pb-8">
 
-<!-- Header -->
-<header class="bg-white border-b border-gray-200 sticky top-0 z-40">
-  <div class="max-w-4xl mx-auto px-4 py-3 flex justify-between items-center">
-    <div class="flex items-center gap-2">
-      <div class="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center text-white">
-        <i class="ph ph-book-open text-xl"></i>
-      </div>
-      <h1 class="text-lg font-bold">Lesso</h1>
+<header class="bg-teal-800 text-white pt-8 pb-10 px-4 rounded-b-3xl shadow-lg">
+  <div class="max-w-md mx-auto flex justify-between items-center">
+    <div>
+      <h1 class="text-2xl font-bold tracking-tight">Намаз Челябинск</h1>
+      <p class="text-teal-200 text-sm mt-1">Зуль-Кагда 1447</p>
     </div>
+    <div class="bg-teal-700/80 backdrop-blur px-3 py-1.5 rounded-full text-xs font-semibold" id="hijri-date">...</div>
   </div>
 </header>
 
-<!-- Navigation -->
-<nav class="bg-white border-b border-gray-200">
-  <div class="max-w-4xl mx-auto px-4">
-    <div class="flex space-x-6 overflow-x-auto">
-      <button onclick="showTab('lessons')" class="nav-btn active px-3 py-3 border-b-2 border-blue-600 text-blue-600 font-medium text-sm whitespace-nowrap">📅 Уроки</button>
-      <button onclick="showTab('words')" class="nav-btn px-3 py-3 border-b-2 border-transparent text-gray-500 font-medium text-sm whitespace-nowrap">📚 Слова</button>
-      <button onclick="showTab('students')" class="nav-btn px-3 py-3 border-b-2 border-transparent text-gray-500 font-medium text-sm whitespace-nowrap">👥 Ученики</button>
-    </div>  </div>
-</nav>
-
-<main class="max-w-4xl mx-auto px-4 py-6">
-
-  <!-- LESSONS TAB -->
-  <div id="lessons" class="tab-content active">
-    <div class="flex justify-between items-center mb-4">
-      <h2 class="text-lg font-semibold">Уроки</h2>
-      <button onclick="openModal('lesson')" class="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700">➕ Добавить</button>
+<main class="max-w-md mx-auto px-4 -mt-6">
+  <div class="card p-5 mb-4 fade-in">
+    <div class="flex justify-between items-center mb-4">      <div>
+        <h2 class="text-lg font-bold text-gray-900" id="today-full-date">Загрузка...</h2>
+        <p class="text-sm text-gray-500" id="today-hijri">...</p>
+      </div>
+      <span class="text-teal-600 text-xs font-bold bg-teal-50 px-3 py-1 rounded-full" id="day-name">...</span>
     </div>
-    <div id="lessons-list" class="space-y-3"></div>
+    <div class="space-y-2" id="today-prayers"></div>
+    <div class="mt-4 p-3 bg-teal-50 rounded-xl text-center border border-teal-100">
+      <p class="text-xs text-teal-600 mb-1">До следующего намаза</p>
+      <p class="text-2xl font-bold text-teal-800 countdown-digit" id="countdown">--:--:--</p>
+    </div>
   </div>
 
-  <!-- WORDS TAB -->
-  <div id="words" class="tab-content">
-    <div class="flex justify-between items-center mb-4">
-      <h2 class="text-lg font-semibold">Слова</h2>
-      <button onclick="openModal('word')" class="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700">➕ Добавить</button>
+  <div class="card overflow-hidden mb-4">
+    <div class="p-4 border-b border-gray-100 bg-gray-50">
+      <h3 class="font-semibold text-gray-800">Расписание на месяц</h3>
     </div>
-    <div class="flex gap-2 mb-4 overflow-x-auto">
-      <button onclick="filterWords('all')" class="px-3 py-1.5 bg-gray-100 rounded-lg text-sm">Все</button>
-      <button onclick="filterWords('new')" class="px-3 py-1.5 status-new rounded-lg text-sm">Новое</button>
-      <button onclick="filterWords('learning')" class="px-3 py-1.5 status-learning rounded-lg text-sm">Учит</button>
-      <button onclick="filterWords('almost')" class="px-3 py-1.5 status-almost rounded-lg text-sm">Почти</button>
-      <button onclick="filterWords('known')" class="px-3 py-1.5 status-known rounded-lg text-sm">Знает</button>
-    </div>
-    <div id="words-list" class="grid grid-cols-1 md:grid-cols-2 gap-3"></div>
+    <div class="max-h-[40vh] overflow-y-auto" id="prayer-list"></div>
   </div>
-
-  <!-- STUDENTS TAB -->
-  <div id="students" class="tab-content">
-    <div class="flex justify-between items-center mb-4">
-      <h2 class="text-lg font-semibold">Ученики</h2>
-      <button onclick="openModal('student')" class="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700">➕ Добавить</button>
-    </div>
-    <div id="students-list" class="space-y-3"></div>
-  </div>
-
 </main>
 
-<!-- LESSON MODAL -->
-<div id="modal-lesson" class="modal">
-  <div class="bg-white rounded-xl max-w-md w-full p-6 m-4 max-h-[90vh] overflow-y-auto">
-    <h3 class="text-lg font-semibold mb-4">📝 Урок</h3>
-    <form onsubmit="saveLesson(event)" class="space-y-3">
-      <input type="hidden" id="lesson-id">
-      <div>
-        <label class="block text-sm font-medium mb-1">Тема урока</label>
-        <input type="text" id="lesson-topic" required class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none">      </div>
-      <div>
-        <label class="block text-sm font-medium mb-1">Дата и время</label>
-        <input type="datetime-local" id="lesson-date" required class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none">
-      </div>
-      <div>
-        <label class="block text-sm font-medium mb-1">Ссылка Zoom</label>
-        <input type="url" id="lesson-zoom" placeholder="https://..." class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none">
-      </div>
-      <div>
-        <label class="block text-sm font-medium mb-1">Домашнее задание</label>
-        <textarea id="lesson-hw" rows="2" class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"></textarea>
-      </div>
-      <div>
-        <label class="block text-sm font-medium mb-1">📷 Фото ДЗ от ученика</label>
-        <input type="file" id="lesson-photo" accept="image/*" class="w-full px-3 py-2 border rounded-lg">
-      </div>
-      <div>
-        <label class="block text-sm font-medium mb-1">Оценка</label>
-        <select id="lesson-grade" class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none">
-          <option value="">— Не ставить —</option>
-          <option value="5">5 — Отлично</option>
-          <option value="4">4 — Хорошо</option>
-          <option value="3">3 — Удовл.</option>
-          <option value="2">2 — Плохо</option>
-        </select>
-      </div>
-      <div>
-        <label class="block text-sm font-medium mb-1">Заметки</label>
-        <textarea id="lesson-notes" rows="2" class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"></textarea>
-      </div>
-      <div>
-        <label class="block text-sm font-medium mb-1">Материалы урока</label>
-        <input type="file" id="lesson-materials" class="w-full px-3 py-2 border rounded-lg">
-      </div>
-      <div class="flex gap-2 pt-2">
-        <button type="submit" class="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg font-medium">Сохранить</button>
-        <button type="button" onclick="closeModal('lesson')" class="flex-1 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg font-medium">Отмена</button>
-      </div>
-    </form>
-  </div>
-</div>
-
-<!-- WORD MODAL -->
-<div id="modal-word" class="modal">
-  <div class="bg-white rounded-xl max-w-md w-full p-6 m-4">
-    <h3 class="text-lg font-semibold mb-4">📚 Новое слово</h3>
-    <form onsubmit="saveWord(event)" class="space-y-3">
-      <input type="hidden" id="word-id">
-      <div>        <label class="block text-sm font-medium mb-1">Английское слово</label>
-        <input type="text" id="word-en" required class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none">
-      </div>
-      <div>
-        <label class="block text-sm font-medium mb-1">Перевод</label>
-        <input type="text" id="word-ru" required class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none">
-      </div>
-      <div>
-        <label class="block text-sm font-medium mb-1">Тема</label>
-        <input type="text" id="word-topic" placeholder="Еда, Школа..." class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none">
-      </div>
-      <div>
-        <label class="block text-sm font-medium mb-1">Уровень</label>
-        <select id="word-level" class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none">
-          <option value="new">Новое</option>
-          <option value="learning">Учит</option>
-          <option value="almost">Почти</option>
-          <option value="known">Знает</option>
-        </select>
-      </div>
-      <div class="flex gap-2 pt-2">
-        <button type="submit" class="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg font-medium">Добавить</button>
-        <button type="button" onclick="closeModal('word')" class="flex-1 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg font-medium">Отмена</button>
-      </div>
-    </form>
-  </div>
-</div>
-
-<!-- STUDENT MODAL -->
-<div id="modal-student" class="modal">
-  <div class="bg-white rounded-xl max-w-md w-full p-6 m-4">
-    <h3 class="text-lg font-semibold mb-4">👤 Ученик</h3>
-    <form onsubmit="saveStudent(event)" class="space-y-3">
-      <input type="hidden" id="student-id">
-      <div>
-        <label class="block text-sm font-medium mb-1">Имя</label>
-        <input type="text" id="student-name" required class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none">
-      </div>
-      <div>
-        <label class="block text-sm font-medium mb-1">Предмет</label>
-        <input type="text" id="student-subject" required class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none">
-      </div>
-      <div>
-        <label class="block text-sm font-medium mb-1">PIN-код (4 цифры)</label>
-        <input type="text" id="student-pin" pattern="[0-9]{4}" maxlength="4" required class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none">
-      </div>
-      <div class="bg-blue-50 p-3 rounded-lg text-xs text-blue-800">
-        👨‍👩‍👦 Родители привязываются сами через «Привязать ребёнка» в своём кабинете. PIN можно передать маме и папе — каждый привяжется отдельно.
-      </div>
-      <div class="flex gap-2 pt-2">        <button type="submit" class="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg font-medium">Сохранить</button>
-        <button type="button" onclick="closeModal('student')" class="flex-1 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg font-medium">Отмена</button>
-      </div>
-    </form>
-  </div>
-</div>
-
 <script>
-  // Data
-  let data = {
-    lessons: JSON.parse(localStorage.getItem('lesso_lessons')) || [],
-    words: JSON.parse(localStorage.getItem('lesso_words')) || [],
-    students: JSON.parse(localStorage.getItem('lesso_students')) || []
+  const PRAYER_DATA = {
+    monthName: "Зуль-Кагда",
+    schedule: [
+      { d:1, date:"18 апр", day:"Сб", suhur:"03:45", fajr:"04:05", sunrise:"05:45", dhuhr:"13:20", asr:"18:24", maghrib:"20:04", isha:"21:44" },
+      { d:2, date:"19 апр", day:"Вс", suhur:"03:43", fajr:"04:03", sunrise:"05:43", dhuhr:"13:20", asr:"18:26", maghrib:"20:06", isha:"21:46" },
+      { d:3, date:"20 апр", day:"Пн", suhur:"03:40", fajr:"04:00", sunrise:"05:40", dhuhr:"13:20", asr:"18:28", maghrib:"20:08", isha:"21:48" },
+      { d:4, date:"21 апр", day:"Вт", suhur:"03:38", fajr:"03:58", sunrise:"05:38", dhuhr:"13:20", asr:"18:29", maghrib:"20:09", isha:"21:49" },
+      { d:5, date:"22 апр", day:"Ср", suhur:"03:36", fajr:"03:56", sunrise:"05:36", dhuhr:"13:20", asr:"18:31", maghrib:"20:11", isha:"21:51" },
+      { d:6, date:"23 апр", day:"Чт", suhur:"03:33", fajr:"03:53", sunrise:"05:33", dhuhr:"13:20", asr:"18:33", maghrib:"20:13", isha:"21:53" },
+      { d:7, date:"24 апр", day:"Пт", suhur:"03:31", fajr:"03:51", sunrise:"05:31", dhuhr:"13:20", asr:"18:35", maghrib:"20:15", isha:"21:55" },
+      { d:8, date:"25 апр", day:"Сб", suhur:"03:29", fajr:"03:49", sunrise:"05:29", dhuhr:"13:20", asr:"18:37", maghrib:"20:17", isha:"21:57" },
+      { d:9, date:"26 апр", day:"Вс", suhur:"03:26", fajr:"03:46", sunrise:"05:26", dhuhr:"13:20", asr:"18:39", maghrib:"20:19", isha:"21:59" },
+      { d:10, date:"27 апр", day:"Пн", suhur:"03:24", fajr:"03:44", sunrise:"05:24", dhuhr:"13:20", asr:"18:41", maghrib:"20:21", isha:"22:01" },
+      { d:11, date:"28 апр", day:"Вт", suhur:"03:22", fajr:"03:42", sunrise:"05:22", dhuhr:"13:20", asr:"18:43", maghrib:"20:23", isha:"22:03" },
+      { d:12, date:"29 апр", day:"Ср", suhur:"03:20", fajr:"03:40", sunrise:"05:20", dhuhr:"13:20", asr:"18:45", maghrib:"20:25", isha:"22:05" },
+      { d:13, date:"30 апр", day:"Чт", suhur:"03:17", fajr:"03:37", sunrise:"05:17", dhuhr:"13:20", asr:"18:47", maghrib:"20:27", isha:"22:07" },
+      { d:14, date:"1 май", day:"Пт", suhur:"03:15", fajr:"03:35", sunrise:"05:15", dhuhr:"13:20", asr:"18:49", maghrib:"20:29", isha:"22:09" },
+      { d:15, date:"2 май", day:"Сб", suhur:"03:13", fajr:"03:33", sunrise:"05:13", dhuhr:"13:20", asr:"18:51", maghrib:"20:31", isha:"22:11" },
+      { d:16, date:"3 май", day:"Вс", suhur:"03:11", fajr:"03:31", sunrise:"05:11", dhuhr:"13:20", asr:"18:53", maghrib:"20:33", isha:"22:13" },
+      { d:17, date:"4 май", day:"Пн", suhur:"03:09", fajr:"03:29", sunrise:"05:09", dhuhr:"13:20", asr:"18:55", maghrib:"20:35", isha:"22:15" },
+      { d:18, date:"5 май", day:"Вт", suhur:"03:07", fajr:"03:27", sunrise:"05:07", dhuhr:"13:20", asr:"18:57", maghrib:"20:37", isha:"22:17" },
+      { d:19, date:"6 май", day:"Ср", suhur:"03:05", fajr:"03:25", sunrise:"05:05", dhuhr:"13:20", asr:"18:59", maghrib:"20:39", isha:"22:19" },
+      { d:20, date:"7 май", day:"Чт", suhur:"03:03", fajr:"03:23", sunrise:"05:03", dhuhr:"13:20", asr:"19:01", maghrib:"20:41", isha:"22:21" },
+      { d:21, date:"8 май", day:"Пт", suhur:"03:01", fajr:"03:21", sunrise:"05:01", dhuhr:"13:20", asr:"19:03", maghrib:"20:43", isha:"22:23" },
+      { d:22, date:"9 май", day:"Сб", suhur:"02:59", fajr:"03:19", sunrise:"04:59", dhuhr:"13:20", asr:"19:05", maghrib:"20:45", isha:"22:25" },
+      { d:23, date:"10 май", day:"Вс", suhur:"02:57", fajr:"03:17", sunrise:"04:57", dhuhr:"13:20", asr:"19:06", maghrib:"20:46", isha:"22:26" },
+      { d:24, date:"11 май", day:"Пн", suhur:"02:55", fajr:"03:15", sunrise:"04:55", dhuhr:"13:20", asr:"19:08", maghrib:"20:48", isha:"22:28" },
+      { d:25, date:"12 май", day:"Вт", suhur:"02:53", fajr:"03:13", sunrise:"04:53", dhuhr:"13:20", asr:"19:10", maghrib:"20:50", isha:"22:30" },      { d:26, date:"13 май", day:"Ср", suhur:"02:51", fajr:"03:11", sunrise:"04:51", dhuhr:"13:20", asr:"19:12", maghrib:"20:52", isha:"22:32" },
+      { d:27, date:"14 май", day:"Чт", suhur:"02:49", fajr:"03:09", sunrise:"04:49", dhuhr:"13:20", asr:"19:14", maghrib:"20:54", isha:"22:34" },
+      { d:28, date:"15 май", day:"Пт", suhur:"02:47", fajr:"03:07", sunrise:"04:47", dhuhr:"13:20", asr:"19:16", maghrib:"20:56", isha:"22:36" },
+      { d:29, date:"16 май", day:"Сб", suhur:"02:46", fajr:"03:06", sunrise:"04:46", dhuhr:"13:20", asr:"19:17", maghrib:"20:57", isha:"22:37" },
+      { d:30, date:"17 май", day:"Вс", suhur:"02:44", fajr:"03:04", sunrise:"04:44", dhuhr:"13:20", asr:"19:19", maghrib:"20:59", isha:"22:39" }
+    ]
   };
 
-  let currentFilter = 'all';
+  const today = new Date();
+  const dayIndex = today.getDate() - 18;
+  const currentData = PRAYER_DATA.schedule[Math.max(0, Math.min(dayIndex, PRAYER_DATA.schedule.length - 1))];
 
-  function saveData() {
-    localStorage.setItem('lesso_lessons', JSON.stringify(data.lessons));
-    localStorage.setItem('lesso_words', JSON.stringify(data.words));
-    localStorage.setItem('lesso_students', JSON.stringify(data.students));
-  }
+  const prayers = [
+    { key: 'suhur', name: 'Сухур', icon: '🌙', type: 'prep' },
+    { key: 'fajr', name: 'Фаджр', icon: '🌅', type: 'prayer' },
+    { key: 'sunrise', name: 'Восход', icon: '☀️', type: 'info' },
+    { key: 'dhuhr', name: 'Зухр', icon: '🕌', type: 'prayer' },
+    { key: 'asr', name: 'Аср', icon: '🕐', type: 'prayer' },
+    { key: 'maghrib', name: 'Магриб', icon: '🌆', type: 'prayer' },
+    { key: 'isha', name: 'Иша', icon: '🌃', type: 'prayer' }
+  ];
 
-  // Tabs
-  function showTab(tab) {
-    document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
-    document.querySelectorAll('.nav-btn').forEach(b => {
-      b.classList.remove('active', 'border-blue-600', 'text-blue-600');
-      b.classList.add('border-transparent', 'text-gray-500');
-    });
-    document.getElementById(tab).classList.add('active');
-    event.target.closest('.nav-btn').classList.add('active', 'border-blue-600', 'text-blue-600');
-    event.target.closest('.nav-btn').classList.remove('border-transparent', 'text-gray-500');
-    renderAll();
-  }
+  function renderTodayPrayers() {
+    const container = document.getElementById('today-prayers');
+    const now = new Date();
+    const currentTime = now.getHours() * 60 + now.getMinutes();
+    let foundNext = false;
 
-  // Modals
-  function openModal(type) {
-    document.getElementById(`modal-${type}`).classList.add('active');
-    if (type === 'lesson') {
-      document.getElementById('lesson-date').value = new Date().toISOString().slice(0, 16);
-    }
-  }
-
-  function closeModal(type) {
-    document.getElementById(`modal-${type}`).classList.remove('active');
-    document.querySelector(`#modal-${type} form`).reset();
-  }
-
-  // Lessons  function saveLesson(e) {
-    e.preventDefault();
-    const id = document.getElementById('lesson-id').value || Date.now().toString();
-    const lesson = {
-      id,
-      topic: document.getElementById('lesson-topic').value,
-      date: document.getElementById('lesson-date').value,
-      zoom: document.getElementById('lesson-zoom').value,
-      hw: document.getElementById('lesson-hw').value,
-      grade: document.getElementById('lesson-grade').value,
-      notes: document.getElementById('lesson-notes').value
-    };
-    const idx = data.lessons.findIndex(l => l.id === id);
-    if (idx >= 0) data.lessons[idx] = lesson;
-    else data.lessons.push(lesson);
-    saveData();
-    closeModal('lesson');
-    renderLessons();
-  }
-
-  function renderLessons() {
-    const list = document.getElementById('lessons-list');
-    if (!data.lessons.length) {
-      list.innerHTML = '<p class="text-gray-500 text-center py-8">Нет уроков</p>';
-      return;
-    }
-    list.innerHTML = data.lessons.sort((a, b) => new Date(b.date) - new Date(a.date)).map(l => `
-      <div class="bg-white p-4 rounded-xl border border-gray-200">
-        <div class="flex justify-between items-start">
-          <div>
-            <h3 class="font-semibold">${l.topic}</h3>
-            <p class="text-sm text-gray-600">${new Date(l.date).toLocaleString('ru', {day:'numeric', month:'short', hour:'2-digit', minute:'2-digit'})}</p>
-            ${l.grade ? `<span class="inline-block mt-1 px-2 py-0.5 bg-blue-100 text-blue-800 rounded text-xs">Оценка: ${l.grade}</span>` : ''}
+    container.innerHTML = prayers.map((prayer) => {
+      const [h, m] = currentData[prayer.key].split(':').map(Number);
+      const prayerTime = h * 60 + m;
+      const isPassed = currentTime > prayerTime;
+      const isNext = !foundNext && !isPassed && prayer.type === 'prayer';
+      if (isNext) foundNext = true;
+      let statusClass = isNext ? 'next' : (isPassed ? 'passed' : '');
+      return `
+        <div class="prayer-card p-3 rounded-xl flex items-center justify-between ${statusClass}">
+          <div class="flex items-center gap-3">
+            <span class="text-2xl">${prayer.icon}</span>
+            <div>
+              <p class="font-semibold text-sm prayer-name ${isNext ? 'text-emerald-800' : 'text-gray-800'}">${prayer.name}</p>
+              ${prayer.type === 'prep' ? '<p class="text-xs opacity-75">До рассвета</p>' : ''}
+              ${prayer.type === 'info' ? '<p class="text-xs opacity-75">Не намаз</p>' : ''}
+            </div>
           </div>
-          <div class="flex gap-1">
-            <button onclick="editLesson('${l.id}')" class="p-2 text-blue-600 hover:bg-blue-50 rounded"><i class="ph ph-pencil-simple"></i></button>
-            <button onclick="deleteLesson('${l.id}')" class="p-2 text-red-600 hover:bg-red-50 rounded"><i class="ph ph-trash"></i></button>
+          <div class="text-right">
+            <p class="text-xl font-bold prayer-time ${isNext ? 'text-emerald-700' : 'text-teal-700'}">${currentData[prayer.key]}</p>
+            ${isNext ? '<p class="text-xs text-emerald-600 font-semibold">Следующий</p>' : ''}
           </div>
-        </div>
-        ${l.hw ? `<p class="text-sm text-gray-700 mt-2"><b>ДЗ:</b> ${l.hw}</p>` : ''}
-        ${l.notes ? `<p class="text-sm text-gray-600 mt-1">${l.notes}</p>` : ''}
-      </div>
-    `).join('');
+        </div>`;    }).join('');
+
+    const nextPrayer = prayers.find(p => {
+      const [h, m] = currentData[p.key].split(':').map(Number);
+      return currentTime < h * 60 + m && p.type === 'prayer';
+    }) || prayers[1];
+    document.getElementById('hijri-date').textContent = `${currentData.d} ${PRAYER_DATA.monthName}`;
+    updateCountdown(nextPrayer);
   }
 
-  function editLesson(id) {
-    const l = data.lessons.find(x => x.id === id);
-    document.getElementById('lesson-id').value = l.id;
-    document.getElementById('lesson-topic').value = l.topic;
-    document.getElementById('lesson-date').value = l.date;    document.getElementById('lesson-zoom').value = l.zoom || '';
-    document.getElementById('lesson-hw').value = l.hw || '';
-    document.getElementById('lesson-grade').value = l.grade || '';
-    document.getElementById('lesson-notes').value = l.notes || '';
-    openModal('lesson');
+  function updateCountdown(prayer) {
+    const now = new Date();
+    const [h, m] = currentData[prayer.key].split(':').map(Number);
+    let target = new Date();
+    target.setHours(h, m, 0, 0);
+    if (target <= now) target.setDate(target.getDate() + 1);
+    const diff = target - now;
+    const hrs = Math.floor(diff / 3600000);
+    const mins = Math.floor((diff % 3600000) / 60000);
+    const secs = Math.floor((diff % 60000) / 1000);
+    document.getElementById('countdown').textContent = `${String(hrs).padStart(2,'0')}:${String(mins).padStart(2,'0')}:${String(secs).padStart(2,'0')}`;
   }
 
-  function deleteLesson(id) {
-    if (confirm('Удалить урок?')) {
-      data.lessons = data.lessons.filter(l => l.id !== id);
-      saveData();
-      renderLessons();
-    }
+  function renderMonthlyList() {
+    const listEl = document.getElementById('prayer-list');
+    const todayDate = today.getDate();
+    listEl.innerHTML = PRAYER_DATA.schedule.map((item) => {
+      const isToday = item.d === todayDate;
+      return `
+        <div class="flex justify-between items-center p-3 border-b border-gray-50 last:border-0 ${isToday ? 'bg-teal-50' : 'hover:bg-gray-50'} transition-colors">
+          <div class="flex items-center gap-3">
+            <span class="w-7 h-7 flex items-center justify-center rounded-full text-xs font-bold ${isToday ? 'bg-teal-600 text-white' : 'bg-gray-100 text-gray-600'}">${item.d}</span>
+            <div><p class="font-medium text-sm text-gray-800">${item.date} <span class="text-gray-400 font-normal">(${item.day})</span></p></div>
+          </div>
+          <div class="flex gap-3 text-xs text-gray-600">
+            <span>🌅 ${item.fajr}</span><span>🕌 ${item.dhuhr}</span><span>🌆 ${item.maghrib}</span>
+          </div>
+        </div>`;
+    }).join('');
   }
 
-  // Words
-  function saveWord(e) {
-    e.preventDefault();
-    const id = document.getElementById('word-id').value || Date.now().toString();
-    const word = {
-      id,
-      en: document.getElementById('word-en').value,
-      ru: document.getElementById('word-ru').value,
-      topic: document.getElementById('word-topic').value,
-      level: document.getElementById('word-level').value
-    };
-    const idx = data.words.findIndex(w => w.id === id);
-    if (idx >= 0) data.words[idx] = word;
-    else data.words.push(word);
-    saveData();
-    closeModal('word');
-    renderWords();
-  }
+  document.getElementById('today-full-date').textContent = `Сегодня, ${currentData.date}`;
+  document.getElementById('today-hijri').textContent = `${currentData.d} ${PRAYER_DATA.monthName} 1447`;
+  document.getElementById('day-name').textContent = currentData.day;
 
-  function filterWords(filter) {
-    currentFilter = filter;
-    renderWords();
-  }
+  renderTodayPrayers();
+  renderMonthlyList();
+  setInterval(renderTodayPrayers, 1000);
 
-  function renderWords() {
-    const list = document.getElementById('words-list');
-    const filtered = currentFilter === 'all' ? data.words : data.words.filter(w => w.level === currentFilter);
-    if (!filtered.length) {
-      list.innerHTML = '<p class="text-gray-500 text-center py-8 col-span-2">Нет слов</p>';
-      return;
-    }
-    const labels = { new: 'Новое', learning: 'Учит', almost: 'Почти', known: 'Знает' };
-    list.innerHTML = filtered.map(w => `
-      <div class="bg-white p-3 rounded-xl border border-gray-200 flex justify-between items-center">
-        <div>          <p class="font-medium">${w.en}</p>
-          <p class="text-sm text-gray-600">${w.ru}</p>
-          ${w.topic ? `<p class="text-xs text-gray-400">${w.topic}</p>` : ''}
-        </div>
-        <div class="flex items-center gap-2">
-          <span class="status-${w.level} px-2 py-1 rounded text-xs">${labels[w.level]}</span>
-          <button onclick="deleteWord('${w.id}')" class="p-1 text-red-600 hover:bg-red-50 rounded"><i class="ph ph-trash"></i></button>
-        </div>
-      </div>
-    `).join('');
+  if ('serviceWorker' in navigator) {    navigator.serviceWorker.register('/sw.js');
   }
-
-  function deleteWord(id) {
-    data.words = data.words.filter(w => w.id !== id);
-    saveData();
-    renderWords();
-  }
-
-  // Students
-  function saveStudent(e) {
-    e.preventDefault();
-    const id = document.getElementById('student-id').value || Date.now().toString();
-    const student = {
-      id,
-      name: document.getElementById('student-name').value,
-      subject: document.getElementById('student-subject').value,
-      pin: document.getElementById('student-pin').value
-    };
-    const idx = data.students.findIndex(s => s.id === id);
-    if (idx >= 0) data.students[idx] = student;
-    else data.students.push(student);
-    saveData();
-    closeModal('student');
-    renderStudents();
-  }
-
-  function renderStudents() {
-    const list = document.getElementById('students-list');
-    if (!data.students.length) {
-      list.innerHTML = '<p class="text-gray-500 text-center py-8">Нет учеников</p>';
-      return;
-    }
-    list.innerHTML = data.students.map(s => `
-      <div class="bg-white p-4 rounded-xl border border-gray-200 flex justify-between items-center">
-        <div>
-          <h3 class="font-semibold">${s.name}</h3>
-          <p class="text-sm text-gray-600">${s.subject}</p>
-          <p class="text-xs text-gray-400 mt-1">PIN: ${s.pin}</p>
-        </div>
-        <div class="flex gap-1">          <button onclick="editStudent('${s.id}')" class="p-2 text-blue-600 hover:bg-blue-50 rounded"><i class="ph ph-pencil-simple"></i></button>
-          <button onclick="deleteStudent('${s.id}')" class="p-2 text-red-600 hover:bg-red-50 rounded"><i class="ph ph-trash"></i></button>
-        </div>
-      </div>
-    `).join('');
-  }
-
-  function editStudent(id) {
-    const s = data.students.find(x => x.id === id);
-    document.getElementById('student-id').value = s.id;
-    document.getElementById('student-name').value = s.name;
-    document.getElementById('student-subject').value = s.subject;
-    document.getElementById('student-pin').value = s.pin;
-    openModal('student');
-  }
-
-  function deleteStudent(id) {
-    if (confirm('Удалить ученика?')) {
-      data.students = data.students.filter(s => s.id !== id);
-      saveData();
-      renderStudents();
-    }
-  }
-
-  function renderAll() {
-    renderLessons();
-    renderWords();
-    renderStudents();
-  }
-
-  // Service Worker
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('/sw.js');
-  }
-
-  // Init
-  renderAll();
 </script>
 </body>
 </html>
