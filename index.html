@@ -80,7 +80,7 @@
   <!-- Card: Qibla Compass -->
   <div class="card p-5 mb-4 fade-in text-center">
     <h3 class="font-semibold text-gray-800 mb-1">🕋 Направление Киблы</h3>
-    <p class="text-xs text-gray-500 mb-4">Для Челябинска (229°)</p>
+    <p class="text-xs text-gray-500 mb-4">Для Челябинска</p>
     
     <!-- Compass UI -->
     <div class="relative w-40 h-40 mx-auto mb-4">
@@ -170,7 +170,6 @@
   // 2. ЛОГИКА РАСПИСАНИЯ
   // ==========================================
   const today = new Date();
-  // 18 апреля = индекс 0. Если дата меньше 18, берем 0, если больше 17 мая - берем последний.
   const dayIndex = today.getDate() - 18;
   const currentData = PRAYER_DATA.schedule[Math.max(0, Math.min(dayIndex, PRAYER_DATA.schedule.length - 1))];
 
@@ -194,8 +193,8 @@
       const [h, m] = currentData[prayer.key].split(':').map(Number);
       const prayerTime = h * 60 + m;
       const isPassed = currentTime > prayerTime;
-      const isNext = !foundNext && !isPassed && prayer.type === 'prayer';      
-      if (isNext) foundNext = true;
+      const isNext = !foundNext && !isPassed && prayer.type === 'prayer';
+            if (isNext) foundNext = true;
       let statusClass = isNext ? 'next' : (isPassed ? 'passed' : '');
       
       return `
@@ -215,14 +214,12 @@
         </div>`;
     }).join('');
 
-    // Обновляем заголовок и дату
     document.getElementById('hijri-date').textContent = `${currentData.d} ${PRAYER_DATA.monthName}`;
     
-    // Находим следующий намаз для таймера
     const nextPrayer = prayers.find(p => {
       const [h, m] = currentData[p.key].split(':').map(Number);
       return currentTime < h * 60 + m && p.type === 'prayer';
-    }) || prayers[1]; // Если все прошли, показываем Фаджр
+    }) || prayers[1];
     
     updateCountdown(nextPrayer);
   }
@@ -243,10 +240,10 @@
 
   function renderMonthlyList() {
     const listEl = document.getElementById('prayer-list');
-    const todayDate = today.getDate();    listEl.innerHTML = PRAYER_DATA.schedule.map((item) => {
+    const todayDate = today.getDate();
+    listEl.innerHTML = PRAYER_DATA.schedule.map((item) => {
       const isToday = item.d === todayDate;
-      return `
-        <div class="flex justify-between items-center p-3 border-b border-gray-50 last:border-0 ${isToday ? 'bg-teal-50' : 'hover:bg-gray-50'} transition-colors">
+      return `        <div class="flex justify-between items-center p-3 border-b border-gray-50 last:border-0 ${isToday ? 'bg-teal-50' : 'hover:bg-gray-50'} transition-colors">
           <div class="flex items-center gap-3">
             <span class="w-7 h-7 flex items-center justify-center rounded-full text-xs font-bold ${isToday ? 'bg-teal-600 text-white' : 'bg-gray-100 text-gray-600'}">${item.d}</span>
             <div><p class="font-medium text-sm text-gray-800">${item.date} <span class="text-gray-400 font-normal">(${item.day})</span></p></div>
@@ -258,111 +255,97 @@
     }).join('');
   }
 
-  // Init UI Texts
+  // Init UI
   document.getElementById('today-full-date').textContent = `Сегодня, ${currentData.date}`;
   document.getElementById('today-hijri').textContent = `${currentData.d} ${PRAYER_DATA.monthName} 1447`;
   document.getElementById('day-name').textContent = currentData.day;
 
-  // Initial Render & Loop
   renderTodayPrayers();
   renderMonthlyList();
   setInterval(renderTodayPrayers, 1000);
 
   // ==========================================
-  // 3. ЛОГИКА КОМПАСА (С МАГНИТНЫМ СКЛОНЕНИЕМ)
+  // 3. ЛОГИКА КОМПАСА (ИСПРАВЛЕННАЯ)
   // ==========================================
   const ARROW = document.getElementById('compass-arrow');
   const ENABLE_BTN = document.getElementById('enable-compass');
   const STATUS = document.getElementById('compass-status');
   
-  // Направление на Каабу (Истинный Север) для Челябинска
-  const QIBLA_ANGLE = 229; 
-  // Магнитное склонение (Челябинск ~ +15° к Востоку)
-  const DECLINATION = 15; 
-  
-  // Эффективный угол для компаса (Магнитный) = 229 - 15 = 214
-  const TARGET_MAGNETIC_ANGLE = 214; 
+  // Челябинск: Истинный угол на Каабу = 229°
+  // Магнитное склонение = +15° (восточное)
+  // Магнитный угол = 229 - 15 = 214°
+  const QIBLA_MAGNETIC_BEARING = 214; 
 
-  let currentRotation = 0;
-  let targetRotation = 0;
   let isCompassActive = false;
 
   function enableCompass() {
     if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
+      // iOS 13+
       DeviceOrientationEvent.requestPermission()
         .then(response => {
           if (response === 'granted') {
-            activateCompassEvents();            ENABLE_BTN.classList.add('hidden');
+            window.addEventListener('deviceorientation', handleOrientation);
+            ENABLE_BTN.classList.add('hidden');
             STATUS.innerText = "Компас активен";
+            isCompassActive = true;
           } else {
-            STATUS.innerText = "⛔ Доступ запрещен";
+            STATUS.innerText = "⛔ Доступ запрещён";
           }
         })
-        .catch(console.error);
-    } else {
-      activateCompassEvents();
+        .catch(console.error);    } else {
+      // Android и старые iOS
+      window.addEventListener('deviceorientation', handleOrientation);
       ENABLE_BTN.classList.add('hidden');
       STATUS.innerText = "Компас активен";
+      isCompassActive = true;
     }
-  }
-
-  function activateCompassEvents() {
-    isCompassActive = true;
-    // iOS требует точного события, Android обычного
-    window.addEventListener('deviceorientation', handleOrientation, true);
-  }
-
-  // Запускаем слушатель сразу (для Android)
-  window.addEventListener('deviceorientation', (e) => {
-    if(!isCompassActive && e.alpha !== null) {
-      activateCompassEvents();
-    }
-  }, { once: true });
-
-  // Если iOS - показываем кнопку
-  if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
-    ENABLE_BTN.classList.remove('hidden');
-    STATUS.innerText = "Нажмите кнопку для запуска";
   }
 
   function handleOrientation(event) {
-    let magneticHeading;
+    let compassHeading;
     
-    // iOS (WebKit) - самый точный
-    if (event.webkitCompassHeading) {
-      magneticHeading = event.webkitCompassHeading;
+    // iOS (WebKit) — точный компас
+    if (event.webkitCompassHeading !== undefined) {
+      compassHeading = event.webkitCompassHeading;
     } 
-    // Android - используем alpha, если он absolute (реальный)
-    else if (event.absolute && event.alpha !== null) {
-      magneticHeading = 360 - event.alpha;
-    } 
-    // Android fallback (относительный)
+    // Android — используем alpha
     else if (event.alpha !== null) {
-       magneticHeading = 360 - event.alpha; 
-       // Примечание: на Android без GPS часто показывает "откуда взяли телефон", это баг браузера
-       STATUS.innerText = "⚠️ Двигайте телефоном «восьмеркой»";
+      // На Android alpha=0 когда телефон смотрит на СЕВЕР
+      // Значения идут по часовой стрелке, инвертируем
+      compassHeading = (360 - event.alpha) % 360;
     }
-    if (magneticHeading !== undefined) {
-      // Вычисляем поворот: Куда указывает Мекка МИНУС Куда смотрит телефон
-      targetRotation = TARGET_MAGNETIC_ANGLE - magneticHeading;
+
+    if (compassHeading !== undefined) {
+      // Вычисляем поворот стрелки:
+      // Куда должна указывать стрелка МИНУС куда смотрит телефон
+      const rotation = QIBLA_MAGNETIC_BEARING - compassHeading;
       
-      // Запускаем плавную анимацию
-      requestAnimationFrame(smoothCompass);
-      STATUS.innerText = "Компас работает";
+      // Применяем с плавностью
+      ARROW.style.transform = `rotate(${rotation}deg)`;
+      
+      if (STATUS.innerText.includes("Нажмите") || STATUS.innerText.includes("⚠️")) {
+        STATUS.innerText = "Компас работает";
+      }
     }
   }
 
-  function smoothCompass() {
-    // Интерполяция для плавности (Lerp)
-    const smoothing = 0.1;
-    currentRotation += (targetRotation - currentRotation) * smoothing;
-    
-    ARROW.style.transform = `rotate(${currentRotation}deg)`;
-    
-    // Продолжаем анимацию, если есть разница
-    if (Math.abs(targetRotation - currentRotation) > 0.05) {
-      requestAnimationFrame(smoothCompass);
+  // Автозапуск для Android
+  window.addEventListener('deviceorientation', (e) => {
+    if (!isCompassActive && e.alpha !== null) {
+      enableCompass();
     }
+  }, { once: true });
+
+  // Для iOS показываем кнопку
+  if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
+    ENABLE_BTN.classList.remove('hidden');
+    STATUS.innerText = "Нажмите для запуска компаса";
+  } else {
+    // Android — пробуем сразу    setTimeout(() => {
+      if (!isCompassActive) {
+        enableCompass();
+      }
+    }, 1000);
   }
 
   // ==========================================
