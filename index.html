@@ -62,17 +62,21 @@
     </div>
   </div>
 
-  <!-- Информация о направлении Киблы (текст) -->
+  <!-- Информация о Кибле + Ссылка на Google -->
   <div class="card p-5 mb-4 fade-in">
     <h3 class="font-semibold text-gray-800 mb-2">🕋 Направление Киблы</h3>
     <p class="text-sm text-gray-600 mb-3">
       Для г. Челябинска направление на Каабу: <b>229° от севера</b> (Юго-Запад)
     </p>
-    <div class="bg-blue-50 border border-blue-200 rounded-lg p-3 text-xs text-blue-800">
-      <p class="mb-2">💡 <b>Совет:</b> Используйте компас на телефоне и установите направление 229°</p>
-      <a href="https://qiblafinder.withgoogle.com" target="_blank" class="text-blue-600 underline font-medium">
-        → Открыть точный компас Киблы
+    <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 text-center">
+      <p class="text-xs text-blue-700 mb-3">Для точного определения с GPS и компасом:</p>
+      <a href="https://qiblafinder.withgoogle.com" 
+         target="_blank" 
+         rel="noopener noreferrer" 
+         class="inline-flex items-center justify-center w-full px-4 py-2.5 bg-blue-600 text-white text-sm font-semibold rounded-lg shadow hover:bg-blue-700 active:scale-95 transition">
+         🌍 Открыть Qibla Finder
       </a>
+      <p class="text-[10px] text-blue-500 mt-2">Откроется в браузере для точного GPS</p>
     </div>
   </div>
 
@@ -92,11 +96,11 @@
 
 <script>
   const PRAYER_DATA = {
-    monthName: "Зуль-Кагда",
-    schedule: [
+    monthName: "Зуль-Кагда",    schedule: [
       { d:1, date:"18 апр", day:"Сб", suhur:"03:45", fajr:"04:05", sunrise:"05:45", dhuhr:"13:20", asr:"18:24", maghrib:"20:04", isha:"21:44" },
       { d:2, date:"19 апр", day:"Вс", suhur:"03:43", fajr:"04:03", sunrise:"05:43", dhuhr:"13:20", asr:"18:26", maghrib:"20:06", isha:"21:46" },
-      { d:3, date:"20 апр", day:"Пн", suhur:"03:40", fajr:"04:00", sunrise:"05:40", dhuhr:"13:20", asr:"18:28", maghrib:"20:08", isha:"21:48" },      { d:4, date:"21 апр", day:"Вт", suhur:"03:38", fajr:"03:58", sunrise:"05:38", dhuhr:"13:20", asr:"18:29", maghrib:"20:09", isha:"21:49" },
+      { d:3, date:"20 апр", day:"Пн", suhur:"03:40", fajr:"04:00", sunrise:"05:40", dhuhr:"13:20", asr:"18:28", maghrib:"20:08", isha:"21:48" },
+      { d:4, date:"21 апр", day:"Вт", suhur:"03:38", fajr:"03:58", sunrise:"05:38", dhuhr:"13:20", asr:"18:29", maghrib:"20:09", isha:"21:49" },
       { d:5, date:"22 апр", day:"Ср", suhur:"03:36", fajr:"03:56", sunrise:"05:36", dhuhr:"13:20", asr:"18:31", maghrib:"20:11", isha:"21:51" },
       { d:6, date:"23 апр", day:"Чт", suhur:"03:33", fajr:"03:53", sunrise:"05:33", dhuhr:"13:20", asr:"18:33", maghrib:"20:13", isha:"21:53" },
       { d:7, date:"24 апр", day:"Пт", suhur:"03:31", fajr:"03:51", sunrise:"05:31", dhuhr:"13:20", asr:"18:35", maghrib:"20:15", isha:"21:55" },
@@ -141,10 +145,10 @@
     const todayDate = today.getDate();
     let currentData = PRAYER_DATA.schedule.find(item => item.d === todayDate) || PRAYER_DATA.schedule[0];
 
-    document.getElementById('today-full-date').textContent = `Сегодня, ${currentData.date}`;
-    document.getElementById('today-hijri').textContent = `${currentData.d} ${PRAYER_DATA.monthName} 1447`;
+    document.getElementById('today-full-date').textContent = `Сегодня, ${currentData.date}`;    document.getElementById('today-hijri').textContent = `${currentData.d} ${PRAYER_DATA.monthName} 1447`;
     document.getElementById('day-name').textContent = currentData.day;
     document.getElementById('hijri-date').textContent = `${currentData.d} ${PRAYER_DATA.monthName}`;
+
     function renderPrayers() {
       const container = document.getElementById('today-prayers');
       const now = new Date();
@@ -190,11 +194,11 @@
       let target = new Date();
       target.setHours(h, m, 0, 0);
       if (target <= now) target.setDate(target.getDate() + 1);
-      
-      const diff = target - now;
+            const diff = target - now;
       const hrs = Math.floor(diff / 3600000);
       const mins = Math.floor((diff % 3600000) / 60000);
-      const secs = Math.floor((diff % 60000) / 1000);      document.getElementById('countdown').textContent = `${String(hrs).padStart(2,'0')}:${String(mins).padStart(2,'0')}:${String(secs).padStart(2,'0')}`;
+      const secs = Math.floor((diff % 60000) / 1000);
+      document.getElementById('countdown').textContent = `${String(hrs).padStart(2,'0')}:${String(mins).padStart(2,'0')}:${String(secs).padStart(2,'0')}`;
     }
 
     function renderMonthlyList() {
@@ -223,7 +227,6 @@
     document.getElementById('today-full-date').textContent = 'Ошибка';
   }
 
-  // Service Worker
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('/sw.js').catch(err => console.log('SW error:', err));
   }
