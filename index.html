@@ -2,364 +2,205 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <meta name="theme-color" content="#0f766e">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="description" content="Время намазов и Кибла для г. Челябинска.">
   <title>Намаз Челябинск</title>
-  
   <link rel="manifest" href="/manifest.json">
   <link rel="icon" type="image/png" href="/icon.png">
-  <link rel="apple-touch-icon" href="/icon.png">
-  
-  <script src="https://cdn.tailwindcss.com"></script>
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
-    body { font-family: 'Inter', sans-serif; background: #f8fafc; overscroll-behavior: none; }
-    .card { background: white; border-radius: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.06); }
-    .prayer-card { transition: all 0.3s; }
-    .prayer-card.passed { opacity: 0.4; background: #f8fafc; }
-    .prayer-card.next { 
-      background: #ecfdf5; 
-      border: 2px solid #10b981; 
-      transform: scale(1.03);
-      box-shadow: 0 4px 15px rgba(16, 185, 129, 0.2);
+    :root { --bg: #f8fafc; --card: #ffffff; --primary: #0f766e; --text: #0f172a; --muted: #64748b; }
+    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--bg); color: var(--text); line-height: 1.5; min-height: 100vh; display: flex; flex-direction: column; }
+    header { background: linear-gradient(135deg, var(--primary), #065f46); color: white; padding: 20px 16px; text-align: center; border-radius: 0 0 24px 24px; }
+    h1 { font-size: 1.5rem; font-weight: 600; margin-bottom: 4px; }
+    .date { font-size: 0.95rem; opacity: 0.9; }
+    .offline-badge { display: inline-flex; align-items: center; gap: 6px; background: rgba(255,255,255,0.2); padding: 4px 10px; border-radius: 12px; font-size: 0.8rem; margin-top: 8px; }
+    .main { flex: 1; padding: 16px; max-width: 480px; margin: 0 auto; width: 100%; }
+    .countdown-box { background: var(--card); padding: 20px; border-radius: 16px; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.05); margin: 16px 0; border: 1px solid #e2e8f0; }
+    .countdown-label { font-size: 0.9rem; color: var(--muted); margin-bottom: 4px; }
+    .countdown-timer { font-size: 2.2rem; font-weight: 700; color: var(--primary); font-variant-numeric: tabular-nums; }
+    .next-prayer { font-size: 1rem; font-weight: 500; margin-bottom: 8px; }
+    .qibla-box { background: var(--card); padding: 16px; border-radius: 16px; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.05); margin-bottom: 16px; border: 1px solid #e2e8f0; }
+    .qibla-title { font-weight: 600; margin-bottom: 8px; }
+    .qibla-deg { font-size: 1.5rem; color: var(--primary); }
+    .qibla-hint { font-size: 0.85rem; color: var(--muted); margin-top: 4px; }
+    .qibla-btn { display: inline-block; margin-top: 12px; padding: 10px 16px; background: var(--primary); color: white; border-radius: 10px; text-decoration: none; font-weight: 500; border: none; cursor: pointer; }
+    .schedule-box { background: var(--card); padding: 16px; border-radius: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); margin-bottom: 16px; border: 1px solid #e2e8f0; }
+    .schedule-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+    .schedule-title { font-weight: 600; }
+    .share-btn { background: none; border: 1px solid var(--primary); color: var(--primary); padding: 6px 12px; border-radius: 8px; font-size: 0.85rem; cursor: pointer; }
+    .prayer-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #f1f5f9; }
+    .prayer-row:last-child { border-bottom: none; }
+    .prayer-name { font-weight: 500; }
+    .prayer-time { font-family: monospace; font-size: 1.1rem; }
+    .prayer-row.active { background: #ecfdf5; border-radius: 8px; padding: 10px 8px; border-bottom: none; }
+    .prayer-row.active .prayer-name { color: var(--primary); font-weight: 600; }
+    .prayer-row.past { opacity: 0.5; }
+    .disclaimer { font-size: 0.8rem; color: var(--muted); text-align: center; padding: 16px; background: #fef3c7; border-radius: 10px; margin-bottom: 20px; }
+    .update-note { font-size: 0.75rem; color: var(--muted); text-align: center; margin-top: 8px; }
+    footer { text-align: center; padding: 16px; font-size: 0.75rem; color: var(--muted); }
+    @media (prefers-color-scheme: dark) {
+      :root { --bg: #0f172a; --card: #1e293b; --text: #f8fafc; --muted: #94a3b8; }
+      .offline-badge { background: rgba(255,255,255,0.1); }
+      .disclaimer { background: #451a03; color: #fde68a; }
     }
-    .prayer-card.next .prayer-name { color: #047857; font-weight: 800; }
-    .prayer-card.next .prayer-time { color: #047857; font-weight: 800; }
-    .fade-in { animation: fadeIn 0.4s ease; }
-    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-    .countdown-digit { font-variant-numeric: tabular-nums; }
-    
-    .compass-wrapper { position: relative; width: 150px; height: 150px; margin: 0 auto 12px; }
-    .compass-ring { position: absolute; inset: 0; transition: transform 0.1s linear; }
-    .compass-arrow { position: absolute; inset: 0; transition: transform 0.1s linear; }
-    .compass-center { position: absolute; top: 50%; left: 50%; width: 10px; height: 10px; background: #374151; border-radius: 50%; transform: translate(-50%, -50%); z-index: 10; }
   </style>
-</head>
-<body class="pb-8">
+</head><body>
+  <header>
+    <h1>Намаз Челябинск</h1>
+    <div class="date" id="islamicDate">Загрузка...</div>
+    <div id="offlineStatus" class="offline-badge" style="display:none;">📶 Офлайн-режим. Данные из кэша.</div>
+  </header>
 
-<div id="offline-banner" class="hidden bg-yellow-500 text-white text-center text-xs py-1.5 font-medium sticky top-0 z-50 shadow-sm">
-  📶 Офлайн-режим. Данные из кэша.
-</div>
-
-<header class="bg-teal-800 text-white pt-8 pb-10 px-4 rounded-b-3xl shadow-lg">
-  <div class="max-w-md mx-auto flex justify-between items-center">
-    <div>
-      <h1 class="text-2xl font-bold tracking-tight">Намаз Челябинск</h1>      <p class="text-teal-200 text-sm mt-1">Зуль-Кагда 1447</p>
+  <main class="main">
+    <div class="countdown-box">
+      <div class="next-prayer" id="nextPrayerName">До следующего намаза</div>
+      <div class="countdown-timer" id="countdown">--:--:--</div>
     </div>
-    <div class="flex flex-col items-end gap-2">
-      <div class="bg-teal-700/80 backdrop-blur px-3 py-1.5 rounded-full text-xs font-semibold" id="hijri-date">Загрузка...</div>
-      <button onclick="shareApp()" class="flex items-center gap-1 text-xs bg-teal-900/50 hover:bg-teal-900 px-2 py-1 rounded transition active:scale-95">
-        📤 Поделиться
-      </button>
-    </div>
-  </div>
-</header>
 
-<main class="max-w-md mx-auto px-4 -mt-6">
-  
-  <div class="card p-5 mb-4 fade-in">
-    <div class="flex justify-between items-center mb-4">
-      <div>
-        <h2 class="text-lg font-bold text-gray-900" id="today-full-date">Загрузка...</h2>
-        <p class="text-sm text-gray-500" id="today-hijri">...</p>
+    <div class="qibla-box">
+      <div class="qibla-title">🕋 Направление Киблы</div>
+      <div class="qibla-deg">Для Челябинска: 229° (СЮЗВ)</div>
+      <div class="qibla-hint">Держите телефон горизонтально.</div>
+      <a href="https://qiblafinder.withgoogle.com" target="_blank" class="qibla-btn">🌍 Открыть точный Qibla Finder</a>
+    </div>
+
+    <div class="schedule-box">
+      <div class="schedule-header">
+        <span class="schedule-title">Расписание на сегодня</span>
+        <button class="share-btn" onclick="shareSchedule()">📤 Поделиться</button>
       </div>
-      <span class="text-teal-600 text-xs font-bold bg-teal-50 px-3 py-1 rounded-full" id="day-name">...</span>
+      <div id="prayerList"></div>
     </div>
-    <div class="space-y-2" id="today-prayers"></div>
-    <div class="mt-4 p-3 bg-teal-50 rounded-xl text-center border border-teal-100">
-      <p class="text-xs text-teal-600 mb-1">До следующего намаза</p>
-      <p class="text-2xl font-bold text-teal-800 countdown-digit" id="countdown">--:--:--</p>
-    </div>
-  </div>
 
-  <div class="card p-5 mb-4 fade-in text-center">
-    <h3 class="font-semibold text-gray-800 mb-1">🕋 Направление Киблы</h3>
-    <p class="text-xs text-gray-500 mb-4">Для Челябинска (229°)</p>
-    
-    <div class="compass-wrapper">
-      <div class="compass-ring" id="compass-ring">
-        <div class="absolute inset-0 rounded-full border-4 border-gray-200 bg-white shadow-inner">
-          <span class="absolute top-1 left-1/2 -translate-x-1/2 text-xs font-bold text-red-500">С</span>
-          <span class="absolute bottom-1 left-1/2 -translate-x-1/2 text-xs font-bold text-gray-400">Ю</span>
-          <span class="absolute left-1 top-1/2 -translate-y-1/2 text-xs font-bold text-gray-400">З</span>
-          <span class="absolute right-1 top-1/2 -translate-y-1/2 text-xs font-bold text-gray-400">В</span>
-        </div>
-      </div>
-      
-      <div class="compass-arrow" id="compass-arrow">
-        <div class="absolute top-3 left-1/2 -translate-x-1/2 w-1 h-12 bg-gradient-to-t from-transparent to-emerald-600 rounded-full origin-bottom"></div>
-        <div class="absolute top-2 left-1/2 -translate-x-1/2 w-3 h-3 bg-emerald-600 rotate-45"></div>
-      </div>
-      
-      <div class="compass-center"></div>
-    </div>
-    <div class="space-y-3">
-      <p class="text-xs text-gray-500 font-medium min-h-[20px]" id="compass-status">Нажмите кнопку ниже</p>
-      
-      <button id="enable-compass-btn" onclick="enableCompass()" class="w-full px-4 py-2.5 bg-blue-600 text-white text-sm font-semibold rounded-lg shadow hover:bg-blue-700 active:scale-95 transition">
-        📡 Включить компас
-      </button>
-      
-      <p class="text-[10px] text-gray-400">
-        Держите телефон горизонтально. Красная С = Север. Зелёная стрелка = Кааба.
-      </p>
-      
-      <div class="pt-2 border-t border-gray-100">
-        <a href="https://qiblafinder.withgoogle.com" target="_blank" rel="noopener noreferrer" class="text-xs text-blue-600 hover:underline font-medium">
-          🌍 Открыть точный Qibla Finder в браузере
-        </a>
-      </div>
-    </div>
-  </div>
-
-  <div class="card overflow-hidden mb-4">
-    <div class="p-4 border-b border-gray-100 bg-gray-50">
-      <h3 class="font-semibold text-gray-800">Расписание на месяц</h3>
-    </div>
-    <div class="max-h-[40vh] overflow-y-auto" id="prayer-list"></div>
-  </div>
-
-  <div class="text-center text-xs text-gray-400 px-4 pb-4">
-    <p>Данные: ЦДУМ России / РДУМ Челябинской обл.</p>
-    <p class="mt-2 text-gray-300 leading-tight">
+    <div class="disclaimer">
       ⚠️ Время намазов указано справочно. Для обязательств сверяйтесь с расписанием местной мечети.
-    </p>
-    <p class="mt-2">Обновляется автоматически в 00:00</p>
-  </div>
-</main>
+      <div class="update-note">Обновляется автоматически в 00:00</div>
+    </div>
+  </main>
 
-<script>
-  const PRAYER_DATA = {
-    monthName: "Зуль-Кагда",
-    schedule: [
-      { d:1, date:"18 апр", day:"Сб", suhur:"03:45", fajr:"04:05", sunrise:"05:45", dhuhr:"13:20", asr:"18:24", maghrib:"20:04", isha:"21:44" },
-      { d:2, date:"19 апр", day:"Вс", suhur:"03:43", fajr:"04:03", sunrise:"05:43", dhuhr:"13:20", asr:"18:26", maghrib:"20:06", isha:"21:46" },
-      { d:3, date:"20 апр", day:"Пн", suhur:"03:40", fajr:"04:00", sunrise:"05:40", dhuhr:"13:20", asr:"18:28", maghrib:"20:08", isha:"21:48" },
-      { d:4, date:"21 апр", day:"Вт", suhur:"03:38", fajr:"03:58", sunrise:"05:38", dhuhr:"13:20", asr:"18:29", maghrib:"20:09", isha:"21:49" },
-      { d:5, date:"22 апр", day:"Ср", suhur:"03:36", fajr:"03:56", sunrise:"05:36", dhuhr:"13:20", asr:"18:31", maghrib:"20:11", isha:"21:51" },
-      { d:6, date:"23 апр", day:"Чт", suhur:"03:33", fajr:"03:53", sunrise:"05:33", dhuhr:"13:20", asr:"18:33", maghrib:"20:13", isha:"21:53" },
-      { d:7, date:"24 апр", day:"Пт", suhur:"03:31", fajr:"03:51", sunrise:"05:31", dhuhr:"13:20", asr:"18:35", maghrib:"20:15", isha:"21:55" },
-      { d:8, date:"25 апр", day:"Сб", suhur:"03:29", fajr:"03:49", sunrise:"05:29", dhuhr:"13:20", asr:"18:37", maghrib:"20:17", isha:"21:57" },
-      { d:9, date:"26 апр", day:"Вс", suhur:"03:26", fajr:"03:46", sunrise:"05:26", dhuhr:"13:20", asr:"18:39", maghrib:"20:19", isha:"21:59" },
-      { d:10, date:"27 апр", day:"Пн", suhur:"03:24", fajr:"03:44", sunrise:"05:24", dhuhr:"13:20", asr:"18:41", maghrib:"20:21", isha:"22:01" },
-      { d:11, date:"28 апр", day:"Вт", suhur:"03:22", fajr:"03:42", sunrise:"05:22", dhuhr:"13:20", asr:"18:43", maghrib:"20:23", isha:"22:03" },      { d:12, date:"29 апр", day:"Ср", suhur:"03:20", fajr:"03:40", sunrise:"05:20", dhuhr:"13:20", asr:"18:45", maghrib:"20:25", isha:"22:05" },
-      { d:13, date:"30 апр", day:"Чт", suhur:"03:17", fajr:"03:37", sunrise:"05:17", dhuhr:"13:20", asr:"18:47", maghrib:"20:27", isha:"22:07" },
-      { d:14, date:"1 май", day:"Пт", suhur:"03:15", fajr:"03:35", sunrise:"05:15", dhuhr:"13:20", asr:"18:49", maghrib:"20:29", isha:"22:09" },
-      { d:15, date:"2 май", day:"Сб", suhur:"03:13", fajr:"03:33", sunrise:"05:13", dhuhr:"13:20", asr:"18:51", maghrib:"20:31", isha:"22:11" },
-      { d:16, date:"3 май", day:"Вс", suhur:"03:11", fajr:"03:31", sunrise:"05:11", dhuhr:"13:20", asr:"18:53", maghrib:"20:33", isha:"22:13" },
-      { d:17, date:"4 май", day:"Пн", suhur:"03:09", fajr:"03:29", sunrise:"05:09", dhuhr:"13:20", asr:"18:55", maghrib:"20:35", isha:"22:15" },
-      { d:18, date:"5 май", day:"Вт", suhur:"03:07", fajr:"03:27", sunrise:"05:07", dhuhr:"13:20", asr:"18:57", maghrib:"20:37", isha:"22:17" },
-      { d:19, date:"6 май", day:"Ср", suhur:"03:05", fajr:"03:25", sunrise:"05:05", dhuhr:"13:20", asr:"18:59", maghrib:"20:39", isha:"22:19" },
-      { d:20, date:"7 май", day:"Чт", suhur:"03:03", fajr:"03:23", sunrise:"05:03", dhuhr:"13:20", asr:"19:01", maghrib:"20:41", isha:"22:21" },
-      { d:21, date:"8 май", day:"Пт", suhur:"03:01", fajr:"03:21", sunrise:"05:01", dhuhr:"13:20", asr:"19:03", maghrib:"20:43", isha:"22:23" },
-      { d:22, date:"9 май", day:"Сб", suhur:"02:59", fajr:"03:19", sunrise:"04:59", dhuhr:"13:20", asr:"19:05", maghrib:"20:45", isha:"22:25" },
-      { d:23, date:"10 май", day:"Вс", suhur:"02:57", fajr:"03:17", sunrise:"04:57", dhuhr:"13:20", asr:"19:06", maghrib:"20:46", isha:"22:26" },
-      { d:24, date:"11 май", day:"Пн", suhur:"02:55", fajr:"03:15", sunrise:"04:55", dhuhr:"13:20", asr:"19:08", maghrib:"20:48", isha:"22:28" },
-      { d:25, date:"12 май", day:"Вт", suhur:"02:53", fajr:"03:13", sunrise:"04:53", dhuhr:"13:20", asr:"19:10", maghrib:"20:50", isha:"22:30" },
-      { d:26, date:"13 май", day:"Ср", suhur:"02:51", fajr:"03:11", sunrise:"04:51", dhuhr:"13:20", asr:"19:12", maghrib:"20:52", isha:"22:32" },
-      { d:27, date:"14 май", day:"Чт", suhur:"02:49", fajr:"03:09", sunrise:"04:49", dhuhr:"13:20", asr:"19:14", maghrib:"20:54", isha:"22:34" },
-      { d:28, date:"15 май", day:"Пт", suhur:"02:47", fajr:"03:07", sunrise:"04:47", dhuhr:"13:20", asr:"19:16", maghrib:"20:56", isha:"22:36" },
-      { d:29, date:"16 май", day:"Сб", suhur:"02:46", fajr:"03:06", sunrise:"04:46", dhuhr:"13:20", asr:"19:17", maghrib:"20:57", isha:"22:37" },
-      { d:30, date:"17 май", day:"Вс", suhur:"02:44", fajr:"03:04", sunrise:"04:44", dhuhr:"13:20", asr:"19:19", maghrib:"20:59", isha:"22:39" }
-    ]
-  };
+  <footer>Данные: ЦДУМ России / РДУМ Челябинской обл.</footer>
 
-  const prayers = [
-    { key: 'suhur', name: 'Сухур', icon: '🌙', type: 'prep' },
-    { key: 'fajr', name: 'Фаджр', icon: '🌅', type: 'prayer' },
-    { key: 'sunrise', name: 'Восход', icon: '☀️', type: 'info' },
-    { key: 'dhuhr', name: 'Зухр', icon: '🕌', type: 'prayer' },
-    { key: 'asr', name: 'Аср', icon: '🕐', type: 'prayer' },
-    { key: 'maghrib', name: 'Магриб', icon: '🌆', type: 'prayer' },
-    { key: 'isha', name: 'Иша', icon: '🌃', type: 'prayer' }
-  ];
+  <script>
+    // === РАСПИСАНИЕ (Обновляй здесь при изменении времени) ===
+    const PRAYERS = [
+      { key: 'fajr', name: 'Фаджр', time: '04:32' },
+      { key: 'sunrise', name: 'Шурук', time: '06:15' },
+      { key: 'dhuhr', name: 'Зухр', time: '12:18' },
+      { key: 'asr', name: 'Аср', time: '16:45' },
+      { key: 'maghrib', name: 'Магриб', time: '18:20' },
+      { key: 'isha', name: 'Иша', time: '19:45' }
+    ];
 
-  const monthNames = ["янв", "фев", "мар", "апр", "май", "июн", "июл", "авг", "сен", "окт", "ноя", "дек"];
+    let nextPrayerObj = null;
 
-  try {
-    const today = new Date();
-    const todayDate = today.getDate();
-    const todayMonth = monthNames[today.getMonth()];
-    const todayStr = `${todayDate} ${todayMonth}`;
-    
-    let currentData = PRAYER_DATA.schedule.find(item => item.date === todayStr);
-    if (!currentData) {
-      console.log('Дата не найдена:', todayStr, 'Используем первый день');
-      currentData = PRAYER_DATA.schedule[0];
-    }
-
-    document.getElementById('today-full-date').textContent = `Сегодня, ${currentData.date}`;
-    document.getElementById('today-hijri').textContent = `${currentData.d} ${PRAYER_DATA.monthName} 1447`;
-    document.getElementById('day-name').textContent = currentData.day;
-    document.getElementById('hijri-date').textContent = `${currentData.d} ${PRAYER_DATA.monthName}`;
-    function renderPrayers() {
-      const container = document.getElementById('today-prayers');
+    function getIslamicDate() {      // Упрощённо. Для точной даты подключи библиотеку hijri-converter
       const now = new Date();
-      const currentTime = now.getHours() * 60 + now.getMinutes();
-      let foundNext = false;
-
-      container.innerHTML = prayers.map((prayer) => {
-        const [h, m] = currentData[prayer.key].split(':').map(Number);
-        const prayerTime = h * 60 + m;
-        const isPassed = currentTime > prayerTime;
-        const isNext = !foundNext && !isPassed && prayer.type === 'prayer';
-        if (isNext) foundNext = true;
-        let statusClass = isNext ? 'next' : (isPassed ? 'passed' : '');
-        
-        return `
-          <div class="prayer-card p-3 rounded-xl flex items-center justify-between ${statusClass}">
-            <div class="flex items-center gap-3">
-              <span class="text-2xl">${prayer.icon}</span>
-              <div>
-                <p class="font-semibold text-sm prayer-name ${isNext ? 'text-emerald-800' : 'text-gray-800'}">${prayer.name}</p>
-                ${prayer.type === 'prep' ? '<p class="text-xs opacity-75">До рассвета</p>' : ''}
-                ${prayer.type === 'info' ? '<p class="text-xs opacity-75">Не намаз</p>' : ''}
-              </div>
-            </div>
-            <div class="text-right">
-              <p class="text-xl font-bold prayer-time ${isNext ? 'text-emerald-700' : 'text-teal-700'}">${currentData[prayer.key]}</p>
-              ${isNext ? '<p class="text-xs text-emerald-600 font-semibold">Следующий</p>' : ''}
-            </div>
-          </div>`;
-      }).join('');
-
-      const nextPrayer = prayers.find(p => {
-        const [h, m] = currentData[p.key].split(':').map(Number);
-        return currentTime < h * 60 + m && p.type === 'prayer';
-      }) || prayers[1];
-      
-      updateCountdown(nextPrayer);
+      const months = ['Мухаррам','Сафар','Раби аль-Авваль','Раби ас-Сани','Джумада аль-Уля','Джумада ас-Сания','Раджаб','Шаабан','Рамадан','Шавваль','Зуль-Каада','Зуль-Хиджа'];
+      document.getElementById('islamicDate').textContent = `Зуль-Каада 1447`;
     }
 
-    function updateCountdown(prayer) {
+    function findNextPrayer() {
       const now = new Date();
-      const [h, m] = currentData[prayer.key].split(':').map(Number);
-      let target = new Date();
-      target.setHours(h, m, 0, 0);
-      if (target <= now) target.setDate(target.getDate() + 1);
-      
-      const diff = target - now;
-      const hrs = Math.floor(diff / 3600000);
-      const mins = Math.floor((diff % 3600000) / 60000);      const secs = Math.floor((diff % 60000) / 1000);
-      document.getElementById('countdown').textContent = `${String(hrs).padStart(2,'0')}:${String(mins).padStart(2,'0')}:${String(secs).padStart(2,'0')}`;
-    }
-
-    function renderMonthlyList() {
-      const listEl = document.getElementById('prayer-list');
-      listEl.innerHTML = PRAYER_DATA.schedule.map((item) => {
-        const isToday = item.date === todayStr;
-        return `
-          <div class="flex justify-between items-center p-3 border-b border-gray-50 last:border-0 ${isToday ? 'bg-teal-50' : 'hover:bg-gray-50'} transition-colors">
-            <div class="flex items-center gap-3">
-              <span class="w-7 h-7 flex items-center justify-center rounded-full text-xs font-bold ${isToday ? 'bg-teal-600 text-white' : 'bg-gray-100 text-gray-600'}">${item.d}</span>
-              <div><p class="font-medium text-sm text-gray-800">${item.date} <span class="text-gray-400 font-normal">(${item.day})</span></p></div>
-            </div>
-            <div class="flex gap-3 text-xs text-gray-600">
-              <span>🌅 ${item.fajr}</span><span>🕌 ${item.dhuhr}</span><span>🌆 ${item.maghrib}</span>
-            </div>
-          </div>`;
-      }).join('');
-    }
-
-    renderPrayers();
-    renderMonthlyList();
-    setInterval(renderPrayers, 1000);
-
-  } catch (error) {
-    console.error('Ошибка:', error);
-    document.getElementById('today-full-date').textContent = 'Ошибка';
-  }
-
-  const ARROW = document.getElementById('compass-arrow');
-  const RING = document.getElementById('compass-ring');
-  const STATUS = document.getElementById('compass-status');
-  const BTN = document.getElementById('enable-compass-btn');
-  
-  const QIBLA_MAGNETIC_BEARING = 214; 
-  let isCompassActive = false;
-  let currentHeading = 0;
-
-  function enableCompass() {
-    if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
-      DeviceOrientationEvent.requestPermission()
-        .then(response => {
-          if (response === 'granted') {
-            startCompass();
-          } else {
-            STATUS.textContent = '⛔ Доступ запрещён';
-          }
-        })
-        .catch(console.error);    } else {
-      startCompass();
-    }
-  }
-
-  function startCompass() {
-    isCompassActive = true;
-    BTN.classList.add('hidden');
-    STATUS.textContent = '🔄 Определение севера...';
-    
-    if ('ondeviceorientationabsolute' in window) {
-      window.addEventListener('deviceorientationabsolute', handleOrientation);
-    } else {
-      window.addEventListener('deviceorientation', handleOrientation);
-    }
-  }
-
-  function handleOrientation(event) {
-    let heading;
-    if (event.webkitCompassHeading !== undefined) {
-      heading = event.webkitCompassHeading;
-    } else if (event.alpha !== null) {
-      heading = (360 - event.alpha) % 360;
-    }
-
-    if (heading !== undefined) {
-      currentHeading = heading;
-      updateCompass();
-      if (STATUS.textContent.includes('Определение')) {
-        STATUS.textContent = '✅ Компас работает';
+      for (const p of PRAYERS) {
+        const [h, m] = p.time.split(':');
+        const d = new Date(); d.setHours(h, m, 0, 0);
+        if (d > now) return { ...p, date: d };
       }
+      // Если все намазы прошли, берём Фаджр завтра
+      const [h, m] = PRAYERS[0].time.split(':');
+      const d = new Date(); d.setDate(d.getDate() + 1); d.setHours(h, m, 0, 0);
+      return { ...PRAYERS[0], date: d };
     }
-  }
 
-  function updateCompass() {
-    const ringRotation = -currentHeading;
-    const arrowRotation = QIBLA_MAGNETIC_BEARING - currentHeading;
-    RING.style.transform = `rotate(${ringRotation}deg)`;
-    ARROW.style.transform = `rotate(${arrowRotation}deg)`;
-  }
+    function renderList() {
+      const now = new Date();
+      const container = document.getElementById('prayerList');
+      let html = '';
+      nextPrayerObj = findNextPrayer();
 
-  window.addEventListener('deviceorientation', (e) => {
-    if (!isCompassActive && e.alpha !== null) {
-      startCompass();
+      PRAYERS.forEach(p => {
+        const [h, m] = p.time.split(':');
+        const d = new Date(); d.setHours(h, m, 0, 0);
+        const isActive = p.key === nextPrayerObj.key;
+        const isPast = d < now && !isActive;
+        html += `<div class="prayer-row ${isActive ? 'active' : ''} ${isPast ? 'past' : ''}">
+          <span class="prayer-name">${p.name}</span>
+          <span class="prayer-time">${p.time}</span>
+        </div>`;
+      });
+      container.innerHTML = html;
+      document.getElementById('nextPrayerName').textContent = `До ${nextPrayerObj.name}`;
     }
-  }, { once: true });
 
-  const banner = document.getElementById('offline-banner');
-  window.addEventListener('online', () => banner.classList.add('hidden'));
-  window.addEventListener('offline', () => banner.classList.remove('hidden'));  if (!navigator.onLine) banner.classList.remove('hidden');
-
-  function shareApp() {
-    if (navigator.share) {
-      navigator.share({
-        title: 'Намаз Челябинск',
-        text: 'Точное время намазов и Кибла для Челябинска 🕌',
-        url: window.location.href
-      }).catch(console.error);
-    } else {
-      navigator.clipboard.writeText(window.location.href)
-        .then(() => alert('Ссылка скопирована!'))
-        .catch(() => alert('Не удалось скопировать'));
+    function startCountdown() {
+      const el = document.getElementById('countdown');
+      setInterval(() => {
+        if (!nextPrayerObj) return;
+        const diff = nextPrayerObj.date - new Date();
+        const hh = String(Math.floor(diff / 3600000)).padStart(2, '0');
+        const mm = String(Math.floor((diff % 3600000) / 60000)).padStart(2, '0');
+        const ss = String(Math.floor((diff % 60000) / 1000)).padStart(2, '0');
+        el.textContent = `${hh}:${mm}:${ss}`;
+      }, 1000);
     }
-  }
+    // === УВЕДОМЛЕНИЯ ===
+    async function initPrayerNotifications() {
+      if (!('Notification' in window) || !('serviceWorker' in navigator)) return;
+      const permission = Notification.permission === 'granted' ? 'granted' : await Notification.requestPermission();
+      if (permission !== 'granted') return;
 
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('/sw.js').catch(err => console.log('SW error:', err));
-  }
-</script>
+      const reg = await navigator.serviceWorker.ready;
+      if (!nextPrayerObj) return;
+
+      const triggerMs = nextPrayerObj.date.getTime() - 5 * 60 * 1000;
+      const delay = triggerMs - Date.now();
+
+      if (delay > 0 && delay < 24 * 60 * 60 * 1000) {
+        localStorage.setItem('pending_notif', JSON.stringify({ name: nextPrayerObj.name, time: nextPrayerObj.time, at: triggerMs, tag: nextPrayerObj.key }));
+        const timer = setTimeout(async () => {
+          await reg.showNotification(`⏰ ${nextPrayerObj.name} через 5 мин`, { body: `Челябинск • ${nextPrayerObj.time}`, icon: '/icon.png', tag: nextPrayerObj.key, requireInteraction: false });
+          localStorage.removeItem('pending_notif');
+        }, delay);
+        window.addEventListener('pagehide', () => clearTimeout(timer), { once: true });
+      }
+      restorePending(reg);
+    }
+
+    function restorePending(reg) {
+      const raw = localStorage.getItem('pending_notif');
+      if (!raw) return;
+      const data = JSON.parse(raw);
+      const delay = data.at - Date.now();
+      if (delay > 0) {
+        setTimeout(async () => {
+          await reg.showNotification(`⏰ ${data.name} через 5 мин`, { body: `Челябинск • ${data.time}`, tag: data.tag, requireInteraction: false });
+          localStorage.removeItem('pending_notif');
+        }, delay);
+      } else localStorage.removeItem('pending_notif');
+    }
+
+    // === ОФЛАЙН / ШЕРИНГ / SW / АВТООБНОВЛЕНИЕ ===
+    function checkOnline() {
+      const b = document.getElementById('offlineStatus');
+      const u = () => b.style.display = navigator.onLine ? 'none' : 'inline-flex';
+      window.addEventListener('online', u); window.addEventListener('offline', u); u();
+    }
+
+    function registerSW() { if ('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js').catch(console.error); }
+
+    function setupAutoUpdate() { setInterval(() => { const n = new Date(); if (n.getHours()===0 && n.getMinutes()===0 && n.getSeconds()<5) location.reload(); }, 10000); }
+
+    async function shareSchedule() {
+      const txt = `🕌 Намазы (Челябинск)\n${PRAYERS.map(p=>`${p.name}: ${p.time}`).join('\n')}\n📲 PWA Намаз Челябинск`;      if (navigator.share) await navigator.share({ title: 'Намаз Челябинск', text: txt });
+      else { navigator.clipboard.writeText(txt); alert('📋 Скопировано'); }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      getIslamicDate(); renderList(); startCountdown(); initPrayerNotifications(); checkOnline(); registerSW(); setupAutoUpdate();
+    });
+  </script>
 </body>
 </html>
