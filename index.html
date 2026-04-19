@@ -20,6 +20,7 @@
     .card { background: white; border-radius: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.06); }
     .prayer-card { transition: all 0.3s; }
     .prayer-card.passed { opacity: 0.4; background: #f8fafc; }
+    /* Класс .next теперь используется для ТЕКУЩЕГО намаза */
     .prayer-card.next { 
       background: #ecfdf5; 
       border: 2px solid #10b981; 
@@ -40,35 +41,27 @@
 </head>
 <body class="pb-8">
 
-<!-- Офлайн баннер -->
 <div id="offline-banner" class="hidden bg-yellow-500 text-white text-center text-xs py-1.5 font-medium sticky top-0 z-50 shadow-sm">
   📶 Офлайн-режим. Данные из кэша.
 </div>
 
-<!-- Шапка -->
 <header class="bg-teal-800 text-white pt-8 pb-10 px-4 rounded-b-3xl shadow-lg">
-  <div class="max-w-md mx-auto flex justify-between items-center">    <div>
-      <h1 class="text-2xl font-bold tracking-tight">Намаз Челябинск</h1>
+  <div class="max-w-md mx-auto flex justify-between items-center">
+    <div>      <h1 class="text-2xl font-bold tracking-tight">Намаз Челябинск</h1>
       <p class="text-teal-200 text-sm mt-1">Зуль-Кагда 1447</p>
     </div>
     <div class="flex flex-col items-end gap-2">
       <div class="flex items-center gap-2">
         <div class="bg-teal-700/80 backdrop-blur px-3 py-1.5 rounded-full text-xs font-semibold" id="hijri-date">Загрузка...</div>
-        <!-- КНОПКА ИНСТРУКЦИИ -->
-        <button onclick="openInstallModal()" class="bg-teal-700/80 w-8 h-8 flex items-center justify-center rounded-full text-sm hover:bg-teal-600 transition">
-          ℹ️
-        </button>
+        <button onclick="openInstallModal()" class="bg-teal-700/80 w-8 h-8 flex items-center justify-center rounded-full text-sm hover:bg-teal-600 transition">ℹ️</button>
       </div>
-      <button onclick="shareApp()" class="flex items-center gap-1 text-xs bg-teal-900/50 hover:bg-teal-900 px-2 py-1 rounded transition active:scale-95">
-        📤 Поделиться
-      </button>
+      <button onclick="shareApp()" class="flex items-center gap-1 text-xs bg-teal-900/50 hover:bg-teal-900 px-2 py-1 rounded transition active:scale-95">📤 Поделиться</button>
     </div>
   </div>
 </header>
 
 <main class="max-w-md mx-auto px-4 -mt-6">
   
-  <!-- Карточка намазов на сегодня -->
   <div class="card p-5 mb-4 fade-in">
     <div class="flex justify-between items-center mb-4">
       <div>
@@ -84,11 +77,9 @@
     </div>
   </div>
 
-  <!-- Карточка компаса -->
   <div class="card p-5 mb-4 fade-in text-center">
     <h3 class="font-semibold text-gray-800 mb-1">🕋 Направление Киблы</h3>
     <p class="text-xs text-gray-500 mb-4">Для Челябинска (229°)</p>
-    
     <div class="compass-wrapper">
       <div class="compass-ring" id="compass-ring">
         <div class="absolute inset-0 rounded-full border-4 border-gray-200 bg-white shadow-inner">
@@ -96,64 +87,40 @@
           <span class="absolute bottom-1 left-1/2 -translate-x-1/2 text-xs font-bold text-gray-400">Ю</span>
           <span class="absolute left-1 top-1/2 -translate-y-1/2 text-xs font-bold text-gray-400">З</span>
           <span class="absolute right-1 top-1/2 -translate-y-1/2 text-xs font-bold text-gray-400">В</span>
-        </div>      </div>
-      
+        </div>
+      </div>
       <div class="compass-arrow" id="compass-arrow">
         <div class="absolute top-3 left-1/2 -translate-x-1/2 w-1 h-12 bg-gradient-to-t from-transparent to-emerald-600 rounded-full origin-bottom"></div>
         <div class="absolute top-2 left-1/2 -translate-x-1/2 w-3 h-3 bg-emerald-600 rotate-45"></div>
       </div>
-      
       <div class="compass-center"></div>
     </div>
     <div class="space-y-3">
-      <p class="text-xs text-gray-500 font-medium min-h-[20px]" id="compass-status">Нажмите кнопку ниже</p>
-      
-      <button id="enable-compass-btn" onclick="enableCompass()" class="w-full px-4 py-2.5 bg-blue-600 text-white text-sm font-semibold rounded-lg shadow hover:bg-blue-700 active:scale-95 transition">
-        📡 Включить компас
-      </button>
-      
-      <p class="text-[10px] text-gray-400">
-        Держите телефон горизонтально. Красная С = Север. Зелёная стрелка = Кааба.
-      </p>
-      
+      <p class="text-xs text-gray-500 font-medium min-h-[20px]" id="compass-status">Нажмите кнопку ниже</p>      <button id="enable-compass-btn" onclick="enableCompass()" class="w-full px-4 py-2.5 bg-blue-600 text-white text-sm font-semibold rounded-lg shadow hover:bg-blue-700 active:scale-95 transition">📡 Включить компас</button>
+      <p class="text-[10px] text-gray-400">Держите телефон горизонтально. Красная С = Север. Зелёная стрелка = Кааба.</p>
       <div class="pt-2 border-t border-gray-100">
-        <a href="https://qiblafinder.withgoogle.com" target="_blank" rel="noopener noreferrer" class="text-xs text-blue-600 hover:underline font-medium">
-          🌍 Открыть точный Qibla Finder в браузере
-        </a>
+        <a href="https://qiblafinder.withgoogle.com" target="_blank" rel="noopener noreferrer" class="text-xs text-blue-600 hover:underline font-medium">🌍 Открыть точный Qibla Finder в браузере</a>
       </div>
     </div>
   </div>
 
-  <!-- Карточка расписания на месяц -->
   <div class="card overflow-hidden mb-4">
-    <div class="p-4 border-b border-gray-100 bg-gray-50">
-      <h3 class="font-semibold text-gray-800">Расписание на месяц</h3>
-    </div>
+    <div class="p-4 border-b border-gray-100 bg-gray-50"><h3 class="font-semibold text-gray-800">Расписание на месяц</h3></div>
     <div class="max-h-[40vh] overflow-y-auto" id="prayer-list"></div>
   </div>
 
-  <!-- Футер (Связь) -->
   <div class="text-center text-xs text-gray-400 px-4 pb-6 pt-4">
     <p>Данные: ЦДУМ России / РДУМ Челябинской обл.</p>
-    <p class="mt-2 text-gray-300 leading-tight">
-      ⚠️ Время намазов указано справочно. Для обязательств сверяйтесь с расписанием местной мечети.
-    </p>
-    
-    <!-- Блок контакта -->
+    <p class="mt-2 text-gray-300 leading-tight">⚠️ Время намазов указано справочно. Для обязательств сверяйтесь с расписанием местной мечети.</p>
     <div class="mt-6 pt-4 border-t border-gray-200">
       <p class="text-gray-500 mb-3 font-medium text-sm">Связь, отзывы и предложения</p>
       <div class="flex justify-center gap-8">
-        <!-- Telegram -->
         <a href="https://t.me/Aslyamov74" target="_blank" class="flex flex-col items-center group">
-          <div class="w-12 h-12 bg-blue-50 rounded-full flex items-center justify-center group-hover:bg-blue-100 transition mb-2">            <span class="text-2xl">💬</span>
-          </div>
+          <div class="w-12 h-12 bg-blue-50 rounded-full flex items-center justify-center group-hover:bg-blue-100 transition mb-2"><span class="text-2xl">💬</span></div>
           <span class="text-blue-600 font-semibold">@Aslyamov74</span>
         </a>
-        <!-- Телефон -->
         <a href="tel:+79911745113" class="flex flex-col items-center group">
-          <div class="w-12 h-12 bg-green-50 rounded-full flex items-center justify-center group-hover:bg-green-100 transition mb-2">
-            <span class="text-2xl">📞</span>
-          </div>
+          <div class="w-12 h-12 bg-green-50 rounded-full flex items-center justify-center group-hover:bg-green-100 transition mb-2"><span class="text-2xl">📞</span></div>
           <span class="text-green-600 font-semibold">8 (991) 174-51-13</span>
         </a>
       </div>
@@ -161,44 +128,29 @@
   </div>
 </main>
 
-<!-- МОДАЛЬНОЕ ОКНО ИНСТРУКЦИИ -->
+<!-- Модальное окно инструкции -->
 <div id="install-modal" class="fixed inset-0 z-[100] hidden">
-  <!-- Фон -->
   <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" onclick="closeInstallModal()"></div>
-  <!-- Контент -->
   <div class="absolute bottom-0 left-0 right-0 bg-white rounded-t-3xl p-6 animate-slide-up md:bottom-auto md:top-1/2 md:-translate-y-1/2 md:mx-auto md:max-w-sm md:rounded-2xl">
     <div class="w-12 h-1.5 bg-gray-200 rounded-full mx-auto mb-6 md:hidden"></div>
-    
     <div class="flex justify-between items-center mb-4">
       <h3 class="text-lg font-bold text-gray-900">📲 Как установить приложение?</h3>
       <button onclick="closeInstallModal()" class="text-gray-400 hover:text-gray-600 text-2xl leading-none">&times;</button>
     </div>
-    
     <div class="space-y-4 text-sm text-gray-700">
       <div class="bg-blue-50 p-4 rounded-xl border border-blue-100">
         <p class="font-semibold text-blue-800 mb-1">🤖 Android (Chrome)</p>
-        <ol class="list-decimal pl-4 space-y-1">
-          <li>Нажмите на меню (три точки <span class="font-bold">⋮</span> справа сверху)</li>
-          <li>Выберите <span class="font-bold text-blue-600">"Добавить на главный экран"</span></li>
-        </ol>
+        <ol class="list-decimal pl-4 space-y-1"><li>Нажмите меню (⋮ справа сверху)</li><li>Выберите <span class="font-bold text-blue-600">"Добавить на главный экран"</span></li></ol>
       </div>
-      
       <div class="bg-gray-50 p-4 rounded-xl border border-gray-100">
         <p class="font-semibold text-gray-800 mb-1">🍎 iPhone (Safari)</p>
-        <ol class="list-decimal pl-4 space-y-1">
-          <li>Нажмите кнопку <span class="font-bold">"Поделиться"</span> (квадрат со стрелкой ⬆️)</li>
-          <li>Найдите в списке <span class="font-bold text-gray-600">"На экран «Домой»"</span></li>
-        </ol>
-      </div>
-    </div>
-    
-    <button onclick="closeInstallModal()" class="w-full mt-6 bg-teal-600 text-white font-semibold py-3 rounded-xl hover:bg-teal-700 transition active:scale-95">
-      Понятно, спасибо!
-    </button>  </div>
+        <ol class="list-decimal pl-4 space-y-1"><li>Нажмите <span class="font-bold">"Поделиться"</span> (⬆️)</li><li>Найдите <span class="font-bold text-gray-600">"На экран «Домой»"</span></li></ol>
+      </div>    </div>
+    <button onclick="closeInstallModal()" class="w-full mt-6 bg-teal-600 text-white font-semibold py-3 rounded-xl hover:bg-teal-700 transition active:scale-95">Понятно, спасибо!</button>
+  </div>
 </div>
 
 <script>
-  // === ДАННЫЕ ===
   const PRAYER_DATA = {
     monthName: "Зуль-Кагда",
     schedule: [
@@ -242,15 +194,14 @@
     { key: 'dhuhr', name: 'Зухр', icon: '🕌', type: 'prayer' },
     { key: 'asr', name: 'Аср', icon: '🕐', type: 'prayer' },
     { key: 'maghrib', name: 'Магриб', icon: '🌆', type: 'prayer' },
-    { key: 'isha', name: 'Иша', icon: '🌃', type: 'prayer' }
-  ];
+    { key: 'isha', name: 'Иша', icon: '🌃', type: 'prayer' }  ];
+
   const monthNames = ["янв", "фев", "мар", "апр", "май", "июн", "июл", "авг", "сен", "окт", "ноя", "дек"];
   let currentData = null;
 
   try {
     const today = new Date();
     const todayStr = `${today.getDate()} ${monthNames[today.getMonth()]}`;
-    
     currentData = PRAYER_DATA.schedule.find(item => item.date === todayStr) || PRAYER_DATA.schedule[0];
 
     document.getElementById('today-full-date').textContent = `Сегодня, ${currentData.date}`;
@@ -258,42 +209,62 @@
     document.getElementById('day-name').textContent = currentData.day;
     document.getElementById('hijri-date').textContent = `${currentData.d} ${PRAYER_DATA.monthName}`;
     
+    // === НОВАЯ ЛОГИКА ВЫДЕЛЕНИЯ ===
     function renderPrayers() {
       const container = document.getElementById('today-prayers');
       const now = new Date();
       const currentTime = now.getHours() * 60 + now.getMinutes();
-      let foundNext = false;
+
+      // Только намазы для логики
+      const prayerKeys = prayers.filter(p => p.type === 'prayer').map(p => p.key);
+      let currentKey = prayerKeys[0];
+      let nextKey = prayerKeys[1];
+
+      // Определяем текущий интервал
+      for (let i = 0; i < prayerKeys.length - 1; i++) {
+        const [h, m] = currentData[prayerKeys[i]].split(':').map(Number);
+        if (currentTime >= h * 60 + m) {
+          currentKey = prayerKeys[i];
+          nextKey = prayerKeys[i + 1];
+        } else {
+          break;
+        }
+      }
+      // Если всё прошло, текущий - Иша
+      const lastKey = prayerKeys[prayerKeys.length - 1];
+      const [lh, lm] = currentData[lastKey].split(':').map(Number);
+      if (currentTime >= lh * 60 + lm) {
+        currentKey = lastKey;
+        nextKey = null;
+      }
 
       container.innerHTML = prayers.map((prayer) => {
         const [h, m] = currentData[prayer.key].split(':').map(Number);
-        const prayerTime = h * 60 + m;
-        const isPassed = currentTime > prayerTime;
-        const isNext = !foundNext && !isPassed && prayer.type === 'prayer';
-        if (isNext) foundNext = true;
-        let statusClass = isNext ? 'next' : (isPassed ? 'passed' : '');
-        
+        const isCurrent = prayer.key === currentKey;
+        const isNext = prayer.key === nextKey;
+        const isPassed = prayer.type === 'prayer' && !isCurrent && !isNext;
+        let statusClass = isCurrent ? 'next' : (isPassed ? 'passed' : '');
+
         return `
           <div class="prayer-card p-3 rounded-xl flex items-center justify-between ${statusClass}">
             <div class="flex items-center gap-3">
               <span class="text-2xl">${prayer.icon}</span>
               <div>
-                <p class="font-semibold text-sm prayer-name ${isNext ? 'text-emerald-800' : 'text-gray-800'}">${prayer.name}</p>
+                <p class="font-semibold text-sm prayer-name ${isCurrent ? 'text-emerald-800' : 'text-gray-800'}">${prayer.name}</p>
                 ${prayer.type === 'prep' ? '<p class="text-xs opacity-75">До рассвета</p>' : ''}
                 ${prayer.type === 'info' ? '<p class="text-xs opacity-75">Не намаз</p>' : ''}
               </div>
             </div>
             <div class="text-right">
-              <p class="text-xl font-bold prayer-time ${isNext ? 'text-emerald-700' : 'text-teal-700'}">${currentData[prayer.key]}</p>
+              <p class="text-xl font-bold prayer-time ${isCurrent ? 'text-emerald-700' : 'text-teal-700'}">${currentData[prayer.key]}</p>
               ${isNext ? '<p class="text-xs text-emerald-600 font-semibold">Следующий</p>' : ''}
             </div>
           </div>`;
       }).join('');
 
-      const nextPrayer = prayers.find(p => {
-        const [h, m] = currentData[p.key].split(':').map(Number);
-        return currentTime < h * 60 + m && p.type === 'prayer';
-      }) || prayers[1];      
-      updateCountdown(nextPrayer);
+      // Таймер всегда до следующего
+      const nextPrayerObj = nextKey ? { key: nextKey } : { key: 'fajr' };
+      updateCountdown(nextPrayerObj);
     }
 
     function updateCountdown(prayer) {
@@ -321,8 +292,7 @@
               <div><p class="font-medium text-sm text-gray-800">${item.date} <span class="text-gray-400 font-normal">(${item.day})</span></p></div>
             </div>
             <div class="flex gap-3 text-xs text-gray-600">
-              <span>🌅 ${item.fajr}</span><span>🕌 ${item.dhuhr}</span><span>🌆 ${item.maghrib}</span>
-            </div>
+              <span>🌅 ${item.fajr}</span><span>🕌 ${item.dhuhr}</span><span>🌆 ${item.maghrib}</span>            </div>
           </div>`;
       }).join('');
     }
@@ -331,30 +301,29 @@
     async function setupNotifications() {
       if (!('Notification' in window) || !('serviceWorker' in navigator)) return;
       if (Notification.permission !== 'granted') return;
-
       const reg = await navigator.serviceWorker.ready;
-      const nextPrayer = prayers.find(p => {
-        const [h, m] = currentData[p.key].split(':').map(Number);
-        const now = new Date();
-        return (now.getHours() * 60 + now.getMinutes()) < h * 60 + m && p.type === 'prayer';
-      }) || prayers[1];
+      
+      const prayerKeys = prayers.filter(p => p.type === 'prayer').map(p => p.key);
+      let nextKey = prayerKeys[0];
+      const now = new Date();
+      const currentTime = now.getHours() * 60 + now.getMinutes();
+      for (const key of prayerKeys) {
+        const [h, m] = currentData[key].split(':').map(Number);
+        if (currentTime < h * 60 + m) { nextKey = key; break; }
+      }
 
-      const [h, m] = currentData[nextPrayer.key].split(':').map(Number);
+      const [h, m] = currentData[nextKey].split(':').map(Number);
       let triggerTime = new Date();
-      triggerTime.setHours(h, m - 5, 0, 0);      
+      triggerTime.setHours(h, m - 5, 0, 0);
       const delay = triggerTime - Date.now();
+      
       if (delay > 0 && delay < 24 * 60 * 60 * 1000) {
-        localStorage.setItem('prayer_notif', JSON.stringify({
-          name: nextPrayer.name, time: currentData[nextPrayer.key], at: triggerTime.getTime(), key: nextPrayer.key
-        }));
+        localStorage.setItem('prayer_notif', JSON.stringify({ name: prayers.find(p=>p.key===nextKey).name, time: currentData[nextKey], at: triggerTime.getTime(), key: nextKey }));
         setTimeout(async () => {
-          await reg.showNotification(`⏰ ${nextPrayer.name} через 5 мин`, {
-            body: `Челябинск • ${currentData[nextPrayer.key]}`, icon: '/icon.png', tag: nextPrayer.key, requireInteraction: false
-          });
+          await reg.showNotification(`⏰ ${prayers.find(p=>p.key===nextKey).name} через 5 мин`, { body: `Челябинск • ${currentData[nextKey]}`, icon: '/icon.png', tag: nextKey, requireInteraction: false });
           localStorage.removeItem('prayer_notif');
         }, delay);
       }
-      // Восстановление
       const saved = localStorage.getItem('prayer_notif');
       if (saved) {
         const data = JSON.parse(saved);
@@ -373,13 +342,12 @@
     renderMonthlyList();
     setupNotifications();
     setInterval(renderPrayers, 1000);
-
   } catch (error) {
     console.error('Ошибка:', error);
     document.getElementById('today-full-date').textContent = 'Ошибка';
   }
 
-  // === КОМПАС (Плавный) ===
+  // === КОМПАС ===
   const ARROW = document.getElementById('compass-arrow');
   const RING = document.getElementById('compass-ring');
   const STATUS = document.getElementById('compass-status');
@@ -390,11 +358,10 @@
 
   function enableCompass() {
     if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
-      DeviceOrientationEvent.requestPermission()        .then(res => res === 'granted' ? startCompass() : (STATUS.textContent = '⛔ Доступ запрещён'))
+      DeviceOrientationEvent.requestPermission()
+        .then(res => res === 'granted' ? startCompass() : (STATUS.textContent = '⛔ Доступ запрещён'))
         .catch(console.error);
-    } else {
-      startCompass();
-    }
+    } else { startCompass(); }
   }
 
   function startCompass() {
@@ -402,10 +369,8 @@
     isCompassActive = true;
     BTN.classList.add('hidden');
     STATUS.textContent = '🔄 Калибровка...';
-    
     let hist = [];
     const smooth = (v) => { hist.push(v); if(hist.length>3) hist.shift(); return hist.reduce((a,b)=>a+b,0)/hist.length; };
-
     compassHandler = (e) => {
       let h = e.webkitCompassHeading !== undefined ? e.webkitCompassHeading : (e.alpha !== null ? (360 - e.alpha) % 360 : null);
       if (h !== null) {
@@ -415,33 +380,21 @@
         if (STATUS.textContent.includes('Калибровка')) STATUS.textContent = '✅ Компас работает';
       }
     };
-
-    if ('ondeviceorientationabsolute' in window) {
-      window.addEventListener('deviceorientationabsolute', compassHandler, { passive: true });
-    } else {
-      window.addEventListener('deviceorientation', compassHandler, { passive: true });
-    }
+    if ('ondeviceorientationabsolute' in window) window.addEventListener('deviceorientationabsolute', compassHandler, { passive: true });
+    else window.addEventListener('deviceorientation', compassHandler, { passive: true });
   }
 
-  // === МОДАЛЬНОЕ ОКНО ===
-  function openInstallModal() {
-    document.getElementById('install-modal').classList.remove('hidden');
-  }
-  function closeInstallModal() {
-    document.getElementById('install-modal').classList.add('hidden');
-  }
+  // === МОДАЛКА И УТИЛИТЫ ===
+  function openInstallModal() { document.getElementById('install-modal').classList.remove('hidden'); }
+  function closeInstallModal() { document.getElementById('install-modal').classList.add('hidden'); }
 
-  // === УТИЛИТЫ ===
   const banner = document.getElementById('offline-banner');
   window.addEventListener('online', () => banner.classList.add('hidden'));
-  window.addEventListener('offline', () => banner.classList.remove('hidden'));
-  if (!navigator.onLine) banner.classList.remove('hidden');
+  window.addEventListener('offline', () => banner.classList.remove('hidden'));  if (!navigator.onLine) banner.classList.remove('hidden');
 
   function shareApp() {
-    if (navigator.share) {
-      navigator.share({ title: 'Намаз Челябинск', text: 'Точное время намазов и Кибла для Челябинска 🕌', url: window.location.href }).catch(console.error);    } else {
-      navigator.clipboard.writeText(window.location.href).then(() => alert('Ссылка скопирована!')).catch(() => alert('Не удалось скопировать'));
-    }
+    if (navigator.share) navigator.share({ title: 'Намаз Челябинск', text: 'Точное время намазов и Кибла для Челябинска 🕌', url: window.location.href }).catch(console.error);
+    else navigator.clipboard.writeText(window.location.href).then(() => alert('Ссылка скопирована!')).catch(() => alert('Не удалось скопировать'));
   }
 
   if ('Notification' in window && Notification.permission === 'default') Notification.requestPermission();
