@@ -40,14 +40,16 @@
 </head>
 <body class="pb-8">
 
+<!-- Офлайн баннер -->
 <div id="offline-banner" class="hidden bg-yellow-500 text-white text-center text-xs py-1.5 font-medium sticky top-0 z-50 shadow-sm">
   📶 Офлайн-режим. Данные из кэша.
 </div>
 
+<!-- Шапка -->
 <header class="bg-teal-800 text-white pt-8 pb-10 px-4 rounded-b-3xl shadow-lg">
-  <div class="max-w-md mx-auto flex justify-between items-center">
-    <div>
-      <h1 class="text-2xl font-bold tracking-tight">Намаз Челябинск</h1>      <p class="text-teal-200 text-sm mt-1">Зуль-Кагда 1447</p>
+  <div class="max-w-md mx-auto flex justify-between items-center">    <div>
+      <h1 class="text-2xl font-bold tracking-tight">Намаз Челябинск</h1>
+      <p class="text-teal-200 text-sm mt-1">Зуль-Кагда 1447</p>
     </div>
     <div class="flex flex-col items-end gap-2">
       <div class="bg-teal-700/80 backdrop-blur px-3 py-1.5 rounded-full text-xs font-semibold" id="hijri-date">Загрузка...</div>
@@ -60,6 +62,7 @@
 
 <main class="max-w-md mx-auto px-4 -mt-6">
   
+  <!-- Карточка намазов на сегодня -->
   <div class="card p-5 mb-4 fade-in">
     <div class="flex justify-between items-center mb-4">
       <div>
@@ -75,6 +78,7 @@
     </div>
   </div>
 
+  <!-- Карточка компаса -->
   <div class="card p-5 mb-4 fade-in text-center">
     <h3 class="font-semibold text-gray-800 mb-1">🕋 Направление Киблы</h3>
     <p class="text-xs text-gray-500 mb-4">Для Челябинска (229°)</p>
@@ -92,11 +96,11 @@
       <div class="compass-arrow" id="compass-arrow">
         <div class="absolute top-3 left-1/2 -translate-x-1/2 w-1 h-12 bg-gradient-to-t from-transparent to-emerald-600 rounded-full origin-bottom"></div>
         <div class="absolute top-2 left-1/2 -translate-x-1/2 w-3 h-3 bg-emerald-600 rotate-45"></div>
-      </div>
-      
+      </div>      
       <div class="compass-center"></div>
     </div>
-    <div class="space-y-3">      <p class="text-xs text-gray-500 font-medium min-h-[20px]" id="compass-status">Нажмите кнопку ниже</p>
+    <div class="space-y-3">
+      <p class="text-xs text-gray-500 font-medium min-h-[20px]" id="compass-status">Нажмите кнопку ниже</p>
       
       <button id="enable-compass-btn" onclick="enableCompass()" class="w-full px-4 py-2.5 bg-blue-600 text-white text-sm font-semibold rounded-lg shadow hover:bg-blue-700 active:scale-95 transition">
         📡 Включить компас
@@ -114,6 +118,7 @@
     </div>
   </div>
 
+  <!-- Карточка расписания на месяц -->
   <div class="card overflow-hidden mb-4">
     <div class="p-4 border-b border-gray-100 bg-gray-50">
       <h3 class="font-semibold text-gray-800">Расписание на месяц</h3>
@@ -121,16 +126,37 @@
     <div class="max-h-[40vh] overflow-y-auto" id="prayer-list"></div>
   </div>
 
-  <div class="text-center text-xs text-gray-400 px-4 pb-4">
+  <!-- Футер (Связь) -->
+  <div class="text-center text-xs text-gray-400 px-4 pb-6 pt-4">
     <p>Данные: ЦДУМ России / РДУМ Челябинской обл.</p>
     <p class="mt-2 text-gray-300 leading-tight">
       ⚠️ Время намазов указано справочно. Для обязательств сверяйтесь с расписанием местной мечети.
     </p>
-    <p class="mt-2">Обновляется автоматически в 00:00</p>
+    
+    <!-- Блок контакта -->
+    <div class="mt-6 pt-4 border-t border-gray-200">
+      <p class="text-gray-500 mb-3 font-medium text-sm">Связь, отзывы и предложения</p>
+      <div class="flex justify-center gap-8">
+        <!-- Telegram -->
+        <a href="https://t.me/Aslyamov74" target="_blank" class="flex flex-col items-center group">
+          <div class="w-12 h-12 bg-blue-50 rounded-full flex items-center justify-center group-hover:bg-blue-100 transition mb-2">
+            <span class="text-2xl">💬</span>
+          </div>
+          <span class="text-blue-600 font-semibold">@Aslyamov74</span>
+        </a>
+        <!-- Телефон -->
+        <a href="tel:+79911745113" class="flex flex-col items-center group">          <div class="w-12 h-12 bg-green-50 rounded-full flex items-center justify-center group-hover:bg-green-100 transition mb-2">
+            <span class="text-2xl">📞</span>
+          </div>
+          <span class="text-green-600 font-semibold">8 (991) 174-51-13</span>
+        </a>
+      </div>
+    </div>
   </div>
 </main>
 
 <script>
+  // === ДАННЫЕ ===
   const PRAYER_DATA = {
     monthName: "Зуль-Кагда",
     schedule: [
@@ -145,7 +171,8 @@
       { d:9, date:"26 апр", day:"Вс", suhur:"03:26", fajr:"03:46", sunrise:"05:26", dhuhr:"13:20", asr:"18:39", maghrib:"20:19", isha:"21:59" },
       { d:10, date:"27 апр", day:"Пн", suhur:"03:24", fajr:"03:44", sunrise:"05:24", dhuhr:"13:20", asr:"18:41", maghrib:"20:21", isha:"22:01" },
       { d:11, date:"28 апр", day:"Вт", suhur:"03:22", fajr:"03:42", sunrise:"05:22", dhuhr:"13:20", asr:"18:43", maghrib:"20:23", isha:"22:03" },
-      { d:12, date:"29 апр", day:"Ср", suhur:"03:20", fajr:"03:40", sunrise:"05:20", dhuhr:"13:20", asr:"18:45", maghrib:"20:25", isha:"22:05" },      { d:13, date:"30 апр", day:"Чт", suhur:"03:17", fajr:"03:37", sunrise:"05:17", dhuhr:"13:20", asr:"18:47", maghrib:"20:27", isha:"22:07" },
+      { d:12, date:"29 апр", day:"Ср", suhur:"03:20", fajr:"03:40", sunrise:"05:20", dhuhr:"13:20", asr:"18:45", maghrib:"20:25", isha:"22:05" },
+      { d:13, date:"30 апр", day:"Чт", suhur:"03:17", fajr:"03:37", sunrise:"05:17", dhuhr:"13:20", asr:"18:47", maghrib:"20:27", isha:"22:07" },
       { d:14, date:"1 май", day:"Пт", suhur:"03:15", fajr:"03:35", sunrise:"05:15", dhuhr:"13:20", asr:"18:49", maghrib:"20:29", isha:"22:09" },
       { d:15, date:"2 май", day:"Сб", suhur:"03:13", fajr:"03:33", sunrise:"05:13", dhuhr:"13:20", asr:"18:51", maghrib:"20:31", isha:"22:11" },
       { d:16, date:"3 май", day:"Вс", suhur:"03:11", fajr:"03:31", sunrise:"05:11", dhuhr:"13:20", asr:"18:53", maghrib:"20:33", isha:"22:13" },
@@ -167,8 +194,7 @@
   };
 
   const prayers = [
-    { key: 'suhur', name: 'Сухур', icon: '🌙', type: 'prep' },
-    { key: 'fajr', name: 'Фаджр', icon: '🌅', type: 'prayer' },
+    { key: 'suhur', name: 'Сухур', icon: '🌙', type: 'prep' },    { key: 'fajr', name: 'Фаджр', icon: '🌅', type: 'prayer' },
     { key: 'sunrise', name: 'Восход', icon: '☀️', type: 'info' },
     { key: 'dhuhr', name: 'Зухр', icon: '🕌', type: 'prayer' },
     { key: 'asr', name: 'Аср', icon: '🕐', type: 'prayer' },
@@ -178,7 +204,6 @@
 
   const monthNames = ["янв", "фев", "мар", "апр", "май", "июн", "июл", "авг", "сен", "окт", "ноя", "дек"];
   let currentData = null;
-  let compassHandler = null;
 
   try {
     const today = new Date();
@@ -194,7 +219,8 @@
     function renderPrayers() {
       const container = document.getElementById('today-prayers');
       const now = new Date();
-      const currentTime = now.getHours() * 60 + now.getMinutes();      let foundNext = false;
+      const currentTime = now.getHours() * 60 + now.getMinutes();
+      let foundNext = false;
 
       container.innerHTML = prayers.map((prayer) => {
         const [h, m] = currentData[prayer.key].split(':').map(Number);
@@ -217,8 +243,7 @@
             <div class="text-right">
               <p class="text-xl font-bold prayer-time ${isNext ? 'text-emerald-700' : 'text-teal-700'}">${currentData[prayer.key]}</p>
               ${isNext ? '<p class="text-xs text-emerald-600 font-semibold">Следующий</p>' : ''}
-            </div>
-          </div>`;
+            </div>          </div>`;
       }).join('');
 
       const nextPrayer = prayers.find(p => {
@@ -243,7 +268,8 @@
       document.getElementById('countdown').textContent = `${String(hrs).padStart(2,'0')}:${String(mins).padStart(2,'0')}:${String(secs).padStart(2,'0')}`;
     }
 
-    function renderMonthlyList() {      const listEl = document.getElementById('prayer-list');
+    function renderMonthlyList() {
+      const listEl = document.getElementById('prayer-list');
       listEl.innerHTML = PRAYER_DATA.schedule.map((item) => {
         const isToday = item.date === todayStr;
         return `
@@ -259,15 +285,14 @@
       }).join('');
     }
 
-    // === УВЕДОМЛЕНИЯ (запускается 1 раз) ===
+    // === УВЕДОМЛЕНИЯ ===
     async function setupNotifications() {
       if (!('Notification' in window) || !('serviceWorker' in navigator)) return;
       if (Notification.permission !== 'granted') return;
 
       const reg = await navigator.serviceWorker.ready;
       const nextPrayer = prayers.find(p => {
-        const [h, m] = currentData[p.key].split(':').map(Number);
-        const now = new Date();
+        const [h, m] = currentData[p.key].split(':').map(Number);        const now = new Date();
         return (now.getHours() * 60 + now.getMinutes()) < h * 60 + m && p.type === 'prayer';
       }) || prayers[1];
 
@@ -292,7 +317,8 @@
       if (saved) {
         const data = JSON.parse(saved);
         const d = data.at - Date.now();
-        if (d > 0) {          setTimeout(async () => {
+        if (d > 0) {
+          setTimeout(async () => {
             const r = await navigator.serviceWorker.ready;
             await r.showNotification(`⏰ ${data.name} через 5 мин`, { body: `Челябинск • ${data.time}`, tag: data.key, requireInteraction: false });
             localStorage.removeItem('prayer_notif');
@@ -311,13 +337,13 @@
     document.getElementById('today-full-date').textContent = 'Ошибка';
   }
 
-  // === КОМПАС (плавный) ===
+  // === КОМПАС (Плавный) ===
   const ARROW = document.getElementById('compass-arrow');
   const RING = document.getElementById('compass-ring');
   const STATUS = document.getElementById('compass-status');
-  const BTN = document.getElementById('enable-compass-btn');
-  const QIBLA = 214;
+  const BTN = document.getElementById('enable-compass-btn');  const QIBLA = 214;
   let isCompassActive = false;
+  let compassHandler = null;
 
   function enableCompass() {
     if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
@@ -341,7 +367,8 @@
     compassHandler = (e) => {
       let h = e.webkitCompassHeading !== undefined ? e.webkitCompassHeading : (e.alpha !== null ? (360 - e.alpha) % 360 : null);
       if (h !== null) {
-        const s = smooth(h);        RING.style.transform = `rotate(${-s}deg)`;
+        const s = smooth(h);
+        RING.style.transform = `rotate(${-s}deg)`;
         ARROW.style.transform = `rotate(${QIBLA - s}deg)`;
         if (STATUS.textContent.includes('Калибровка')) STATUS.textContent = '✅ Компас работает';
       }
@@ -354,7 +381,7 @@
     }
   }
 
-  // === ОФЛАЙН / ШЕРИНГ / SW ===
+  // === УТИЛИТЫ ===
   const banner = document.getElementById('offline-banner');
   window.addEventListener('online', () => banner.classList.add('hidden'));
   window.addEventListener('offline', () => banner.classList.remove('hidden'));
@@ -363,8 +390,7 @@
   function shareApp() {
     if (navigator.share) {
       navigator.share({ title: 'Намаз Челябинск', text: 'Точное время намазов и Кибла для Челябинска 🕌', url: window.location.href }).catch(console.error);
-    } else {
-      navigator.clipboard.writeText(window.location.href).then(() => alert('Ссылка скопирована!')).catch(() => alert('Не удалось скопировать'));
+    } else {      navigator.clipboard.writeText(window.location.href).then(() => alert('Ссылка скопирована!')).catch(() => alert('Не удалось скопировать'));
     }
   }
 
