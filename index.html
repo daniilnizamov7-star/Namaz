@@ -24,6 +24,8 @@
     .card { background: white; border-radius: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.06); }
     .prayer-card { transition: all 0.3s; }
     .prayer-card.passed { opacity: 0.4; background: #f8fafc; }
+    
+    /* Зелёное выделение текущего намаза */
     .prayer-card.next { 
       background: #ecfdf5; 
       border: 2px solid #10b981; 
@@ -32,10 +34,20 @@
     }
     .prayer-card.next .prayer-name { color: #047857; font-weight: 800; }
     .prayer-card.next .prayer-time { color: #047857; font-weight: 800; }
+    
+    /* 🔴 Красное выделение периода после восхода (нежелательное время) */
+    .prayer-card.makruh { 
+      background: #fef2f2; 
+      border: 2px solid #fca5a5; 
+      transform: scale(1.02);
+      box-shadow: 0 2px 10px rgba(239, 68, 68, 0.15);
+    }
+    .prayer-card.makruh .prayer-name { color: #b91c1c; font-weight: 700; }
+    .prayer-card.makruh .prayer-time { color: #dc2626; font-weight: 700; }
+
     .fade-in { animation: fadeIn 0.4s ease; }
     @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-    .countdown-digit { font-variant-numeric: tabular-nums; }
-    
+    .countdown-digit { font-variant-numeric: tabular-nums; }    
     .compass-wrapper { position: relative; width: 150px; height: 150px; margin: 0 auto 12px; }
     .compass-ring { position: absolute; inset: 0; transition: transform 0.1s linear; }
     .compass-arrow { position: absolute; inset: 0; transition: transform 0.1s linear; }
@@ -47,6 +59,7 @@
 <div id="offline-banner" class="hidden bg-yellow-500 text-white text-center text-xs py-1.5 font-medium sticky top-0 z-50 shadow-sm">
   📶 Офлайн-режим. Данные из кэша.
 </div>
+
 <header class="bg-teal-800 text-white pt-8 pb-10 px-4 rounded-b-3xl shadow-lg">
   <div class="max-w-md mx-auto flex justify-between items-center">
     <div>
@@ -83,8 +96,7 @@
   <div class="card p-5 mb-4 fade-in text-center">
     <h3 class="font-semibold text-gray-800 mb-1">🕋 Направление Киблы</h3>
     <p class="text-xs text-gray-500 mb-4">Для Челябинска (229°)</p>
-    
-    <div class="compass-wrapper">
+        <div class="compass-wrapper">
       <div class="compass-ring" id="compass-ring">
         <div class="absolute inset-0 rounded-full border-4 border-gray-200 bg-white shadow-inner">
           <span class="absolute top-1 left-1/2 -translate-x-1/2 text-xs font-bold text-red-500">С</span>
@@ -96,7 +108,8 @@
       
       <div class="compass-arrow" id="compass-arrow">
         <div class="absolute top-3 left-1/2 -translate-x-1/2 w-1 h-12 bg-gradient-to-t from-transparent to-emerald-600 rounded-full origin-bottom"></div>
-        <div class="absolute top-2 left-1/2 -translate-x-1/2 w-3 h-3 bg-emerald-600 rotate-45"></div>      </div>
+        <div class="absolute top-2 left-1/2 -translate-x-1/2 w-3 h-3 bg-emerald-600 rotate-45"></div>
+      </div>
       
       <div class="compass-center"></div>
     </div>
@@ -132,8 +145,7 @@
       ⚠️ Время намазов указано справочно. Для обязательств сверяйтесь с расписанием местной мечети.
     </p>
     
-    <div class="mt-6 pt-4 border-t border-gray-200">
-      <p class="text-gray-500 mb-3 font-medium text-sm">Связь, отзывы и предложения</p>
+    <div class="mt-6 pt-4 border-t border-gray-200">      <p class="text-gray-500 mb-3 font-medium text-sm">Связь, отзывы и предложения</p>
       <div class="flex justify-center gap-8">
         <a href="https://t.me/Aslyamov74" target="_blank" class="flex flex-col items-center group">
           <div class="w-12 h-12 bg-blue-50 rounded-full flex items-center justify-center group-hover:bg-blue-100 transition mb-2">
@@ -145,7 +157,8 @@
           <div class="w-12 h-12 bg-green-50 rounded-full flex items-center justify-center group-hover:bg-green-100 transition mb-2">
             <span class="text-2xl">📞</span>
           </div>
-          <span class="text-green-600 font-semibold">8 (991) 174-51-13</span>        </a>
+          <span class="text-green-600 font-semibold">8 (991) 174-51-13</span>
+        </a>
       </div>
     </div>
   </div>
@@ -181,8 +194,7 @@
     </div>
     
     <button onclick="closeInstallModal()" class="w-full mt-6 bg-teal-600 text-white font-semibold py-3 rounded-xl hover:bg-teal-700 transition active:scale-95">
-      Понятно, спасибо!
-    </button>
+      Понятно, спасибо!    </button>
   </div>
 </div>
 
@@ -194,7 +206,8 @@
       { d:1, date:"18 апр", day:"Сб", suhur:"03:45", fajr:"04:05", sunrise:"05:45", dhuhr:"13:20", asr:"18:24", maghrib:"20:04", isha:"21:44" },
       { d:2, date:"19 апр", day:"Вс", suhur:"03:43", fajr:"04:03", sunrise:"05:43", dhuhr:"13:20", asr:"18:26", maghrib:"20:06", isha:"21:46" },
       { d:3, date:"20 апр", day:"Пн", suhur:"03:40", fajr:"04:00", sunrise:"05:40", dhuhr:"13:20", asr:"18:28", maghrib:"20:08", isha:"21:48" },
-      { d:4, date:"21 апр", day:"Вт", suhur:"03:38", fajr:"03:58", sunrise:"05:38", dhuhr:"13:20", asr:"18:29", maghrib:"20:09", isha:"21:49" },      { d:5, date:"22 апр", day:"Ср", suhur:"03:36", fajr:"03:56", sunrise:"05:36", dhuhr:"13:20", asr:"18:31", maghrib:"20:11", isha:"21:51" },
+      { d:4, date:"21 апр", day:"Вт", suhur:"03:38", fajr:"03:58", sunrise:"05:38", dhuhr:"13:20", asr:"18:29", maghrib:"20:09", isha:"21:49" },
+      { d:5, date:"22 апр", day:"Ср", suhur:"03:36", fajr:"03:56", sunrise:"05:36", dhuhr:"13:20", asr:"18:31", maghrib:"20:11", isha:"21:51" },
       { d:6, date:"23 апр", day:"Чт", suhur:"03:33", fajr:"03:53", sunrise:"05:33", dhuhr:"13:20", asr:"18:33", maghrib:"20:13", isha:"21:53" },
       { d:7, date:"24 апр", day:"Пт", suhur:"03:31", fajr:"03:51", sunrise:"05:31", dhuhr:"13:20", asr:"18:35", maghrib:"20:15", isha:"21:55" },
       { d:8, date:"25 апр", day:"Сб", suhur:"03:29", fajr:"03:49", sunrise:"05:29", dhuhr:"13:20", asr:"18:37", maghrib:"20:17", isha:"21:57" },
@@ -230,8 +243,7 @@
     { key: 'dhuhr', name: 'Зухр', icon: '🕌', type: 'prayer' },
     { key: 'asr', name: 'Аср', icon: '🕐', type: 'prayer' },
     { key: 'maghrib', name: 'Магриб', icon: '🌆', type: 'prayer' },
-    { key: 'isha', name: 'Иша', icon: '🌃', type: 'prayer' }
-  ];
+    { key: 'isha', name: 'Иша', icon: '🌃', type: 'prayer' }  ];
 
   const monthNames = ["янв", "фев", "мар", "апр", "май", "июн", "июл", "авг", "сен", "окт", "ноя", "дек"];
   let currentData = null;
@@ -239,13 +251,14 @@
   try {
     const today = new Date();
     const todayStr = `${today.getDate()} ${monthNames[today.getMonth()]}`;
-    
     currentData = PRAYER_DATA.schedule.find(item => item.date === todayStr) || PRAYER_DATA.schedule[0];
 
     document.getElementById('today-full-date').textContent = `Сегодня, ${currentData.date}`;
-    document.getElementById('today-hijri').textContent = `${currentData.d} ${PRAYER_DATA.monthName} 1447`;    document.getElementById('day-name').textContent = currentData.day;
+    document.getElementById('today-hijri').textContent = `${currentData.d} ${PRAYER_DATA.monthName} 1447`;
+    document.getElementById('day-name').textContent = currentData.day;
     document.getElementById('hijri-date').textContent = `${currentData.d} ${PRAYER_DATA.monthName}`;
     
+    // ✅ ОБНОВЛЁННАЯ ЛОГИКА ОТОБРАЖЕНИЯ НАМАЗОВ
     function renderPrayers() {
       const container = document.getElementById('today-prayers');
       const now = new Date();
@@ -254,7 +267,18 @@
       const prayerKeys = prayers.filter(p => p.type === 'prayer').map(p => p.key);
       let currentKey = prayerKeys[0];
       let nextKey = prayerKeys[1];
+      let isMakruhSunrise = false;
 
+      // Время восхода в минутах
+      const [sunH, sunM] = currentData.sunrise.split(':').map(Number);
+      const sunriseTime = sunH * 60 + sunM;
+
+      // Проверяем период нежелательности (30 минут после восхода)
+      if (currentTime >= sunriseTime && currentTime < sunriseTime + 30) {
+        isMakruhSunrise = true;
+      }
+
+      // Определяем текущий интервал намаза
       for (let i = 0; i < prayerKeys.length - 1; i++) {
         const [h, m] = currentData[prayerKeys[i]].split(':').map(Number);
         if (currentTime >= h * 60 + m) {
@@ -268,35 +292,61 @@
       const [lh, lm] = currentData[lastKey].split(':').map(Number);
       if (currentTime >= lh * 60 + lm) {
         currentKey = lastKey;
-        nextKey = null;
-      }
+        nextKey = null;      }
 
       container.innerHTML = prayers.map((prayer) => {
         const [h, m] = currentData[prayer.key].split(':').map(Number);
-        const isCurrent = prayer.key === currentKey;
-        const isNext = prayer.key === nextKey;
-        const isPassed = prayer.type === 'prayer' && !isCurrent && !isNext;
+        const prayerTimeMin = h * 60 + m;
 
-        let statusClass = isCurrent ? 'next' : (isPassed ? 'passed' : '');
+        let statusClass = '';
+        let extraHtml = '';
+
+        if (prayer.key === 'sunrise') {
+          if (isMakruhSunrise) {
+            statusClass = 'makruh';
+            extraHtml = '<p class="text-xs text-red-500 font-medium mt-1">⏳ 30 мин после восхода нежелательно</p>';
+          } else if (currentTime > prayerTimeMin) {
+            statusClass = 'passed';
+          }
+        } else if (prayer.type === 'prayer') {
+          const isCurrent = prayer.key === currentKey;
+          const isNext = prayer.key === nextKey;
+          const isPassed = currentTime > prayerTimeMin;
+
+          // Зелёное выделение только если НЕ период нежелательности
+          if (isCurrent && !isMakruhSunrise) {
+            statusClass = 'next';
+          } else if (isPassed) {
+            statusClass = 'passed';
+          }
+          if (isNext) {
+            extraHtml = '<p class="text-xs text-emerald-600 font-semibold">Следующий</p>';
+          }
+        } else if (prayer.type === 'prep' && currentTime > prayerTimeMin) {
+          statusClass = 'passed';
+        }
+
+        const nameColor = statusClass === 'next' ? 'text-emerald-800' : statusClass === 'makruh' ? 'text-red-700' : 'text-gray-800';
+        const timeColor = statusClass === 'next' ? 'text-emerald-700' : statusClass === 'makruh' ? 'text-red-600' : 'text-teal-700';
 
         return `
           <div class="prayer-card p-3 rounded-xl flex items-center justify-between ${statusClass}">
             <div class="flex items-center gap-3">
               <span class="text-2xl">${prayer.icon}</span>
               <div>
-                <p class="font-semibold text-sm prayer-name ${isCurrent ? 'text-emerald-800' : 'text-gray-800'}">${prayer.name}</p>
+                <p class="font-semibold text-sm prayer-name ${nameColor}">${prayer.name}</p>
                 ${prayer.type === 'prep' ? '<p class="text-xs opacity-75">До рассвета</p>' : ''}
-                ${prayer.type === 'info' ? '<p class="text-xs opacity-75">Не намаз</p>' : ''}
+                ${prayer.type === 'info' && !isMakruhSunrise ? '<p class="text-xs opacity-75">Не намаз</p>' : ''}
+                ${extraHtml}
               </div>
             </div>
             <div class="text-right">
-              <p class="text-xl font-bold prayer-time ${isCurrent ? 'text-emerald-700' : 'text-teal-700'}">${currentData[prayer.key]}</p>
-              ${isNext ? '<p class="text-xs text-emerald-600 font-semibold">Следующий</p>' : ''}
-            </div>          </div>`;
+              <p class="text-xl font-bold prayer-time ${timeColor}">${currentData[prayer.key]}</p>            </div>
+          </div>`;
       }).join('');
 
-      const nextPrayerObj = nextKey ? { key: nextKey } : { key: 'fajr' };
-      updateCountdown(nextPrayerObj);
+      const targetKey = nextKey || 'fajr';
+      updateCountdown({ key: targetKey });
     }
 
     function updateCountdown(prayer) {
@@ -313,7 +363,6 @@
       document.getElementById('countdown').textContent = `${String(hrs).padStart(2,'0')}:${String(mins).padStart(2,'0')}:${String(secs).padStart(2,'0')}`;
     }
 
-    // ✅ ВЫДЕЛЕНИЕ ПЯТНИЦЫ (ДЖУМА)
     function renderMonthlyList() {
       const listEl = document.getElementById('prayer-list');
       listEl.innerHTML = PRAYER_DATA.schedule.map((item) => {
