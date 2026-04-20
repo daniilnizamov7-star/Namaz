@@ -25,7 +25,6 @@
     .prayer-card { transition: all 0.3s; }
     .prayer-card.passed { opacity: 0.4; background: #f8fafc; }
     
-    /* Зелёное: текущее время намаза */
     .prayer-card.next { 
       background: #ecfdf5; 
       border: 2px solid #10b981; 
@@ -35,7 +34,6 @@
     .prayer-card.next .prayer-name { color: #047857; font-weight: 800; }
     .prayer-card.next .prayer-time { color: #047857; font-weight: 800; }
     
-    /* 🔴 Красное: время макрух (30 мин после восхода И последняя 1/3 ночи) */
     .prayer-card.makruh { 
       background: #fef2f2; 
       border: 2px solid #fca5a5; 
@@ -44,7 +42,6 @@
     .prayer-card.makruh .prayer-name { color: #b91c1c; font-weight: 700; }
     .prayer-card.makruh .prayer-time { color: #dc2626; font-weight: 700; }
 
-    /* 🟠 Оранжевое: вторая 1/3 ночи (можно, но не желательно) */
     .prayer-card.night-second-third { 
       background: #fff7ed; 
       border: 2px solid #fdba74; 
@@ -145,23 +142,19 @@
     <p>Данные: ЦДУМ России / РДУМ Челябинской обл.</p>
     <p class="mt-2 text-gray-300 leading-tight">⚠️ Время намазов указано справочно. Для обязательств сверяйтесь с расписанием местной мечети.</p>
     
-    <!-- Футер с контактами и портфолио -->
     <div class="mt-6 pt-4 border-t border-gray-200">
       <p class="text-gray-500 mb-3 font-medium text-sm">Связь, отзывы и предложения</p>
       <div class="flex justify-center gap-8">
-        <!-- Telegram -->
         <a href="https://t.me/Aslyamov74" target="_blank" class="flex flex-col items-center group">
           <div class="w-12 h-12 bg-blue-50 rounded-full flex items-center justify-center group-hover:bg-blue-100 transition mb-2"><span class="text-2xl">💬</span></div>
           <span class="text-blue-600 font-semibold">@Aslyamov74</span>
         </a>
-        <!-- Телефон -->
         <a href="tel:+79911745113" class="flex flex-col items-center group">
           <div class="w-12 h-12 bg-green-50 rounded-full flex items-center justify-center group-hover:bg-green-100 transition mb-2"><span class="text-2xl">📞</span></div>
           <span class="text-green-600 font-semibold">8 (991) 174-51-13</span>
         </a>
       </div>
       
-      <!-- Ссылка на портфолио -->
       <div class="mt-5 pt-4 border-t border-gray-100">
         <a href="https://nizamov-tech.vercel.app/" target="_blank" class="inline-flex items-center gap-2 text-teal-600 hover:text-teal-800 font-medium text-sm transition group">
           🚀 Еще больше проектов тут
@@ -213,18 +206,61 @@
   let scheduleData = [];
   let currentMonthName = "";
 
-  // === ЗАГРУЗКА ДАННЫХ ИЗ JSON ===
+  // === РЕЗЕРВНЫЕ ДАННЫЕ (если JSON не загрузится) ===
+  const FALLBACK_DATA = {
+    monthName: "Зуль-Кагда",
+    schedule: [
+      { d:1, date:"18 апр", day:"Сб", suhur:"03:45", fajr:"04:05", sunrise:"05:45", dhuhr:"13:20", asr:"18:24", maghrib:"20:04", isha:"21:44" },
+      { d:2, date:"19 апр", day:"Вс", suhur:"03:43", fajr:"04:03", sunrise:"05:43", dhuhr:"13:20", asr:"18:26", maghrib:"20:06", isha:"21:46" },
+      { d:3, date:"20 апр", day:"Пн", suhur:"03:40", fajr:"04:00", sunrise:"05:40", dhuhr:"13:20", asr:"18:28", maghrib:"20:08", isha:"21:48" },
+      { d:4, date:"21 апр", day:"Вт", suhur:"03:38", fajr:"03:58", sunrise:"05:38", dhuhr:"13:20", asr:"18:29", maghrib:"20:09", isha:"21:49" },
+      { d:5, date:"22 апр", day:"Ср", suhur:"03:36", fajr:"03:56", sunrise:"05:36", dhuhr:"13:20", asr:"18:31", maghrib:"20:11", isha:"21:51" },
+      { d:6, date:"23 апр", day:"Чт", suhur:"03:33", fajr:"03:53", sunrise:"05:33", dhuhr:"13:20", asr:"18:33", maghrib:"20:13", isha:"21:53" },
+      { d:7, date:"24 апр", day:"Пт", suhur:"03:31", fajr:"03:51", sunrise:"05:31", dhuhr:"13:20", asr:"18:35", maghrib:"20:15", isha:"21:55" },
+      { d:8, date:"25 апр", day:"Сб", suhur:"03:29", fajr:"03:49", sunrise:"05:29", dhuhr:"13:20", asr:"18:37", maghrib:"20:17", isha:"21:57" },
+      { d:9, date:"26 апр", day:"Вс", suhur:"03:26", fajr:"03:46", sunrise:"05:26", dhuhr:"13:20", asr:"18:39", maghrib:"20:19", isha:"21:59" },
+      { d:10, date:"27 апр", day:"Пн", suhur:"03:24", fajr:"03:44", sunrise:"05:24", dhuhr:"13:20", asr:"18:41", maghrib:"20:21", isha:"22:01" },
+      { d:11, date:"28 апр", day:"Вт", suhur:"03:22", fajr:"03:42", sunrise:"05:22", dhuhr:"13:20", asr:"18:43", maghrib:"20:23", isha:"22:03" },
+      { d:12, date:"29 апр", day:"Ср", suhur:"03:20", fajr:"03:40", sunrise:"05:20", dhuhr:"13:20", asr:"18:45", maghrib:"20:25", isha:"22:05" },
+      { d:13, date:"30 апр", day:"Чт", suhur:"03:17", fajr:"03:37", sunrise:"05:17", dhuhr:"13:20", asr:"18:47", maghrib:"20:27", isha:"22:07" },
+      { d:14, date:"1 май", day:"Пт", suhur:"03:15", fajr:"03:35", sunrise:"05:15", dhuhr:"13:20", asr:"18:49", maghrib:"20:29", isha:"22:09" },
+      { d:15, date:"2 май", day:"Сб", suhur:"03:13", fajr:"03:33", sunrise:"05:13", dhuhr:"13:20", asr:"18:51", maghrib:"20:31", isha:"22:11" },
+      { d:16, date:"3 май", day:"Вс", suhur:"03:11", fajr:"03:31", sunrise:"05:11", dhuhr:"13:20", asr:"18:53", maghrib:"20:33", isha:"22:13" },
+      { d:17, date:"4 май", day:"Пн", suhur:"03:09", fajr:"03:29", sunrise:"05:09", dhuhr:"13:20", asr:"18:55", maghrib:"20:35", isha:"22:15" },
+      { d:18, date:"5 май", day:"Вт", suhur:"03:07", fajr:"03:27", sunrise:"05:07", dhuhr:"13:20", asr:"18:57", maghrib:"20:37", isha:"22:17" },
+      { d:19, date:"6 май", day:"Ср", suhur:"03:05", fajr:"03:25", sunrise:"05:05", dhuhr:"13:20", asr:"18:59", maghrib:"20:39", isha:"22:19" },
+      { d:20, date:"7 май", day:"Чт", suhur:"03:03", fajr:"03:23", sunrise:"05:03", dhuhr:"13:20", asr:"19:01", maghrib:"20:41", isha:"22:21" },
+      { d:21, date:"8 май", day:"Пт", suhur:"03:01", fajr:"03:21", sunrise:"05:01", dhuhr:"13:20", asr:"19:03", maghrib:"20:43", isha:"22:23" },
+      { d:22, date:"9 май", day:"Сб", suhur:"02:59", fajr:"03:19", sunrise:"04:59", dhuhr:"13:20", asr:"19:05", maghrib:"20:45", isha:"22:25" },
+      { d:23, date:"10 май", day:"Вс", suhur:"02:57", fajr:"03:17", sunrise:"04:57", dhuhr:"13:20", asr:"19:06", maghrib:"20:46", isha:"22:26" },
+      { d:24, date:"11 май", day:"Пн", suhur:"02:55", fajr:"03:15", sunrise:"04:55", dhuhr:"13:20", asr:"19:08", maghrib:"20:48", isha:"22:28" },
+      { d:25, date:"12 май", day:"Вт", suhur:"02:53", fajr:"03:13", sunrise:"04:53", dhuhr:"13:20", asr:"19:10", maghrib:"20:50", isha:"22:30" },
+      { d:26, date:"13 май", day:"Ср", suhur:"02:51", fajr:"03:11", sunrise:"04:51", dhuhr:"13:20", asr:"19:12", maghrib:"20:52", isha:"22:32" },
+      { d:27, date:"14 май", day:"Чт", suhur:"02:49", fajr:"03:09", sunrise:"04:49", dhuhr:"13:20", asr:"19:14", maghrib:"20:54", isha:"22:34" },
+      { d:28, date:"15 май", day:"Пт", suhur:"02:47", fajr:"03:07", sunrise:"04:47", dhuhr:"13:20", asr:"19:16", maghrib:"20:56", isha:"22:36" },
+      { d:29, date:"16 май", day:"Сб", suhur:"02:46", fajr:"03:06", sunrise:"04:46", dhuhr:"13:20", asr:"19:17", maghrib:"20:57", isha:"22:37" },
+      { d:30, date:"17 май", day:"Вс", suhur:"02:44", fajr:"03:04", sunrise:"04:44", dhuhr:"13:20", asr:"19:19", maghrib:"20:59", isha:"22:39" }
+    ]
+  };
+
+  // === ЗАГРУЗКА ДАННЫХ ===
   function loadAppData() {
     fetch('/api/prayer-data.json')
-      .then(response => response.json())
+      .then(response => {
+        if (!response.ok) throw new Error('Network response was not ok');
+        return response.json();
+      })
       .then(data => {
+        console.log('✅ Данные загружены из JSON');
         scheduleData = data.schedule;
         currentMonthName = data.monthName;
         initApp();
       })
       .catch(err => {
-        console.error("Ошибка загрузки данных (возможно офлайн):", err);
-        document.getElementById('today-full-date').textContent = "Нет данных";
+        console.warn('⚠️ Не удалось загрузить JSON, использую резервные данные:', err);
+        scheduleData = FALLBACK_DATA.schedule;
+        currentMonthName = FALLBACK_DATA.monthName;
+        initApp();
       });
   }
 
@@ -241,7 +277,6 @@
       document.getElementById('day-name').textContent = currentData.day;
       document.getElementById('hijri-date').textContent = `${currentData.d} ${currentMonthName}`;
       
-      // === ОТСЛЕЖИВАНИЕ УСТАНОВКИ ===
       function isPWAInstalled() {
         return window.matchMedia('(display-mode: standalone)').matches || 
                window.navigator.standalone === true ||
@@ -257,10 +292,13 @@
       setupNotifications();
       setInterval(renderPrayers, 1000);
 
-    } catch (e) { console.error(e); document.getElementById('today-full-date').textContent = 'Ошибка'; }
+    } catch (e) { 
+      console.error('❌ Ошибка инициализации:', e); 
+      document.getElementById('today-full-date').textContent = 'Ошибка'; 
+    }
   }
 
-  // === РАСЧЁТ ТРЕТЕЙ НОЧИ (ХАНАФИТСКИЙ МАЗХАБ) ===
+  // === РАСЧЁТ ТРЕТЕЙ НОЧИ ===
   function getNightThirds() {
     if (!currentData) return null;
     
@@ -270,18 +308,17 @@
     const ishaMinutes = ishaH * 60 + ishaM;
     let fajrMinutes = fajrH * 60 + fajrM;
     
-    // Если Фаджр раньше Иша (ночь переходит на следующий день)
     if (fajrMinutes < ishaMinutes) {
-      fajrMinutes += 24 * 60; // Добавляем сутки
+      fajrMinutes += 24 * 60;
     }
     
     const nightDuration = fajrMinutes - ishaMinutes;
     const thirdDuration = nightDuration / 3;
     
     return {
-      firstThirdEnd: ishaMinutes + thirdDuration,      // Конец первой 1/3
-      secondThirdEnd: ishaMinutes + (2 * thirdDuration), // Конец второй 1/3
-      thirdThirdStart: secondThirdEnd,                    // Начало последней 1/3
+      firstThirdEnd: ishaMinutes + thirdDuration,
+      secondThirdEnd: ishaMinutes + (2 * thirdDuration),
+      thirdThirdStart: ishaMinutes + (2 * thirdDuration),
       nightDuration: nightDuration
     };
   }
@@ -300,17 +337,15 @@
     const [sunH, sunM] = currentData.sunrise.split(':').map(Number);
     const sunriseTime = sunH * 60 + sunM;
 
-    // Получаем трети ночи
     const thirds = getNightThirds();
-    let nightPeriod = null; // 'first', 'second', 'third', или null
+    let nightPeriod = null;
     
     if (thirds) {
       const [ishaH, ishaM] = currentData.isha.split(':').map(Number);
       const ishaMinutes = ishaH * 60 + ishaM;
       let currentTimeAdjusted = currentTime;
       
-      // Если сейчас ночь (после Иша)
-      if (currentTime >= ishaMinutes || currentTime < (thirds.firstThirdEnd > 24*60 ? thirds.firstThirdEnd - 24*60 : thirds.firstThirdEnd)) {
+      if (currentTime >= ishaMinutes || currentTime < sunriseTime) {
         if (currentTime < ishaMinutes) currentTimeAdjusted += 24 * 60;
         
         if (currentTimeAdjusted < thirds.firstThirdEnd) {
@@ -362,7 +397,6 @@
         statusClass = 'passed';
       }
 
-      // === ДОБАВЛЯЕМ ИНФОРМАЦИЮ О ТРЕТЯХ НОЧИ ДЛЯ ИША ===
       if (prayer.key === 'isha' && thirds) {
         const [ishaH, ishaM] = currentData.isha.split(':').map(Number);
         const ishaMinutes = ishaH * 60 + ishaM;
@@ -376,7 +410,6 @@
             extraHtml = '<p class="text-xs text-red-600 font-medium mt-1">🔴 Макрух (последняя 1/3)</p>';
           }
           
-          // Предупреждение за 30 минут до последней трети
           const timeToThird = thirds.thirdThirdStart - currentTime;
           if (timeToThird > 0 && timeToThird <= 30 && nightPeriod === 'second') {
             const minsLeft = Math.floor(timeToThird);
@@ -443,7 +476,6 @@
     }).join('');
   }
 
-  // === УВЕДОМЛЕНИЯ ===
   async function setupNotifications() {
     if (!('Notification' in window) || !('serviceWorker' in navigator) || !currentData) return;
     if (Notification.permission !== 'granted') return;
@@ -476,7 +508,6 @@
     }
   }
 
-  // === КОМПАС ===
   const ARROW = document.getElementById('compass-arrow'), RING = document.getElementById('compass-ring'), STATUS = document.getElementById('compass-status'), BTN = document.getElementById('enable-compass-btn'), QIBLA = 214;
   let isCompassActive = false;
   function enableCompass() {
@@ -495,7 +526,6 @@
     else window.addEventListener('deviceorientation', handler, {passive:true});
   }
 
-  // === УТИЛИТЫ ===
   function openInstallModal() { document.getElementById('install-modal').classList.remove('hidden'); }
   function closeInstallModal() { document.getElementById('install-modal').classList.add('hidden'); }
   const banner = document.getElementById('offline-banner');
@@ -509,7 +539,6 @@
   if ('Notification' in window && Notification.permission === 'default') Notification.requestPermission();
   if ('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js').catch(console.error);
 
-  // Запуск
   loadAppData();
 </script>
 </body>
