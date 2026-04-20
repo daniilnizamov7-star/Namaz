@@ -47,7 +47,8 @@
     .fade-in { animation: fadeIn 0.4s ease; }
     @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
     .countdown-digit { font-variant-numeric: tabular-nums; }
-        .compass-wrapper { position: relative; width: 150px; height: 150px; margin: 0 auto 12px; }
+    
+    .compass-wrapper { position: relative; width: 150px; height: 150px; margin: 0 auto 12px; }
     .compass-ring { position: absolute; inset: 0; transition: transform 0.1s linear; }
     .compass-arrow { position: absolute; inset: 0; transition: transform 0.1s linear; }
     .compass-center { position: absolute; top: 50%; left: 50%; width: 10px; height: 10px; background: #374151; border-radius: 50%; transform: translate(-50%, -50%); z-index: 10; }
@@ -63,11 +64,11 @@
   <div class="max-w-md mx-auto flex justify-between items-center">
     <div>
       <h1 class="text-2xl font-bold tracking-tight">Намаз Челябинск</h1>
-      <p class="text-teal-200 text-sm mt-1">Зуль-Кагда 1447</p>
+      <p class="text-teal-200 text-sm mt-1" id="header-hijri">Загрузка...</p>
     </div>
     <div class="flex flex-col items-end gap-2">
       <div class="flex items-center gap-2">
-        <div class="bg-teal-700/80 backdrop-blur px-3 py-1.5 rounded-full text-xs font-semibold" id="hijri-date">Загрузка...</div>
+        <div class="bg-teal-700/80 backdrop-blur px-3 py-1.5 rounded-full text-xs font-semibold" id="hijri-date">...</div>
         <button onclick="openInstallModal()" class="bg-teal-700/80 w-8 h-8 flex items-center justify-center rounded-full text-sm hover:bg-teal-600 transition" aria-label="Как установить">ℹ️</button>
       </div>
       <button onclick="shareApp()" class="flex items-center gap-1 text-xs bg-teal-900/50 hover:bg-teal-900 px-2 py-1 rounded transition active:scale-95">📤 Поделиться</button>
@@ -96,7 +97,8 @@
     <h3 class="font-semibold text-gray-800 mb-1">🕋 Направление Киблы</h3>
     <p class="text-xs text-gray-500 mb-4">Для Челябинска (229°)</p>
     
-    <div class="compass-wrapper">      <div class="compass-ring" id="compass-ring">
+    <div class="compass-wrapper">
+      <div class="compass-ring" id="compass-ring">
         <div class="absolute inset-0 rounded-full border-4 border-gray-200 bg-white shadow-inner">
           <span class="absolute top-1 left-1/2 -translate-x-1/2 text-xs font-bold text-red-500">С</span>
           <span class="absolute bottom-1 left-1/2 -translate-x-1/2 text-xs font-bold text-gray-400">Ю</span>
@@ -116,10 +118,7 @@
       <p class="text-xs text-gray-500 font-medium min-h-[20px]" id="compass-status">Нажмите кнопку ниже</p>
       <button id="enable-compass-btn" onclick="enableCompass()" class="w-full px-4 py-2.5 bg-blue-600 text-white text-sm font-semibold rounded-lg shadow hover:bg-blue-700 active:scale-95 transition">📡 Включить компас</button>
       <p class="text-[10px] text-gray-400">Держите телефон горизонтально. Красная С = Север. Зелёная стрелка = Кааба.</p>
-      </p>
-      <p class="text-[10px] text-amber-600 font-medium mt-2">
-  ⚠️ Компас может иметь погрешность. Для точности сверяйтесь с другими источниками
-      </p>
+      <p class="text-[10px] text-amber-600 font-medium mt-1">⚠️ Компас может иметь погрешность. Для точности сверяйтесь с другими источниками</p>
       <div class="pt-2 border-t border-gray-100">
         <a href="https://qiblafinder.withgoogle.com" target="_blank" rel="noopener noreferrer" class="text-xs text-blue-600 hover:underline font-medium">🌍 Открыть точный Qibla Finder в браузере</a>
       </div>
@@ -149,7 +148,8 @@
         </a>
       </div>
     </div>
-  </div></main>
+  </div>
+</main>
 
 <!-- Модальное окно установки -->
 <div id="install-modal" class="fixed inset-0 z-[100] hidden">
@@ -175,42 +175,6 @@
 </div>
 
 <script>
-  // === ДАННЫЕ ===
-  const PRAYER_DATA = {
-    monthName: "Зуль-Кагда",
-    schedule: [
-      { d:1, date:"18 апр", day:"Сб", suhur:"03:45", fajr:"04:05", sunrise:"05:45", dhuhr:"13:20", asr:"18:24", maghrib:"20:04", isha:"21:44" },
-      { d:2, date:"19 апр", day:"Вс", suhur:"03:43", fajr:"04:03", sunrise:"05:43", dhuhr:"13:20", asr:"18:26", maghrib:"20:06", isha:"21:46" },
-      { d:3, date:"20 апр", day:"Пн", suhur:"03:40", fajr:"04:00", sunrise:"05:40", dhuhr:"13:20", asr:"18:28", maghrib:"20:08", isha:"21:48" },
-      { d:4, date:"21 апр", day:"Вт", suhur:"03:38", fajr:"03:58", sunrise:"05:38", dhuhr:"13:20", asr:"18:29", maghrib:"20:09", isha:"21:49" },
-      { d:5, date:"22 апр", day:"Ср", suhur:"03:36", fajr:"03:56", sunrise:"05:36", dhuhr:"13:20", asr:"18:31", maghrib:"20:11", isha:"21:51" },
-      { d:6, date:"23 апр", day:"Чт", suhur:"03:33", fajr:"03:53", sunrise:"05:33", dhuhr:"13:20", asr:"18:33", maghrib:"20:13", isha:"21:53" },
-      { d:7, date:"24 апр", day:"Пт", suhur:"03:31", fajr:"03:51", sunrise:"05:31", dhuhr:"13:20", asr:"18:35", maghrib:"20:15", isha:"21:55" },
-      { d:8, date:"25 апр", day:"Сб", suhur:"03:29", fajr:"03:49", sunrise:"05:29", dhuhr:"13:20", asr:"18:37", maghrib:"20:17", isha:"21:57" },
-      { d:9, date:"26 апр", day:"Вс", suhur:"03:26", fajr:"03:46", sunrise:"05:26", dhuhr:"13:20", asr:"18:39", maghrib:"20:19", isha:"21:59" },
-      { d:10, date:"27 апр", day:"Пн", suhur:"03:24", fajr:"03:44", sunrise:"05:24", dhuhr:"13:20", asr:"18:41", maghrib:"20:21", isha:"22:01" },
-      { d:11, date:"28 апр", day:"Вт", suhur:"03:22", fajr:"03:42", sunrise:"05:22", dhuhr:"13:20", asr:"18:43", maghrib:"20:23", isha:"22:03" },
-      { d:12, date:"29 апр", day:"Ср", suhur:"03:20", fajr:"03:40", sunrise:"05:20", dhuhr:"13:20", asr:"18:45", maghrib:"20:25", isha:"22:05" },
-      { d:13, date:"30 апр", day:"Чт", suhur:"03:17", fajr:"03:37", sunrise:"05:17", dhuhr:"13:20", asr:"18:47", maghrib:"20:27", isha:"22:07" },
-      { d:14, date:"1 май", day:"Пт", suhur:"03:15", fajr:"03:35", sunrise:"05:15", dhuhr:"13:20", asr:"18:49", maghrib:"20:29", isha:"22:09" },
-      { d:15, date:"2 май", day:"Сб", suhur:"03:13", fajr:"03:33", sunrise:"05:13", dhuhr:"13:20", asr:"18:51", maghrib:"20:31", isha:"22:11" },
-      { d:16, date:"3 май", day:"Вс", suhur:"03:11", fajr:"03:31", sunrise:"05:11", dhuhr:"13:20", asr:"18:53", maghrib:"20:33", isha:"22:13" },
-      { d:17, date:"4 май", day:"Пн", suhur:"03:09", fajr:"03:29", sunrise:"05:09", dhuhr:"13:20", asr:"18:55", maghrib:"20:35", isha:"22:15" },
-      { d:18, date:"5 май", day:"Вт", suhur:"03:07", fajr:"03:27", sunrise:"05:07", dhuhr:"13:20", asr:"18:57", maghrib:"20:37", isha:"22:17" },
-      { d:19, date:"6 май", day:"Ср", suhur:"03:05", fajr:"03:25", sunrise:"05:05", dhuhr:"13:20", asr:"18:59", maghrib:"20:39", isha:"22:19" },
-      { d:20, date:"7 май", day:"Чт", suhur:"03:03", fajr:"03:23", sunrise:"05:03", dhuhr:"13:20", asr:"19:01", maghrib:"20:41", isha:"22:21" },      { d:21, date:"8 май", day:"Пт", suhur:"03:01", fajr:"03:21", sunrise:"05:01", dhuhr:"13:20", asr:"19:03", maghrib:"20:43", isha:"22:23" },
-      { d:22, date:"9 май", day:"Сб", suhur:"02:59", fajr:"03:19", sunrise:"04:59", dhuhr:"13:20", asr:"19:05", maghrib:"20:45", isha:"22:25" },
-      { d:23, date:"10 май", day:"Вс", suhur:"02:57", fajr:"03:17", sunrise:"04:57", dhuhr:"13:20", asr:"19:06", maghrib:"20:46", isha:"22:26" },
-      { d:24, date:"11 май", day:"Пн", suhur:"02:55", fajr:"03:15", sunrise:"04:55", dhuhr:"13:20", asr:"19:08", maghrib:"20:48", isha:"22:28" },
-      { d:25, date:"12 май", day:"Вт", suhur:"02:53", fajr:"03:13", sunrise:"04:53", dhuhr:"13:20", asr:"19:10", maghrib:"20:50", isha:"22:30" },
-      { d:26, date:"13 май", day:"Ср", suhur:"02:51", fajr:"03:11", sunrise:"04:51", dhuhr:"13:20", asr:"19:12", maghrib:"20:52", isha:"22:32" },
-      { d:27, date:"14 май", day:"Чт", suhur:"02:49", fajr:"03:09", sunrise:"04:49", dhuhr:"13:20", asr:"19:14", maghrib:"20:54", isha:"22:34" },
-      { d:28, date:"15 май", day:"Пт", suhur:"02:47", fajr:"03:07", sunrise:"04:47", dhuhr:"13:20", asr:"19:16", maghrib:"20:56", isha:"22:36" },
-      { d:29, date:"16 май", day:"Сб", suhur:"02:46", fajr:"03:06", sunrise:"04:46", dhuhr:"13:20", asr:"19:17", maghrib:"20:57", isha:"22:37" },
-      { d:30, date:"17 май", day:"Вс", suhur:"02:44", fajr:"03:04", sunrise:"04:44", dhuhr:"13:20", asr:"19:19", maghrib:"20:59", isha:"22:39" }
-    ]
-  };
-
   const prayers = [
     { key: 'suhur', name: 'Сухур', icon: '🌙', type: 'prep' },
     { key: 'fajr', name: 'Фаджр', icon: '🌅', type: 'prayer' },
@@ -223,170 +187,200 @@
 
   const monthNames = ["янв", "фев", "мар", "апр", "май", "июн", "июл", "авг", "сен", "окт", "ноя", "дек"];
   let currentData = null;
+  let scheduleData = [];
+  let currentMonthName = "";
 
-  try {
+  // === ЗАГРУЗКА ДАННЫХ ИЗ JSON ===
+  function loadAppData() {
+    fetch('/api/prayer-data.json')
+      .then(response => response.json())
+      .then(data => {
+        scheduleData = data.schedule;
+        currentMonthName = data.monthName;
+        initApp();
+      })
+      .catch(err => {
+        console.error("Ошибка загрузки данных (возможно офлайн):", err);
+        // Если офлайн и кэш пуст, покажем ошибку, но SW должен подхватить
+        document.getElementById('today-full-date').textContent = "Нет данных";
+      });
+  }
+
+  function initApp() {
+    try {
+      const today = new Date();
+      const todayStr = `${today.getDate()} ${monthNames[today.getMonth()]}`;
+      
+      currentData = scheduleData.find(item => item.date === todayStr) || scheduleData[0];
+
+      document.getElementById('today-full-date').textContent = `Сегодня, ${currentData.date}`;
+      document.getElementById('today-hijri').textContent = `${currentData.d} ${currentMonthName} 1447`;
+      document.getElementById('header-hijri').textContent = `${currentMonthName} 1447`;
+      document.getElementById('day-name').textContent = currentData.day;
+      document.getElementById('hijri-date').textContent = `${currentData.d} ${currentMonthName}`;
+      
+      // === ОТСЛЕЖИВАНИЕ УСТАНОВКИ ===
+      function isPWAInstalled() {
+        return window.matchMedia('(display-mode: standalone)').matches || 
+               window.navigator.standalone === true ||
+               document.referrer.includes('android-app://');
+      }
+      if (isPWAInstalled() && window.location.search.indexOf('mode=') === -1) {
+        const sep = window.location.search ? '&' : '?';
+        history.replaceState(null, '', `${window.location.pathname}${sep}mode=installed`);
+      }
+
+      renderPrayers();
+      renderMonthlyList();
+      setupNotifications();
+      setInterval(renderPrayers, 1000);
+
+    } catch (e) { console.error(e); document.getElementById('today-full-date').textContent = 'Ошибка'; }
+  }
+
+  // === ЛОГИКА ОТОБРАЖЕНИЯ ===
+  function renderPrayers() {
+    if(!currentData) return;
+    const container = document.getElementById('today-prayers');
+    const now = new Date();
+    const currentTime = now.getHours() * 60 + now.getMinutes();
+
+    const prayerKeys = prayers.filter(p => p.type === 'prayer').map(p => p.key);
+    let currentKey = null;
+    let nextKey = prayerKeys[0];
+
+    const [sunH, sunM] = currentData.sunrise.split(':').map(Number);
+    const sunriseTime = sunH * 60 + sunM;
+
+    for (const key of prayerKeys) {
+      const [h, m] = currentData[key].split(':').map(Number);
+      if (currentTime < h * 60 + m) { nextKey = key; break; }
+    }
+
+    for (let i = 0; i < prayerKeys.length - 1; i++) {
+      const [h, m] = currentData[prayerKeys[i]].split(':').map(Number);
+      const pTime = h * 60 + m;
+      const [nh, nm] = currentData[prayerKeys[i+1]].split(':').map(Number);
+      const nTime = nh * 60 + nm;
+
+      if (currentTime >= pTime && currentTime < nTime) {
+        if (!(prayerKeys[i] === 'fajr' && currentTime >= sunriseTime)) {
+          currentKey = prayerKeys[i];
+        }
+        break;
+      }
+    }
+
+    container.innerHTML = prayers.map((prayer) => {
+      const [h, m] = currentData[prayer.key].split(':').map(Number);
+      const pMin = h * 60 + m;
+      let statusClass = '', extraHtml = '';
+
+      if (prayer.key === 'sunrise') {
+        if (currentTime >= sunriseTime && currentTime < sunriseTime + 30) {
+          statusClass = 'makruh';
+          extraHtml = '<p class="text-xs text-red-500 font-medium mt-1">⏳ 30 мин после восхода нежелательно</p>';
+        } else if (currentTime > pMin) {
+          statusClass = 'passed';
+        }
+      } else if (prayer.type === 'prayer') {
+        if (prayer.key === currentKey) statusClass = 'next';
+        else if (currentTime > pMin) statusClass = 'passed';
+        if (prayer.key === nextKey && prayer.key !== currentKey) extraHtml = '<p class="text-xs text-emerald-600 font-semibold">Следующий</p>';
+      } else if (prayer.type === 'prep' && currentTime > pMin) {
+        statusClass = 'passed';
+      }
+
+      const nCol = statusClass === 'next' ? 'text-emerald-800' : statusClass === 'makruh' ? 'text-red-700' : 'text-gray-800';
+      const tCol = statusClass === 'next' ? 'text-emerald-700' : statusClass === 'makruh' ? 'text-red-600' : 'text-teal-700';
+
+      return `<div class="prayer-card p-3 rounded-xl flex items-center justify-between ${statusClass}">
+        <div class="flex items-center gap-3">
+          <span class="text-2xl">${prayer.icon}</span>
+          <div>
+            <p class="font-semibold text-sm prayer-name ${nCol}">${prayer.name}</p>
+            ${prayer.type === 'prep' ? '<p class="text-xs opacity-75">До рассвета</p>' : ''}
+            ${prayer.type === 'info' && statusClass !== 'makruh' ? '<p class="text-xs opacity-75">Не намаз</p>' : ''}
+            ${extraHtml}
+          </div>
+        </div>
+        <div class="text-right">
+          <p class="text-xl font-bold prayer-time ${tCol}">${currentData[prayer.key]}</p>
+        </div>
+      </div>`;
+    }).join('');
+
+    updateCountdown({ key: nextKey || 'fajr' });
+  }
+
+  function updateCountdown(prayer) {
+    if(!currentData) return;
+    const now = new Date();
+    const [h, m] = currentData[prayer.key].split(':').map(Number);
+    let target = new Date(); target.setHours(h, m, 0, 0);
+    if (target <= now) target.setDate(target.getDate() + 1);
+    const diff = target - now;
+    document.getElementById('countdown').textContent = 
+      `${String(Math.floor(diff/3600000)).padStart(2,'0')}:${String(Math.floor((diff%3600000)/60000)).padStart(2,'0')}:${String(Math.floor((diff%60000)/1000)).padStart(2,'0')}`;
+  }
+
+  function renderMonthlyList() {
+    if(!currentData || scheduleData.length === 0) return;
+    const listEl = document.getElementById('prayer-list');
     const today = new Date();
     const todayStr = `${today.getDate()} ${monthNames[today.getMonth()]}`;
-    currentData = PRAYER_DATA.schedule.find(item => item.date === todayStr) || PRAYER_DATA.schedule[0];
 
-    document.getElementById('today-full-date').textContent = `Сегодня, ${currentData.date}`;
-    document.getElementById('today-hijri').textContent = `${currentData.d} ${PRAYER_DATA.monthName} 1447`;
-    document.getElementById('day-name').textContent = currentData.day;
-    document.getElementById('hijri-date').textContent = `${currentData.d} ${PRAYER_DATA.monthName}`;
-    
-    // === ОТСЛЕЖИВАНИЕ УСТАНОВКИ (GoatCounter) ===
-    function isPWAInstalled() {
-      return window.matchMedia('(display-mode: standalone)').matches || 
-             window.navigator.standalone === true ||
-             document.referrer.includes('android-app://');
-    }
-    if (isPWAInstalled() && window.location.search.indexOf('mode=') === -1) {
-      const sep = window.location.search ? '&' : '?';
-      history.replaceState(null, '', `${window.location.pathname}${sep}mode=installed`);
-    }
-
-    // === ЛОГИКА ОТОБРАЖЕНИЯ ===
-    function renderPrayers() {
-      const container = document.getElementById('today-prayers');      const now = new Date();
-      const currentTime = now.getHours() * 60 + now.getMinutes();
-
-      const prayerKeys = prayers.filter(p => p.type === 'prayer').map(p => p.key);
-      let currentKey = null;
-      let nextKey = prayerKeys[0];
-
-      const [sunH, sunM] = currentData.sunrise.split(':').map(Number);
-      const sunriseTime = sunH * 60 + sunM;
-
-      // Находим следующий намаз
-      for (const key of prayerKeys) {
-        const [h, m] = currentData[key].split(':').map(Number);
-        if (currentTime < h * 60 + m) { nextKey = key; break; }
-      }
-
-      // Определяем активный (зелёный) намаз
-      for (let i = 0; i < prayerKeys.length - 1; i++) {
-        const [h, m] = currentData[prayerKeys[i]].split(':').map(Number);
-        const pTime = h * 60 + m;
-        const [nh, nm] = currentData[prayerKeys[i+1]].split(':').map(Number);
-        const nTime = nh * 60 + nm;
-
-        if (currentTime >= pTime && currentTime < nTime) {
-          // Между Фаджр и Зухр зелёного выделения НЕТ
-          if (!(prayerKeys[i] === 'fajr' && currentTime >= sunriseTime)) {
-            currentKey = prayerKeys[i];
-          }
-          break;
-        }
-      }
-
-      container.innerHTML = prayers.map((prayer) => {
-        const [h, m] = currentData[prayer.key].split(':').map(Number);
-        const pMin = h * 60 + m;
-        let statusClass = '', extraHtml = '';
-
-        if (prayer.key === 'sunrise') {
-          if (currentTime >= sunriseTime && currentTime < sunriseTime + 30) {
-            statusClass = 'makruh';
-            extraHtml = '<p class="text-xs text-red-500 font-medium mt-1">⏳ 30 мин после восхода нежелательно</p>';
-          } else if (currentTime > pMin) {
-            statusClass = 'passed';
-          }
-        } else if (prayer.type === 'prayer') {
-          if (prayer.key === currentKey) statusClass = 'next';
-          else if (currentTime > pMin) statusClass = 'passed';
-          if (prayer.key === nextKey && prayer.key !== currentKey) extraHtml = '<p class="text-xs text-emerald-600 font-semibold">Следующий</p>';
-        } else if (prayer.type === 'prep' && currentTime > pMin) {
-          statusClass = 'passed';        }
-
-        const nCol = statusClass === 'next' ? 'text-emerald-800' : statusClass === 'makruh' ? 'text-red-700' : 'text-gray-800';
-        const tCol = statusClass === 'next' ? 'text-emerald-700' : statusClass === 'makruh' ? 'text-red-600' : 'text-teal-700';
-
-        return `<div class="prayer-card p-3 rounded-xl flex items-center justify-between ${statusClass}">
-          <div class="flex items-center gap-3">
-            <span class="text-2xl">${prayer.icon}</span>
-            <div>
-              <p class="font-semibold text-sm prayer-name ${nCol}">${prayer.name}</p>
-              ${prayer.type === 'prep' ? '<p class="text-xs opacity-75">До рассвета</p>' : ''}
-              ${prayer.type === 'info' && statusClass !== 'makruh' ? '<p class="text-xs opacity-75">Не намаз</p>' : ''}
-              ${extraHtml}
-            </div>
+    listEl.innerHTML = scheduleData.map(item => {
+      const isToday = item.date === todayStr;
+      const isFri = item.day === 'Пт';
+      const rowC = `flex justify-between items-center p-3 border-b border-gray-100 last:border-0 ${isToday ? 'bg-teal-50 border-l-4 border-l-teal-600' : isFri ? 'bg-amber-50 border-l-4 border-l-amber-500' : 'hover:bg-gray-50'} transition-colors`;
+      const numC = `w-7 h-7 flex items-center justify-center rounded-full text-xs font-bold ${isToday ? 'bg-teal-600 text-white' : isFri ? 'bg-amber-200 text-amber-800' : 'bg-gray-100 text-gray-600'}`;
+      return `<div class="${rowC}">
+        <div class="flex items-center gap-3">
+          <span class="${numC}">${item.d}</span>
+          <div class="flex items-center flex-wrap gap-1">
+            <p class="font-medium text-sm text-gray-800">${item.date}</p>
+            <span class="text-gray-400 font-normal text-sm">(${item.day})</span>
+            ${isFri && !isToday ? '<span class="text-amber-700 text-[10px] font-bold bg-amber-100 px-1.5 py-0.5 rounded-full">🕌 Джума</span>' : ''}
           </div>
-          <div class="text-right">
-            <p class="text-xl font-bold prayer-time ${tCol}">${currentData[prayer.key]}</p>
-          </div>
-        </div>`;
-      }).join('');
+        </div>
+        <div class="flex gap-3 text-xs text-gray-600"><span>🌅 ${item.fajr}</span><span>🕌 ${item.dhuhr}</span><span>🌆 ${item.maghrib}</span></div>
+      </div>`;
+    }).join('');
+  }
 
-      updateCountdown({ key: nextKey || 'fajr' });
+  // === УВЕДОМЛЕНИЯ ===
+  async function setupNotifications() {
+    if (!('Notification' in window) || !('serviceWorker' in navigator) || !currentData) return;
+    if (Notification.permission !== 'granted') return;
+    const reg = await navigator.serviceWorker.ready;
+    const pKeys = prayers.filter(p => p.type === 'prayer').map(p => p.key);
+    let nextK = pKeys[0];
+    const now = new Date(), curT = now.getHours()*60 + now.getMinutes();
+    for (const k of pKeys) {
+      const [h,m] = currentData[k].split(':').map(Number);
+      if (curT < h*60+m) { nextK = k; break; }
     }
-
-    function updateCountdown(prayer) {
-      const now = new Date();
-      const [h, m] = currentData[prayer.key].split(':').map(Number);
-      let target = new Date(); target.setHours(h, m, 0, 0);
-      if (target <= now) target.setDate(target.getDate() + 1);
-      const diff = target - now;
-      document.getElementById('countdown').textContent = 
-        `${String(Math.floor(diff/3600000)).padStart(2,'0')}:${String(Math.floor((diff%3600000)/60000)).padStart(2,'0')}:${String(Math.floor((diff%60000)/1000)).padStart(2,'0')}`;
+    const [h,m] = currentData[nextK].split(':').map(Number);
+    let trig = new Date(); trig.setHours(h, m-5, 0, 0);
+    const delay = trig - Date.now();
+    if (delay > 0 && delay < 86400000) {
+      localStorage.setItem('prayer_notif', JSON.stringify({n: prayers.find(x=>x.key===nextK).name, t: currentData[nextK], a: trig.getTime(), k: nextK}));
+      setTimeout(async () => {
+        await reg.showNotification(`⏰ ${prayers.find(x=>x.key===nextK).name} через 5 мин`, {body: `Челябинск • ${currentData[nextK]}`, icon: '/icon.png', tag: nextK, requireInteraction: false});
+        localStorage.removeItem('prayer_notif');
+      }, delay);
     }
-
-    function renderMonthlyList() {
-      const listEl = document.getElementById('prayer-list');
-      listEl.innerHTML = PRAYER_DATA.schedule.map(item => {
-        const isToday = item.date === todayStr;
-        const isFri = item.day === 'Пт';
-        const rowC = `flex justify-between items-center p-3 border-b border-gray-100 last:border-0 ${isToday ? 'bg-teal-50 border-l-4 border-l-teal-600' : isFri ? 'bg-amber-50 border-l-4 border-l-amber-500' : 'hover:bg-gray-50'} transition-colors`;
-        const numC = `w-7 h-7 flex items-center justify-center rounded-full text-xs font-bold ${isToday ? 'bg-teal-600 text-white' : isFri ? 'bg-amber-200 text-amber-800' : 'bg-gray-100 text-gray-600'}`;
-        return `<div class="${rowC}">
-          <div class="flex items-center gap-3">
-            <span class="${numC}">${item.d}</span>
-            <div class="flex items-center flex-wrap gap-1">
-              <p class="font-medium text-sm text-gray-800">${item.date}</p>
-              <span class="text-gray-400 font-normal text-sm">(${item.day})</span>
-              ${isFri && !isToday ? '<span class="text-amber-700 text-[10px] font-bold bg-amber-100 px-1.5 py-0.5 rounded-full">🕌 Джума</span>' : ''}
-            </div>
-          </div>          <div class="flex gap-3 text-xs text-gray-600"><span>🌅 ${item.fajr}</span><span>🕌 ${item.dhuhr}</span><span>🌆 ${item.maghrib}</span></div>
-        </div>`;
-      }).join('');
+    const saved = localStorage.getItem('prayer_notif');
+    if (saved) {
+      const d = JSON.parse(saved), diff = d.a - Date.now();
+      if (diff > 0) setTimeout(async () => {
+        const r = await navigator.serviceWorker.ready;
+        await r.showNotification(`⏰ ${d.n} через 5 мин`, {body: `Челябинск • ${d.t}`, tag: d.k, requireInteraction: false});
+        localStorage.removeItem('prayer_notif');
+      }, diff); else localStorage.removeItem('prayer_notif');
     }
-
-    // === УВЕДОМЛЕНИЯ ===
-    async function setupNotifications() {
-      if (!('Notification' in window) || !('serviceWorker' in navigator)) return;
-      if (Notification.permission !== 'granted') return;
-      const reg = await navigator.serviceWorker.ready;
-      const pKeys = prayers.filter(p => p.type === 'prayer').map(p => p.key);
-      let nextK = pKeys[0];
-      const now = new Date(), curT = now.getHours()*60 + now.getMinutes();
-      for (const k of pKeys) {
-        const [h,m] = currentData[k].split(':').map(Number);
-        if (curT < h*60+m) { nextK = k; break; }
-      }
-      const [h,m] = currentData[nextK].split(':').map(Number);
-      let trig = new Date(); trig.setHours(h, m-5, 0, 0);
-      const delay = trig - Date.now();
-      if (delay > 0 && delay < 86400000) {
-        localStorage.setItem('prayer_notif', JSON.stringify({n: prayers.find(x=>x.key===nextK).name, t: currentData[nextK], a: trig.getTime(), k: nextK}));
-        setTimeout(async () => {
-          await reg.showNotification(`⏰ ${prayers.find(x=>x.key===nextK).name} через 5 мин`, {body: `Челябинск • ${currentData[nextK]}`, icon: '/icon.png', tag: nextK, requireInteraction: false});
-          localStorage.removeItem('prayer_notif');
-        }, delay);
-      }
-      const saved = localStorage.getItem('prayer_notif');
-      if (saved) {
-        const d = JSON.parse(saved), diff = d.a - Date.now();
-        if (diff > 0) setTimeout(async () => {
-          const r = await navigator.serviceWorker.ready;
-          await r.showNotification(`⏰ ${d.n} через 5 мин`, {body: `Челябинск • ${d.t}`, tag: d.k, requireInteraction: false});
-          localStorage.removeItem('prayer_notif');
-        }, diff); else localStorage.removeItem('prayer_notif');
-      }
-    }
-
-    renderPrayers(); renderMonthlyList(); setupNotifications();
-    setInterval(renderPrayers, 1000);
-
-  } catch (e) { console.error(e); document.getElementById('today-full-date').textContent = 'Ошибка'; }
+  }
 
   // === КОМПАС ===
   const ARROW = document.getElementById('compass-arrow'), RING = document.getElementById('compass-ring'), STATUS = document.getElementById('compass-status'), BTN = document.getElementById('enable-compass-btn'), QIBLA = 214;
@@ -394,7 +388,8 @@
   function enableCompass() {
     if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
       DeviceOrientationEvent.requestPermission().then(res => res === 'granted' ? startCompass() : (STATUS.textContent = '⛔ Доступ запрещён')).catch(console.error);
-    } else startCompass();  }
+    } else startCompass();
+  }
   function startCompass() {
     if (isCompassActive) return; isCompassActive = true; BTN.classList.add('hidden'); STATUS.textContent = '🔄 Калибровка...';
     let hist = []; const smooth = v => { hist.push(v); if(hist.length>3) hist.shift(); return hist.reduce((a,b)=>a+b,0)/hist.length; };
@@ -419,6 +414,9 @@
   }
   if ('Notification' in window && Notification.permission === 'default') Notification.requestPermission();
   if ('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js').catch(console.error);
+
+  // Запуск
+  loadAppData();
 </script>
 </body>
 </html>
