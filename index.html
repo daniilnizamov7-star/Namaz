@@ -15,7 +15,6 @@
   
   <script src="https://cdn.tailwindcss.com"></script>
   
-  <!-- ✅ GoatCounter Analytics -->
   <script data-goatcounter="https://namaz.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
   
   <style>
@@ -25,6 +24,7 @@
     .prayer-card { transition: all 0.3s; }
     .prayer-card.passed { opacity: 0.4; background: #f8fafc; }
     
+    /* Зелёное: текущее время намаза */
     .prayer-card.next { 
       background: #ecfdf5; 
       border: 2px solid #10b981; 
@@ -34,6 +34,7 @@
     .prayer-card.next .prayer-name { color: #047857; font-weight: 800; }
     .prayer-card.next .prayer-time { color: #047857; font-weight: 800; }
     
+    /* 🔴 Красное: время макрух (30 мин после восхода) */
     .prayer-card.makruh { 
       background: #fef2f2; 
       border: 2px solid #fca5a5; 
@@ -42,13 +43,23 @@
     .prayer-card.makruh .prayer-name { color: #b91c1c; font-weight: 700; }
     .prayer-card.makruh .prayer-time { color: #dc2626; font-weight: 700; }
 
-    .prayer-card.night-second-third { 
+    /* 🟠 Иша: вторая 1/3 ночи */
+    .prayer-card.isha-second-third { 
       background: #fff7ed; 
       border: 2px solid #fdba74; 
       box-shadow: 0 2px 10px rgba(249, 115, 22, 0.15);
     }
-    .prayer-card.night-second-third .prayer-name { color: #c2410c; font-weight: 600; }
-    .prayer-card.night-second-third .prayer-time { color: #ea580c; font-weight: 600; }
+    .prayer-card.isha-second-third .prayer-name { color: #c2410c; font-weight: 700; }
+    .prayer-card.isha-second-third .prayer-time { color: #ea580c; font-weight: 700; }
+
+    /* 🔴 Иша: последняя 1/3 ночи (макрух) */
+    .prayer-card.isha-third-third { 
+      background: #fef2f2; 
+      border: 2px solid #fca5a5; 
+      box-shadow: 0 2px 10px rgba(239, 68, 68, 0.15);
+    }
+    .prayer-card.isha-third-third .prayer-name { color: #b91c1c; font-weight: 700; }
+    .prayer-card.isha-third-third .prayer-time { color: #dc2626; font-weight: 700; }
 
     .fade-in { animation: fadeIn 0.4s ease; }
     @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
@@ -167,7 +178,6 @@
   </div>
 </main>
 
-<!-- Модальное окно установки -->
 <div id="install-modal" class="fixed inset-0 z-[100] hidden">
   <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" onclick="closeInstallModal()"></div>
   <div class="absolute bottom-0 left-0 right-0 bg-white rounded-t-3xl p-6 animate-slide-up md:bottom-auto md:top-1/2 md:-translate-y-1/2 md:mx-auto md:max-w-sm md:rounded-2xl">
@@ -206,7 +216,6 @@
   let scheduleData = [];
   let currentMonthName = "";
 
-  // === РЕЗЕРВНЫЕ ДАННЫЕ (если JSON не загрузится) ===
   const FALLBACK_DATA = {
     monthName: "Зуль-Кагда",
     schedule: [
@@ -243,7 +252,6 @@
     ]
   };
 
-  // === ЗАГРУЗКА ДАННЫХ ===
   function loadAppData() {
     fetch('/api/prayer-data.json')
       .then(response => {
@@ -337,6 +345,7 @@
     const [sunH, sunM] = currentData.sunrise.split(':').map(Number);
     const sunriseTime = sunH * 60 + sunM;
 
+    // Получаем трети ночи
     const thirds = getNightThirds();
     let nightPeriod = null;
     
@@ -345,6 +354,7 @@
       const ishaMinutes = ishaH * 60 + ishaM;
       let currentTimeAdjusted = currentTime;
       
+      // Если сейчас ночь (после Иша)
       if (currentTime >= ishaMinutes || currentTime < sunriseTime) {
         if (currentTime < ishaMinutes) currentTimeAdjusted += 24 * 60;
         
@@ -358,11 +368,13 @@
       }
     }
 
+    // Определяем следующий намаз
     for (const key of prayerKeys) {
       const [h, m] = currentData[key].split(':').map(Number);
       if (currentTime < h * 60 + m) { nextKey = key; break; }
     }
 
+    // Определяем текущий намаз
     for (let i = 0; i < prayerKeys.length - 1; i++) {
       const [h, m] = currentData[prayerKeys[i]].split(':').map(Number);
       const pTime = h * 60 + m;
@@ -376,11 +388,19 @@
         break;
       }
     }
+    
+    // Иша остаётся текущим до Фаджра
+    const [ishaH, ishaM] = currentData.isha.split(':').map(Number);
+    const ishaMinutes = ishaH * 60 + ishaM;
+    if (currentTime >= ishaMinutes && currentTime < (sunriseTime + 24*60)) {
+      currentKey = 'isha';
+    }
 
     container.innerHTML = prayers.map((prayer) => {
       const [h, m] = currentData[prayer.key].split(':').map(Number);
       const pMin = h * 60 + m;
-      let statusClass = '', extraHtml = '';
+      let statusClass = '';
+      let extraHtml = '';
 
       if (prayer.key === 'sunrise') {
         if (currentTime >= sunriseTime && currentTime < sunriseTime + 30) {
@@ -390,36 +410,59 @@
           statusClass = 'passed';
         }
       } else if (prayer.type === 'prayer') {
-        if (prayer.key === currentKey) statusClass = 'next';
-        else if (currentTime > pMin) statusClass = 'passed';
-        if (prayer.key === nextKey && prayer.key !== currentKey) extraHtml = '<p class="text-xs text-emerald-600 font-semibold">Следующий</p>';
+        const isCurrent = prayer.key === currentKey;
+        const isNext = prayer.key === nextKey;
+        const isPassed = currentTime > pMin;
+
+        // Специальная логика для Иша
+        if (prayer.key === 'isha') {
+          if (currentTime >= ishaMinutes) {
+            // Иша всегда выделен после своего времени
+            if (nightPeriod === 'first') {
+              statusClass = 'next'; // Зелёный
+              extraHtml = '<p class="text-xs text-emerald-600 font-medium mt-1">🟢 Лучшее время (1/3 ночи)</p>';
+            } else if (nightPeriod === 'second') {
+              statusClass = 'isha-second-third'; // Оранжевый
+              extraHtml = '<p class="text-xs text-orange-600 font-medium mt-1">🟠 Можно, но не желательно (2/3)</p>';
+              
+              // Предупреждение за 30 мин до последней трети
+              const timeToThird = thirds.thirdThirdStart - currentTime;
+              if (timeToThird > 0 && timeToThird <= 30) {
+                const minsLeft = Math.floor(timeToThird);
+                extraHtml = `<p class="text-xs text-red-600 font-bold mt-1">⏰ Осталось ${minsLeft} мин до макрух!</p>`;
+              }
+            } else if (nightPeriod === 'third') {
+              statusClass = 'isha-third-third'; // Красный
+              extraHtml = '<p class="text-xs text-red-600 font-medium mt-1">🔴 Макрух (последняя 1/3)</p>';
+            }
+          } else if (isPassed) {
+            statusClass = 'passed';
+          }
+        } else {
+          // Обычная логика для других намазов
+          if (isCurrent) {
+            statusClass = 'next';
+          } else if (isPassed) {
+            statusClass = 'passed';
+          }
+          if (isNext && !isCurrent) {
+            extraHtml = '<p class="text-xs text-emerald-600 font-semibold">Следующий</p>';
+          }
+        }
       } else if (prayer.type === 'prep' && currentTime > pMin) {
         statusClass = 'passed';
       }
 
-      if (prayer.key === 'isha' && thirds) {
-        const [ishaH, ishaM] = currentData.isha.split(':').map(Number);
-        const ishaMinutes = ishaH * 60 + ishaM;
-        
-        if (currentTime >= ishaMinutes) {
-          if (nightPeriod === 'first') {
-            extraHtml = '<p class="text-xs text-emerald-600 font-medium mt-1">🟢 Лучшее время (1/3 ночи)</p>';
-          } else if (nightPeriod === 'second') {
-            extraHtml = '<p class="text-xs text-orange-600 font-medium mt-1">🟠 Можно, но не желательно (2/3)</p>';
-          } else if (nightPeriod === 'third') {
-            extraHtml = '<p class="text-xs text-red-600 font-medium mt-1">🔴 Макрух (последняя 1/3)</p>';
-          }
-          
-          const timeToThird = thirds.thirdThirdStart - currentTime;
-          if (timeToThird > 0 && timeToThird <= 30 && nightPeriod === 'second') {
-            const minsLeft = Math.floor(timeToThird);
-            extraHtml = `<p class="text-xs text-red-600 font-bold mt-1">⏰ Осталось ${minsLeft} мин до макрух!</p>`;
-          }
-        }
-      }
-
-      const nCol = statusClass === 'next' ? 'text-emerald-800' : statusClass === 'makruh' ? 'text-red-700' : 'text-gray-800';
-      const tCol = statusClass === 'next' ? 'text-emerald-700' : statusClass === 'makruh' ? 'text-red-600' : 'text-teal-700';
+      const nCol = statusClass === 'next' ? 'text-emerald-800' : 
+                   statusClass === 'makruh' ? 'text-red-700' : 
+                   statusClass === 'isha-second-third' ? 'text-orange-800' :
+                   statusClass === 'isha-third-third' ? 'text-red-700' :
+                   'text-gray-800';
+      const tCol = statusClass === 'next' ? 'text-emerald-700' : 
+                   statusClass === 'makruh' ? 'text-red-600' :
+                   statusClass === 'isha-second-third' ? 'text-orange-600' :
+                   statusClass === 'isha-third-third' ? 'text-red-600' :
+                   'text-teal-700';
 
       return `<div class="prayer-card p-3 rounded-xl flex items-center justify-between ${statusClass}">
         <div class="flex items-center gap-3">
