@@ -1,5 +1,5 @@
-const CACHE_NAME = 'namaz-chelyabinsk-v6';
-const ASSETS = ['/', '/index.html', '/manifest.json', '/icon.png'];
+const CACHE_NAME = 'namaz-chelyabinsk-v7';
+const ASSETS = ['/', '/index.html', '/manifest.json', '/icon.png', '/api/prayer-data.json'];
 
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(ASSETS)));
