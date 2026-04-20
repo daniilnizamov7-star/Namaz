@@ -15,7 +15,7 @@
   
   <script src="https://cdn.tailwindcss.com"></script>
   
-  <!-- ✅ СЧЁТЧИК GOATCOUNTER (ДОБАВЛЕНО) -->
+  <!-- ✅ GoatCounter Statistics -->
   <script data-goatcounter="https://namaz.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
   
   <style>
@@ -313,15 +313,25 @@
       document.getElementById('countdown').textContent = `${String(hrs).padStart(2,'0')}:${String(mins).padStart(2,'0')}:${String(secs).padStart(2,'0')}`;
     }
 
+    // ✅ ВЫДЕЛЕНИЕ ПЯТНИЦЫ (ДЖУМА)
     function renderMonthlyList() {
       const listEl = document.getElementById('prayer-list');
       listEl.innerHTML = PRAYER_DATA.schedule.map((item) => {
         const isToday = item.date === todayStr;
+        const isFriday = item.day === 'Пт';
+        
+        const rowClass = `flex justify-between items-center p-3 border-b border-gray-100 last:border-0 ${isToday ? 'bg-teal-50 border-l-4 border-l-teal-600' : isFriday ? 'bg-amber-50 border-l-4 border-l-amber-500' : 'hover:bg-gray-50'} transition-colors`;
+        const numClass = `w-7 h-7 flex items-center justify-center rounded-full text-xs font-bold ${isToday ? 'bg-teal-600 text-white' : isFriday ? 'bg-amber-200 text-amber-800' : 'bg-gray-100 text-gray-600'}`;
+        
         return `
-          <div class="flex justify-between items-center p-3 border-b border-gray-50 last:border-0 ${isToday ? 'bg-teal-50' : 'hover:bg-gray-50'} transition-colors">
+          <div class="${rowClass}">
             <div class="flex items-center gap-3">
-              <span class="w-7 h-7 flex items-center justify-center rounded-full text-xs font-bold ${isToday ? 'bg-teal-600 text-white' : 'bg-gray-100 text-gray-600'}">${item.d}</span>
-              <div><p class="font-medium text-sm text-gray-800">${item.date} <span class="text-gray-400 font-normal">(${item.day})</span></p></div>
+              <span class="${numClass}">${item.d}</span>
+              <div class="flex items-center flex-wrap gap-1">
+                <p class="font-medium text-sm text-gray-800">${item.date}</p>
+                <span class="text-gray-400 font-normal text-sm">(${item.day})</span>
+                ${isFriday && !isToday ? '<span class="text-amber-700 text-[10px] font-bold bg-amber-100 px-1.5 py-0.5 rounded-full">🕌 Джума</span>' : ''}
+              </div>
             </div>
             <div class="flex gap-3 text-xs text-gray-600">
               <span>🌅 ${item.fajr}</span><span>🕌 ${item.dhuhr}</span><span>🌆 ${item.maghrib}</span>
@@ -331,8 +341,7 @@
     }
 
     async function setupNotifications() {
-      if (!('Notification' in window) || !('serviceWorker' in navigator)) return;
-      if (Notification.permission !== 'granted') return;
+      if (!('Notification' in window) || !('serviceWorker' in navigator)) return;      if (Notification.permission !== 'granted') return;
       const reg = await navigator.serviceWorker.ready;
       
       const prayerKeys = prayers.filter(p => p.type === 'prayer').map(p => p.key);
@@ -341,7 +350,8 @@
       const currentTime = now.getHours() * 60 + now.getMinutes();
       for (const key of prayerKeys) {
         const [h, m] = currentData[key].split(':').map(Number);
-        if (currentTime < h * 60 + m) { nextKey = key; break; }      }
+        if (currentTime < h * 60 + m) { nextKey = key; break; }
+      }
 
       const [h, m] = currentData[nextKey].split(':').map(Number);
       let triggerTime = new Date();
@@ -380,8 +390,7 @@
   }
 
   const ARROW = document.getElementById('compass-arrow');
-  const RING = document.getElementById('compass-ring');
-  const STATUS = document.getElementById('compass-status');
+  const RING = document.getElementById('compass-ring');  const STATUS = document.getElementById('compass-status');
   const BTN = document.getElementById('enable-compass-btn');
   const QIBLA = 214;
   let isCompassActive = false;
@@ -390,7 +399,8 @@
   function enableCompass() {
     if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
       DeviceOrientationEvent.requestPermission()
-        .then(res => res === 'granted' ? startCompass() : (STATUS.textContent = '⛔ Доступ запрещён'))        .catch(console.error);
+        .then(res => res === 'granted' ? startCompass() : (STATUS.textContent = '⛔ Доступ запрещён'))
+        .catch(console.error);
     } else { startCompass(); }
   }
 
@@ -429,6 +439,5 @@
 
   if ('Notification' in window && Notification.permission === 'default') Notification.requestPermission();
   if ('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js').catch(console.error);
-</script>
-</body>
+</script></body>
 </html>
