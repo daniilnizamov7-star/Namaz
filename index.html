@@ -19,12 +19,25 @@
   
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
-    body { font-family: 'Inter', sans-serif; background: #f8fafc; overscroll-behavior: none; }
+    body { 
+      font-family: 'Inter', sans-serif; 
+      background: #f8fafc; 
+      overscroll-behavior: none;
+      transition: background 2s ease;
+    }
+    
+    /* Градиенты времени */
+    body.time-fajr { background: linear-gradient(135deg, #e0f2fe 0%, #f0f9ff 100%); }
+    body.time-dhuhr { background: linear-gradient(135deg, #fef3c7 0%, #fffbeb 100%); }
+    body.time-asr { background: linear-gradient(135deg, #fed7aa 0%, #fff7ed 100%); }
+    body.time-maghrib { background: linear-gradient(135deg, #fdba74 0%, #ffedd5 100%); }
+    body.time-isha { background: linear-gradient(135deg, #134e4a 0%, #0f766e 100%); }
+    body.time-night { background: linear-gradient(135deg, #0c4a6e 0%, #075985 100%); }
+    
     .card { background: white; border-radius: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.06); }
     .prayer-card { transition: all 0.3s; }
     .prayer-card.passed { opacity: 0.4; background: #f8fafc; }
     
-    /* Зелёное: текущее время намаза */
     .prayer-card.next { 
       background: #ecfdf5; 
       border: 2px solid #10b981; 
@@ -34,7 +47,17 @@
     .prayer-card.next .prayer-name { color: #047857; font-weight: 800; }
     .prayer-card.next .prayer-time { color: #047857; font-weight: 800; }
     
-    /* 🔴 Красное: время макрух (30 мин после восхода) */
+    /* 🔔 Мягкое напоминание за 10 минут */
+    .prayer-card.soon {
+      animation: gentlePulse 3s ease-in-out infinite;
+      border: 2px solid #fbbf24;
+      background: #fffbeb;
+    }
+    @keyframes gentlePulse {
+      0%, 100% { box-shadow: 0 2px 8px rgba(251, 191, 36, 0.2); }
+      50% { box-shadow: 0 4px 16px rgba(251, 191, 36, 0.4); }
+    }
+    
     .prayer-card.makruh { 
       background: #fef2f2; 
       border: 2px solid #fca5a5; 
@@ -43,7 +66,6 @@
     .prayer-card.makruh .prayer-name { color: #b91c1c; font-weight: 700; }
     .prayer-card.makruh .prayer-time { color: #dc2626; font-weight: 700; }
 
-    /* 🟠 Иша: вторая 1/3 ночи */
     .prayer-card.isha-second-third { 
       background: #fff7ed; 
       border: 2px solid #fdba74; 
@@ -52,7 +74,6 @@
     .prayer-card.isha-second-third .prayer-name { color: #c2410c; font-weight: 700; }
     .prayer-card.isha-second-third .prayer-time { color: #ea580c; font-weight: 700; }
 
-    /* 🔴 Иша: последняя 1/3 ночи (макрух) */
     .prayer-card.isha-third-third { 
       background: #fef2f2; 
       border: 2px solid #fca5a5; 
@@ -85,7 +106,10 @@
     </div>
     <div class="flex flex-col items-end gap-2">
       <div class="flex items-center gap-2">
-        <div class="bg-teal-700/80 backdrop-blur px-3 py-1.5 rounded-full text-xs font-semibold" id="hijri-date">...</div>
+        <div class="bg-teal-700/80 backdrop-blur px-3 py-1.5 rounded-full text-xs font-semibold flex items-center gap-1.5" id="hijri-date">
+          <span>...</span>
+          <span id="moon-phase" class="text-sm">🌑</span>
+        </div>
         <button onclick="openInstallModal()" class="bg-teal-700/80 w-8 h-8 flex items-center justify-center rounded-full text-sm hover:bg-teal-600 transition" aria-label="Как установить">ℹ️</button>
       </div>
       <button onclick="shareApp()" class="flex items-center gap-1 text-xs bg-teal-900/50 hover:bg-teal-900 px-2 py-1 rounded transition active:scale-95">📤 Поделиться</button>
@@ -252,6 +276,32 @@
     ]
   };
 
+  // === ФАЗА ЛУНЫ ===
+  function getMoonPhase(date) {
+    const year = date.getFullYear();
+    const month = date.getMonth() + 1;
+    const day = date.getDate();
+    
+    let c = e = jd = b = 0;
+    
+    if (month < 3) {
+      year--;
+      month += 12;
+    }
+    
+    ++month;
+    c = 365.25 * year;
+    e = 30.6 * month;
+    jd = c + e + day - 694039.09;
+    jd /= 29.5305882;
+    b = parseInt(jd);
+    jd -= b;
+    b = Math.round(jd * 8);
+    
+    const phases = ['🌑', '🌒', '🌓', '🌔', '', '🌖', '🌗', '🌘'];
+    return phases[b >= 8 ? 0 : b];
+  }
+
   function loadAppData() {
     fetch('/api/prayer-data.json')
       .then(response => {
@@ -285,6 +335,10 @@
       document.getElementById('day-name').textContent = currentData.day;
       document.getElementById('hijri-date').textContent = `${currentData.d} ${currentMonthName}`;
       
+      // 🌙 Фаза луны
+      const moonPhase = getMoonPhase(today);
+      document.getElementById('moon-phase').textContent = moonPhase;
+      
       function isPWAInstalled() {
         return window.matchMedia('(display-mode: standalone)').matches || 
                window.navigator.standalone === true ||
@@ -303,6 +357,45 @@
     } catch (e) { 
       console.error('❌ Ошибка инициализации:', e); 
       document.getElementById('today-full-date').textContent = 'Ошибка'; 
+    }
+  }
+
+  // === ГРАДИЕНТ ФОНА ПО ВРЕМЕНИ ===
+  function updateBackgroundGradient() {
+    if(!currentData) return;
+    const now = new Date();
+    const currentTime = now.getHours() * 60 + now.getMinutes();
+    
+    const [fajrH, fajrM] = currentData.fajr.split(':').map(Number);
+    const [sunriseH, sunriseM] = currentData.sunrise.split(':').map(Number);
+    const [dhuhrH, dhuhrM] = currentData.dhuhr.split(':').map(Number);
+    const [asrH, asrM] = currentData.asr.split(':').map(Number);
+    const [maghribH, maghribM] = currentData.maghrib.split(':').map(Number);
+    const [ishaH, ishaM] = currentData.isha.split(':').map(Number);
+    
+    const fajrTime = fajrH * 60 + fajrM;
+    const sunriseTime = sunriseH * 60 + sunriseM;
+    const dhuhrTime = dhuhrH * 60 + dhuhrM;
+    const asrTime = asrH * 60 + asrM;
+    const maghribTime = maghribH * 60 + maghribM;
+    const ishaTime = ishaH * 60 + ishaM;
+    
+    document.body.classList.remove('time-fajr', 'time-dhuhr', 'time-asr', 'time-maghrib', 'time-isha', 'time-night');
+    
+    if (currentTime >= fajrTime && currentTime < sunriseTime) {
+      document.body.classList.add('time-fajr');
+    } else if (currentTime >= sunriseTime && currentTime < dhuhrTime) {
+      document.body.classList.add('time-dhuhr');
+    } else if (currentTime >= dhuhrTime && currentTime < asrTime) {
+      document.body.classList.add('time-dhuhr');
+    } else if (currentTime >= asrTime && currentTime < maghribTime) {
+      document.body.classList.add('time-asr');
+    } else if (currentTime >= maghribTime && currentTime < ishaTime) {
+      document.body.classList.add('time-maghrib');
+    } else if (currentTime >= ishaTime) {
+      document.body.classList.add('time-isha');
+    } else {
+      document.body.classList.add('time-night');
     }
   }
 
@@ -345,7 +438,6 @@
     const [sunH, sunM] = currentData.sunrise.split(':').map(Number);
     const sunriseTime = sunH * 60 + sunM;
 
-    // Получаем трети ночи
     const thirds = getNightThirds();
     let nightPeriod = null;
     
@@ -354,7 +446,6 @@
       const ishaMinutes = ishaH * 60 + ishaM;
       let currentTimeAdjusted = currentTime;
       
-      // Если сейчас ночь (после Иша)
       if (currentTime >= ishaMinutes || currentTime < sunriseTime) {
         if (currentTime < ishaMinutes) currentTimeAdjusted += 24 * 60;
         
@@ -368,13 +459,11 @@
       }
     }
 
-    // Определяем следующий намаз
     for (const key of prayerKeys) {
       const [h, m] = currentData[key].split(':').map(Number);
       if (currentTime < h * 60 + m) { nextKey = key; break; }
     }
 
-    // Определяем текущий намаз
     for (let i = 0; i < prayerKeys.length - 1; i++) {
       const [h, m] = currentData[prayerKeys[i]].split(':').map(Number);
       const pTime = h * 60 + m;
@@ -389,7 +478,6 @@
       }
     }
     
-    // Иша остаётся текущим до Фаджра
     const [ishaH, ishaM] = currentData.isha.split(':').map(Number);
     const ishaMinutes = ishaH * 60 + ishaM;
     if (currentTime >= ishaMinutes && currentTime < (sunriseTime + 24*60)) {
@@ -414,39 +502,47 @@
         const isNext = prayer.key === nextKey;
         const isPassed = currentTime > pMin;
 
-        // Специальная логика для Иша
+        // 🔔 Проверка: за 10 минут до намаза
+        const minutesToPrayer = pMin - currentTime;
+        const isSoon = minutesToPrayer > 0 && minutesToPrayer <= 10 && !isCurrent;
+
         if (prayer.key === 'isha') {
           if (currentTime >= ishaMinutes) {
-            // Иша всегда выделен после своего времени
             if (nightPeriod === 'first') {
-              statusClass = 'next'; // Зелёный
+              statusClass = 'next';
               extraHtml = '<p class="text-xs text-emerald-600 font-medium mt-1">🟢 Лучшее время (1/3 ночи)</p>';
             } else if (nightPeriod === 'second') {
-              statusClass = 'isha-second-third'; // Оранжевый
+              statusClass = 'isha-second-third';
               extraHtml = '<p class="text-xs text-orange-600 font-medium mt-1">🟠 Можно, но не желательно (2/3)</p>';
               
-              // Предупреждение за 30 мин до последней трети
               const timeToThird = thirds.thirdThirdStart - currentTime;
               if (timeToThird > 0 && timeToThird <= 30) {
                 const minsLeft = Math.floor(timeToThird);
                 extraHtml = `<p class="text-xs text-red-600 font-bold mt-1">⏰ Осталось ${minsLeft} мин до макрух!</p>`;
               }
             } else if (nightPeriod === 'third') {
-              statusClass = 'isha-third-third'; // Красный
+              statusClass = 'isha-third-third';
               extraHtml = '<p class="text-xs text-red-600 font-medium mt-1">🔴 Макрух (последняя 1/3)</p>';
             }
           } else if (isPassed) {
             statusClass = 'passed';
           }
+          if (isSoon && statusClass !== 'next') {
+            statusClass = 'soon';
+          }
         } else {
-          // Обычная логика для других намазов
           if (isCurrent) {
             statusClass = 'next';
           } else if (isPassed) {
             statusClass = 'passed';
           }
-          if (isNext && !isCurrent) {
+          if (isSoon && !isCurrent) {
+            statusClass = 'soon';
+          }
+          if (isNext && !isCurrent && !isSoon) {
             extraHtml = '<p class="text-xs text-emerald-600 font-semibold">Следующий</p>';
+          } else if (isSoon) {
+            extraHtml = '<p class="text-xs text-amber-600 font-semibold">⏰ Скоро (10 мин)</p>';
           }
         }
       } else if (prayer.type === 'prep' && currentTime > pMin) {
@@ -457,11 +553,13 @@
                    statusClass === 'makruh' ? 'text-red-700' : 
                    statusClass === 'isha-second-third' ? 'text-orange-800' :
                    statusClass === 'isha-third-third' ? 'text-red-700' :
+                   statusClass === 'soon' ? 'text-amber-700' :
                    'text-gray-800';
       const tCol = statusClass === 'next' ? 'text-emerald-700' : 
                    statusClass === 'makruh' ? 'text-red-600' :
                    statusClass === 'isha-second-third' ? 'text-orange-600' :
                    statusClass === 'isha-third-third' ? 'text-red-600' :
+                   statusClass === 'soon' ? 'text-amber-600' :
                    'text-teal-700';
 
       return `<div class="prayer-card p-3 rounded-xl flex items-center justify-between ${statusClass}">
@@ -481,6 +579,7 @@
     }).join('');
 
     updateCountdown({ key: nextKey || 'fajr' });
+    updateBackgroundGradient();
   }
 
   function updateCountdown(prayer) {
