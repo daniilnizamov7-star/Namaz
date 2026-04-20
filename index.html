@@ -15,7 +15,7 @@
   
   <script src="https://cdn.tailwindcss.com"></script>
   
-  <!-- ✅ GoatCounter Statistics -->
+  <!-- ✅ GoatCounter Analytics -->
   <script data-goatcounter="https://namaz.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
   
   <style>
@@ -25,7 +25,7 @@
     .prayer-card { transition: all 0.3s; }
     .prayer-card.passed { opacity: 0.4; background: #f8fafc; }
     
-    /* Зелёное выделение (Текущий намаз) */
+    /* Зелёное: текущее время намаза */
     .prayer-card.next { 
       background: #ecfdf5; 
       border: 2px solid #10b981; 
@@ -35,7 +35,7 @@
     .prayer-card.next .prayer-name { color: #047857; font-weight: 800; }
     .prayer-card.next .prayer-time { color: #047857; font-weight: 800; }
     
-    /* 🔴 Красное выделение (Нежелательное время - Макрух) */
+    /* 🔴 Красное: время макрух (30 мин после восхода) */
     .prayer-card.makruh { 
       background: #fef2f2; 
       border: 2px solid #fca5a5; 
@@ -68,7 +68,7 @@
     <div class="flex flex-col items-end gap-2">
       <div class="flex items-center gap-2">
         <div class="bg-teal-700/80 backdrop-blur px-3 py-1.5 rounded-full text-xs font-semibold" id="hijri-date">Загрузка...</div>
-        <button onclick="openInstallModal()" class="bg-teal-700/80 w-8 h-8 flex items-center justify-center rounded-full text-sm hover:bg-teal-600 transition">ℹ️</button>
+        <button onclick="openInstallModal()" class="bg-teal-700/80 w-8 h-8 flex items-center justify-center rounded-full text-sm hover:bg-teal-600 transition" aria-label="Как установить">ℹ️</button>
       </div>
       <button onclick="shareApp()" class="flex items-center gap-1 text-xs bg-teal-900/50 hover:bg-teal-900 px-2 py-1 rounded transition active:scale-95">📤 Поделиться</button>
     </div>
@@ -114,19 +114,10 @@
     </div>
     <div class="space-y-3">
       <p class="text-xs text-gray-500 font-medium min-h-[20px]" id="compass-status">Нажмите кнопку ниже</p>
-      
-      <button id="enable-compass-btn" onclick="enableCompass()" class="w-full px-4 py-2.5 bg-blue-600 text-white text-sm font-semibold rounded-lg shadow hover:bg-blue-700 active:scale-95 transition">
-        📡 Включить компас
-      </button>
-      
-      <p class="text-[10px] text-gray-400">
-        Держите телефон горизонтально. Красная С = Север. Зелёная стрелка = Кааба.
-      </p>
-      
+      <button id="enable-compass-btn" onclick="enableCompass()" class="w-full px-4 py-2.5 bg-blue-600 text-white text-sm font-semibold rounded-lg shadow hover:bg-blue-700 active:scale-95 transition">📡 Включить компас</button>
+      <p class="text-[10px] text-gray-400">Держите телефон горизонтально. Красная С = Север. Зелёная стрелка = Кааба.</p>
       <div class="pt-2 border-t border-gray-100">
-        <a href="https://qiblafinder.withgoogle.com" target="_blank" rel="noopener noreferrer" class="text-xs text-blue-600 hover:underline font-medium">
-          🌍 Открыть точный Qibla Finder в браузере
-        </a>
+        <a href="https://qiblafinder.withgoogle.com" target="_blank" rel="noopener noreferrer" class="text-xs text-blue-600 hover:underline font-medium">🌍 Открыть точный Qibla Finder в браузере</a>
       </div>
     </div>
   </div>
@@ -140,61 +131,43 @@
 
   <div class="text-center text-xs text-gray-400 px-4 pb-6 pt-4">
     <p>Данные: ЦДУМ России / РДУМ Челябинской обл.</p>
-    <p class="mt-2 text-gray-300 leading-tight">
-      ⚠️ Время намазов указано справочно. Для обязательств сверяйтесь с расписанием местной мечети.
-    </p>
-    
+    <p class="mt-2 text-gray-300 leading-tight">⚠️ Время намазов указано справочно. Для обязательств сверяйтесь с расписанием местной мечети.</p>
     <div class="mt-6 pt-4 border-t border-gray-200">
-      <p class="text-gray-500 mb-3 font-medium text-sm">Связь, отзывы и предложения</p>      <div class="flex justify-center gap-8">
+      <p class="text-gray-500 mb-3 font-medium text-sm">Связь, отзывы и предложения</p>
+      <div class="flex justify-center gap-8">
         <a href="https://t.me/Aslyamov74" target="_blank" class="flex flex-col items-center group">
-          <div class="w-12 h-12 bg-blue-50 rounded-full flex items-center justify-center group-hover:bg-blue-100 transition mb-2">
-            <span class="text-2xl">💬</span>
-          </div>
+          <div class="w-12 h-12 bg-blue-50 rounded-full flex items-center justify-center group-hover:bg-blue-100 transition mb-2"><span class="text-2xl">💬</span></div>
           <span class="text-blue-600 font-semibold">@Aslyamov74</span>
         </a>
         <a href="tel:+79911745113" class="flex flex-col items-center group">
-          <div class="w-12 h-12 bg-green-50 rounded-full flex items-center justify-center group-hover:bg-green-100 transition mb-2">
-            <span class="text-2xl">📞</span>
-          </div>
+          <div class="w-12 h-12 bg-green-50 rounded-full flex items-center justify-center group-hover:bg-green-100 transition mb-2"><span class="text-2xl">📞</span></div>
           <span class="text-green-600 font-semibold">8 (991) 174-51-13</span>
         </a>
       </div>
     </div>
-  </div>
-</main>
+  </div></main>
 
-<!-- Модальное окно инструкции -->
+<!-- Модальное окно установки -->
 <div id="install-modal" class="fixed inset-0 z-[100] hidden">
   <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" onclick="closeInstallModal()"></div>
   <div class="absolute bottom-0 left-0 right-0 bg-white rounded-t-3xl p-6 animate-slide-up md:bottom-auto md:top-1/2 md:-translate-y-1/2 md:mx-auto md:max-w-sm md:rounded-2xl">
     <div class="w-12 h-1.5 bg-gray-200 rounded-full mx-auto mb-6 md:hidden"></div>
-    
     <div class="flex justify-between items-center mb-4">
       <h3 class="text-lg font-bold text-gray-900">📲 Как установить приложение?</h3>
       <button onclick="closeInstallModal()" class="text-gray-400 hover:text-gray-600 text-2xl leading-none">&times;</button>
     </div>
-    
     <div class="space-y-4 text-sm text-gray-700">
       <div class="bg-blue-50 p-4 rounded-xl border border-blue-100">
         <p class="font-semibold text-blue-800 mb-1">🤖 Android (Chrome)</p>
-        <ol class="list-decimal pl-4 space-y-1">
-          <li>Нажмите меню (⋮ справа сверху)</li>
-          <li>Выберите <span class="font-bold text-blue-600">"Добавить на главный экран"</span></li>
-        </ol>
+        <ol class="list-decimal pl-4 space-y-1"><li>Нажмите меню (⋮ справа сверху)</li><li>Выберите <span class="font-bold text-blue-600">"Добавить на главный экран"</span></li></ol>
       </div>
-      
       <div class="bg-gray-50 p-4 rounded-xl border border-gray-100">
         <p class="font-semibold text-gray-800 mb-1">🍎 iPhone (Safari)</p>
-        <ol class="list-decimal pl-4 space-y-1">
-          <li>Нажмите <span class="font-bold">"Поделиться"</span> (⬆️)</li>
-          <li>Найдите <span class="font-bold text-gray-600">"На экран «Домой»"</span></li>
-        </ol>
+        <ol class="list-decimal pl-4 space-y-1"><li>Нажмите <span class="font-bold">"Поделиться"</span> (⬆️)</li><li>Найдите <span class="font-bold text-gray-600">"На экран «Домой»"</span></li></ol>
       </div>
     </div>
-    
-    <button onclick="closeInstallModal()" class="w-full mt-6 bg-teal-600 text-white font-semibold py-3 rounded-xl hover:bg-teal-700 transition active:scale-95">
-      Понятно, спасибо!
-    </button>  </div>
+    <button onclick="closeInstallModal()" class="w-full mt-6 bg-teal-600 text-white font-semibold py-3 rounded-xl hover:bg-teal-700 transition active:scale-95">Понятно, спасибо!</button>
+  </div>
 </div>
 
 <script>
@@ -221,8 +194,7 @@
       { d:17, date:"4 май", day:"Пн", suhur:"03:09", fajr:"03:29", sunrise:"05:09", dhuhr:"13:20", asr:"18:55", maghrib:"20:35", isha:"22:15" },
       { d:18, date:"5 май", day:"Вт", suhur:"03:07", fajr:"03:27", sunrise:"05:07", dhuhr:"13:20", asr:"18:57", maghrib:"20:37", isha:"22:17" },
       { d:19, date:"6 май", day:"Ср", suhur:"03:05", fajr:"03:25", sunrise:"05:05", dhuhr:"13:20", asr:"18:59", maghrib:"20:39", isha:"22:19" },
-      { d:20, date:"7 май", day:"Чт", suhur:"03:03", fajr:"03:23", sunrise:"05:03", dhuhr:"13:20", asr:"19:01", maghrib:"20:41", isha:"22:21" },
-      { d:21, date:"8 май", day:"Пт", suhur:"03:01", fajr:"03:21", sunrise:"05:01", dhuhr:"13:20", asr:"19:03", maghrib:"20:43", isha:"22:23" },
+      { d:20, date:"7 май", day:"Чт", suhur:"03:03", fajr:"03:23", sunrise:"05:03", dhuhr:"13:20", asr:"19:01", maghrib:"20:41", isha:"22:21" },      { d:21, date:"8 май", day:"Пт", suhur:"03:01", fajr:"03:21", sunrise:"05:01", dhuhr:"13:20", asr:"19:03", maghrib:"20:43", isha:"22:23" },
       { d:22, date:"9 май", day:"Сб", suhur:"02:59", fajr:"03:19", sunrise:"04:59", dhuhr:"13:20", asr:"19:05", maghrib:"20:45", isha:"22:25" },
       { d:23, date:"10 май", day:"Вс", suhur:"02:57", fajr:"03:17", sunrise:"04:57", dhuhr:"13:20", asr:"19:06", maghrib:"20:46", isha:"22:26" },
       { d:24, date:"11 май", day:"Пн", suhur:"02:55", fajr:"03:15", sunrise:"04:55", dhuhr:"13:20", asr:"19:08", maghrib:"20:48", isha:"22:28" },
@@ -244,6 +216,7 @@
     { key: 'maghrib', name: 'Магриб', icon: '🌆', type: 'prayer' },
     { key: 'isha', name: 'Иша', icon: '🌃', type: 'prayer' }
   ];
+
   const monthNames = ["янв", "фев", "мар", "апр", "май", "июн", "июл", "авг", "сен", "окт", "ноя", "дек"];
   let currentData = null;
 
@@ -257,46 +230,46 @@
     document.getElementById('day-name').textContent = currentData.day;
     document.getElementById('hijri-date').textContent = `${currentData.d} ${PRAYER_DATA.monthName}`;
     
-    // ✅ ОБНОВЛЁННАЯ ЛОГИКА ОТОБРАЖЕНИЯ НАМАЗОВ
+    // === ОТСЛЕЖИВАНИЕ УСТАНОВКИ (GoatCounter) ===
+    function isPWAInstalled() {
+      return window.matchMedia('(display-mode: standalone)').matches || 
+             window.navigator.standalone === true ||
+             document.referrer.includes('android-app://');
+    }
+    if (isPWAInstalled() && window.location.search.indexOf('mode=') === -1) {
+      const sep = window.location.search ? '&' : '?';
+      history.replaceState(null, '', `${window.location.pathname}${sep}mode=installed`);
+    }
+
+    // === ЛОГИКА ОТОБРАЖЕНИЯ ===
     function renderPrayers() {
-      const container = document.getElementById('today-prayers');
-      const now = new Date();
+      const container = document.getElementById('today-prayers');      const now = new Date();
       const currentTime = now.getHours() * 60 + now.getMinutes();
 
       const prayerKeys = prayers.filter(p => p.type === 'prayer').map(p => p.key);
-      let currentKey = null; // Изначально нет активного (зелёного) намаза
-      let nextKey = prayerKeys[0]; // По умолчанию следующий - первый
+      let currentKey = null;
+      let nextKey = prayerKeys[0];
 
-      // Время восхода в минутах
       const [sunH, sunM] = currentData.sunrise.split(':').map(Number);
       const sunriseTime = sunH * 60 + sunM;
 
-      // Определяем следующий намаз (первый, который ещё не наступил)
+      // Находим следующий намаз
       for (const key of prayerKeys) {
         const [h, m] = currentData[key].split(':').map(Number);
-        const prayerTime = h * 60 + m;
-        if (currentTime < prayerTime) {
-          nextKey = key;
-          break;
-        }
+        if (currentTime < h * 60 + m) { nextKey = key; break; }
       }
 
-      // Определяем текущий намаз (зелёный)
-      // Если мы между Фаджр и Зухр, то ничего не подсвечиваем (Fajr уже прошёл, Makruh время)
-      // Подсветка (currentKey) включается только если время намаза уже пришло
+      // Определяем активный (зелёный) намаз
       for (let i = 0; i < prayerKeys.length - 1; i++) {
         const [h, m] = currentData[prayerKeys[i]].split(':').map(Number);
-        const prayerTime = h * 60 + m;
-        const nextPrayerTime = (() => {
-          const [nh, nm] = currentData[prayerKeys[i + 1]].split(':').map(Number);
-          return nh * 60 + nm;
-        })();
+        const pTime = h * 60 + m;
+        const [nh, nm] = currentData[prayerKeys[i+1]].split(':').map(Number);
+        const nTime = nh * 60 + nm;
 
-        if (currentTime >= prayerTime && currentTime < nextPrayerTime) {          // ВАЖНО: Если это период после Фаджр и перед Зухр, НЕ подсвечиваем Фаджр
-          if (prayerKeys[i] === 'fajr' && currentTime >= sunriseTime) {
-             // currentKey остаётся null
-          } else {
-             currentKey = prayerKeys[i];
+        if (currentTime >= pTime && currentTime < nTime) {
+          // Между Фаджр и Зухр зелёного выделения НЕТ
+          if (!(prayerKeys[i] === 'fajr' && currentTime >= sunriseTime)) {
+            currentKey = prayerKeys[i];
           }
           break;
         }
@@ -304,201 +277,142 @@
 
       container.innerHTML = prayers.map((prayer) => {
         const [h, m] = currentData[prayer.key].split(':').map(Number);
-        const prayerTimeMin = h * 60 + m;
+        const pMin = h * 60 + m;
+        let statusClass = '', extraHtml = '';
 
-        let statusClass = '';
-        let extraHtml = '';
-
-        // Логика для Восхода
         if (prayer.key === 'sunrise') {
           if (currentTime >= sunriseTime && currentTime < sunriseTime + 30) {
-            statusClass = 'makruh'; // Красный макрух
+            statusClass = 'makruh';
             extraHtml = '<p class="text-xs text-red-500 font-medium mt-1">⏳ 30 мин после восхода нежелательно</p>';
-          } else if (currentTime > prayerTimeMin) {
-            statusClass = 'passed'; // Серый
+          } else if (currentTime > pMin) {
+            statusClass = 'passed';
           }
-        } 
-        // Логика для Намазов
-        else if (prayer.type === 'prayer') {
-          const isCurrent = prayer.key === currentKey;
-          const isNext = prayer.key === nextKey;
-          const isPassed = currentTime > prayerTimeMin;
+        } else if (prayer.type === 'prayer') {
+          if (prayer.key === currentKey) statusClass = 'next';
+          else if (currentTime > pMin) statusClass = 'passed';
+          if (prayer.key === nextKey && prayer.key !== currentKey) extraHtml = '<p class="text-xs text-emerald-600 font-semibold">Следующий</p>';
+        } else if (prayer.type === 'prep' && currentTime > pMin) {
+          statusClass = 'passed';        }
 
-          if (isCurrent) {
-            statusClass = 'next'; // Зелёный
-          } else if (isPassed) {
-            statusClass = 'passed'; // Серый
-          }
-          
-          if (isNext && !isCurrent) {
-            extraHtml = '<p class="text-xs text-emerald-600 font-semibold">Следующий</p>';
-          }
-        } 
-        // Логика для Сухура
-        else if (prayer.type === 'prep' && currentTime > prayerTimeMin) {
-          statusClass = 'passed';
-        }
+        const nCol = statusClass === 'next' ? 'text-emerald-800' : statusClass === 'makruh' ? 'text-red-700' : 'text-gray-800';
+        const tCol = statusClass === 'next' ? 'text-emerald-700' : statusClass === 'makruh' ? 'text-red-600' : 'text-teal-700';
 
-        const nameColor = statusClass === 'next' ? 'text-emerald-800' : statusClass === 'makruh' ? 'text-red-700' : 'text-gray-800';
-        const timeColor = statusClass === 'next' ? 'text-emerald-700' : statusClass === 'makruh' ? 'text-red-600' : 'text-teal-700';
-        return `
-          <div class="prayer-card p-3 rounded-xl flex items-center justify-between ${statusClass}">
-            <div class="flex items-center gap-3">
-              <span class="text-2xl">${prayer.icon}</span>
-              <div>
-                <p class="font-semibold text-sm prayer-name ${nameColor}">${prayer.name}</p>
-                ${prayer.type === 'prep' ? '<p class="text-xs opacity-75">До рассвета</p>' : ''}
-                ${prayer.type === 'info' && !statusClass.includes('makruh') ? '<p class="text-xs opacity-75">Не намаз</p>' : ''}
-                ${extraHtml}
-              </div>
+        return `<div class="prayer-card p-3 rounded-xl flex items-center justify-between ${statusClass}">
+          <div class="flex items-center gap-3">
+            <span class="text-2xl">${prayer.icon}</span>
+            <div>
+              <p class="font-semibold text-sm prayer-name ${nCol}">${prayer.name}</p>
+              ${prayer.type === 'prep' ? '<p class="text-xs opacity-75">До рассвета</p>' : ''}
+              ${prayer.type === 'info' && statusClass !== 'makruh' ? '<p class="text-xs opacity-75">Не намаз</p>' : ''}
+              ${extraHtml}
             </div>
-            <div class="text-right">
-              <p class="text-xl font-bold prayer-time ${timeColor}">${currentData[prayer.key]}</p>
-            </div>
-          </div>`;
+          </div>
+          <div class="text-right">
+            <p class="text-xl font-bold prayer-time ${tCol}">${currentData[prayer.key]}</p>
+          </div>
+        </div>`;
       }).join('');
 
-      // Таймер считаем до следующего намаза
-      const targetKey = nextKey || 'fajr';
-      updateCountdown({ key: targetKey });
+      updateCountdown({ key: nextKey || 'fajr' });
     }
 
     function updateCountdown(prayer) {
       const now = new Date();
       const [h, m] = currentData[prayer.key].split(':').map(Number);
-      let target = new Date();
-      target.setHours(h, m, 0, 0);
+      let target = new Date(); target.setHours(h, m, 0, 0);
       if (target <= now) target.setDate(target.getDate() + 1);
-      
       const diff = target - now;
-      const hrs = Math.floor(diff / 3600000);
-      const mins = Math.floor((diff % 3600000) / 60000);
-      const secs = Math.floor((diff % 60000) / 1000);
-      document.getElementById('countdown').textContent = `${String(hrs).padStart(2,'0')}:${String(mins).padStart(2,'0')}:${String(secs).padStart(2,'0')}`;
+      document.getElementById('countdown').textContent = 
+        `${String(Math.floor(diff/3600000)).padStart(2,'0')}:${String(Math.floor((diff%3600000)/60000)).padStart(2,'0')}:${String(Math.floor((diff%60000)/1000)).padStart(2,'0')}`;
     }
 
     function renderMonthlyList() {
       const listEl = document.getElementById('prayer-list');
-      listEl.innerHTML = PRAYER_DATA.schedule.map((item) => {
+      listEl.innerHTML = PRAYER_DATA.schedule.map(item => {
         const isToday = item.date === todayStr;
-        const isFriday = item.day === 'Пт';
-        
-        const rowClass = `flex justify-between items-center p-3 border-b border-gray-100 last:border-0 ${isToday ? 'bg-teal-50 border-l-4 border-l-teal-600' : isFriday ? 'bg-amber-50 border-l-4 border-l-amber-500' : 'hover:bg-gray-50'} transition-colors`;
-        const numClass = `w-7 h-7 flex items-center justify-center rounded-full text-xs font-bold ${isToday ? 'bg-teal-600 text-white' : isFriday ? 'bg-amber-200 text-amber-800' : 'bg-gray-100 text-gray-600'}`;
-        
-        return `
-          <div class="${rowClass}">
-            <div class="flex items-center gap-3">
-              <span class="${numClass}">${item.d}</span>
-              <div class="flex items-center flex-wrap gap-1">                <p class="font-medium text-sm text-gray-800">${item.date}</p>
-                <span class="text-gray-400 font-normal text-sm">(${item.day})</span>
-                ${isFriday && !isToday ? '<span class="text-amber-700 text-[10px] font-bold bg-amber-100 px-1.5 py-0.5 rounded-full">🕌 Джума</span>' : ''}
-              </div>
+        const isFri = item.day === 'Пт';
+        const rowC = `flex justify-between items-center p-3 border-b border-gray-100 last:border-0 ${isToday ? 'bg-teal-50 border-l-4 border-l-teal-600' : isFri ? 'bg-amber-50 border-l-4 border-l-amber-500' : 'hover:bg-gray-50'} transition-colors`;
+        const numC = `w-7 h-7 flex items-center justify-center rounded-full text-xs font-bold ${isToday ? 'bg-teal-600 text-white' : isFri ? 'bg-amber-200 text-amber-800' : 'bg-gray-100 text-gray-600'}`;
+        return `<div class="${rowC}">
+          <div class="flex items-center gap-3">
+            <span class="${numC}">${item.d}</span>
+            <div class="flex items-center flex-wrap gap-1">
+              <p class="font-medium text-sm text-gray-800">${item.date}</p>
+              <span class="text-gray-400 font-normal text-sm">(${item.day})</span>
+              ${isFri && !isToday ? '<span class="text-amber-700 text-[10px] font-bold bg-amber-100 px-1.5 py-0.5 rounded-full">🕌 Джума</span>' : ''}
             </div>
-            <div class="flex gap-3 text-xs text-gray-600">
-              <span>🌅 ${item.fajr}</span><span>🕌 ${item.dhuhr}</span><span>🌆 ${item.maghrib}</span>
-            </div>
-          </div>`;
+          </div>          <div class="flex gap-3 text-xs text-gray-600"><span>🌅 ${item.fajr}</span><span>🕌 ${item.dhuhr}</span><span>🌆 ${item.maghrib}</span></div>
+        </div>`;
       }).join('');
     }
 
+    // === УВЕДОМЛЕНИЯ ===
     async function setupNotifications() {
       if (!('Notification' in window) || !('serviceWorker' in navigator)) return;
       if (Notification.permission !== 'granted') return;
       const reg = await navigator.serviceWorker.ready;
-      
-      const prayerKeys = prayers.filter(p => p.type === 'prayer').map(p => p.key);
-      let nextKey = prayerKeys[0];
-      const now = new Date();
-      const currentTime = now.getHours() * 60 + now.getMinutes();
-      for (const key of prayerKeys) {
-        const [h, m] = currentData[key].split(':').map(Number);
-        if (currentTime < h * 60 + m) { nextKey = key; break; }
+      const pKeys = prayers.filter(p => p.type === 'prayer').map(p => p.key);
+      let nextK = pKeys[0];
+      const now = new Date(), curT = now.getHours()*60 + now.getMinutes();
+      for (const k of pKeys) {
+        const [h,m] = currentData[k].split(':').map(Number);
+        if (curT < h*60+m) { nextK = k; break; }
       }
-
-      const [h, m] = currentData[nextKey].split(':').map(Number);
-      let triggerTime = new Date();
-      triggerTime.setHours(h, m - 5, 0, 0);
-      const delay = triggerTime - Date.now();
-      
-      if (delay > 0 && delay < 24 * 60 * 60 * 1000) {
-        localStorage.setItem('prayer_notif', JSON.stringify({ name: prayers.find(p=>p.key===nextKey).name, time: currentData[nextKey], at: triggerTime.getTime(), key: nextKey }));
+      const [h,m] = currentData[nextK].split(':').map(Number);
+      let trig = new Date(); trig.setHours(h, m-5, 0, 0);
+      const delay = trig - Date.now();
+      if (delay > 0 && delay < 86400000) {
+        localStorage.setItem('prayer_notif', JSON.stringify({n: prayers.find(x=>x.key===nextK).name, t: currentData[nextK], a: trig.getTime(), k: nextK}));
         setTimeout(async () => {
-          await reg.showNotification(`⏰ ${prayers.find(p=>p.key===nextKey).name} через 5 мин`, { body: `Челябинск • ${currentData[nextKey]}`, icon: '/icon.png', tag: nextKey, requireInteraction: false });
+          await reg.showNotification(`⏰ ${prayers.find(x=>x.key===nextK).name} через 5 мин`, {body: `Челябинск • ${currentData[nextK]}`, icon: '/icon.png', tag: nextK, requireInteraction: false});
           localStorage.removeItem('prayer_notif');
         }, delay);
       }
       const saved = localStorage.getItem('prayer_notif');
       if (saved) {
-        const data = JSON.parse(saved);
-        const d = data.at - Date.now();
-        if (d > 0) {
-          setTimeout(async () => {
-            const r = await navigator.serviceWorker.ready;
-            await r.showNotification(`⏰ ${data.name} через 5 мин`, { body: `Челябинск • ${data.time}`, tag: data.key, requireInteraction: false });
-            localStorage.removeItem('prayer_notif');
-          }, d);
-        } else localStorage.removeItem('prayer_notif');
-      }    }
+        const d = JSON.parse(saved), diff = d.a - Date.now();
+        if (diff > 0) setTimeout(async () => {
+          const r = await navigator.serviceWorker.ready;
+          await r.showNotification(`⏰ ${d.n} через 5 мин`, {body: `Челябинск • ${d.t}`, tag: d.k, requireInteraction: false});
+          localStorage.removeItem('prayer_notif');
+        }, diff); else localStorage.removeItem('prayer_notif');
+      }
+    }
 
-    renderPrayers();
-    renderMonthlyList();
-    setupNotifications();
+    renderPrayers(); renderMonthlyList(); setupNotifications();
     setInterval(renderPrayers, 1000);
 
-  } catch (error) {
-    console.error('Ошибка:', error);
-    document.getElementById('today-full-date').textContent = 'Ошибка';
-  }
+  } catch (e) { console.error(e); document.getElementById('today-full-date').textContent = 'Ошибка'; }
 
-  const ARROW = document.getElementById('compass-arrow');
-  const RING = document.getElementById('compass-ring');
-  const STATUS = document.getElementById('compass-status');
-  const BTN = document.getElementById('enable-compass-btn');
-  const QIBLA = 214;
+  // === КОМПАС ===
+  const ARROW = document.getElementById('compass-arrow'), RING = document.getElementById('compass-ring'), STATUS = document.getElementById('compass-status'), BTN = document.getElementById('enable-compass-btn'), QIBLA = 214;
   let isCompassActive = false;
-  let compassHandler = null;
-
   function enableCompass() {
     if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
-      DeviceOrientationEvent.requestPermission()
-        .then(res => res === 'granted' ? startCompass() : (STATUS.textContent = '⛔ Доступ запрещён'))
-        .catch(console.error);
-    } else { startCompass(); }
-  }
-
+      DeviceOrientationEvent.requestPermission().then(res => res === 'granted' ? startCompass() : (STATUS.textContent = '⛔ Доступ запрещён')).catch(console.error);
+    } else startCompass();  }
   function startCompass() {
-    if (isCompassActive) return;
-    isCompassActive = true;
-    BTN.classList.add('hidden');
-    STATUS.textContent = '🔄 Калибровка...';
-    let hist = [];
-    const smooth = (v) => { hist.push(v); if(hist.length>3) hist.shift(); return hist.reduce((a,b)=>a+b,0)/hist.length; };
-    compassHandler = (e) => {
+    if (isCompassActive) return; isCompassActive = true; BTN.classList.add('hidden'); STATUS.textContent = '🔄 Калибровка...';
+    let hist = []; const smooth = v => { hist.push(v); if(hist.length>3) hist.shift(); return hist.reduce((a,b)=>a+b,0)/hist.length; };
+    const handler = e => {
       let h = e.webkitCompassHeading !== undefined ? e.webkitCompassHeading : (e.alpha !== null ? (360 - e.alpha) % 360 : null);
-      if (h !== null) {
-        const s = smooth(h);
-        RING.style.transform = `rotate(${-s}deg)`;
-        ARROW.style.transform = `rotate(${QIBLA - s}deg)`;
-        if (STATUS.textContent.includes('Калибровка')) STATUS.textContent = '✅ Компас работает';
-      }
+      if (h !== null) { const s = smooth(h); RING.style.transform = `rotate(${-s}deg)`; ARROW.style.transform = `rotate(${QIBLA - s}deg)`; if(STATUS.textContent.includes('Калибровка')) STATUS.textContent = '✅ Компас работает'; }
     };
-    if ('ondeviceorientationabsolute' in window) window.addEventListener('deviceorientationabsolute', compassHandler, { passive: true });
-    else window.addEventListener('deviceorientation', compassHandler, { passive: true });
+    if ('ondeviceorientationabsolute' in window) window.addEventListener('deviceorientationabsolute', handler, {passive:true});
+    else window.addEventListener('deviceorientation', handler, {passive:true});
   }
 
+  // === УТИЛИТЫ ===
   function openInstallModal() { document.getElementById('install-modal').classList.remove('hidden'); }
   function closeInstallModal() { document.getElementById('install-modal').classList.add('hidden'); }
   const banner = document.getElementById('offline-banner');
   window.addEventListener('online', () => banner.classList.add('hidden'));
   window.addEventListener('offline', () => banner.classList.remove('hidden'));
   if (!navigator.onLine) banner.classList.remove('hidden');
-
   function shareApp() {
-    if (navigator.share) navigator.share({ title: 'Намаз Челябинск', text: 'Точное время намазов и Кибла для Челябинска 🕌', url: window.location.href }).catch(console.error);
-    else navigator.clipboard.writeText(window.location.href).then(() => alert('Ссылка скопирована!')).catch(() => alert('Не удалось скопировать'));
+    if (navigator.share) navigator.share({title: 'Намаз Челябинск', text: 'Точное время намазов и Кибла для Челябинска 🕌', url: location.href}).catch(console.error);
+    else navigator.clipboard.writeText(location.href).then(() => alert('Ссылка скопирована!')).catch(() => alert('Ошибка'));
   }
-
   if ('Notification' in window && Notification.permission === 'default') Notification.requestPermission();
   if ('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js').catch(console.error);
 </script>
