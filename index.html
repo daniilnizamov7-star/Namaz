@@ -193,8 +193,8 @@ const API_URL = 'https://raw.githubusercontent.com/daniilnizamov7-star/Namaz/mai
 const CACHE_KEY = 'namaz_cache_v1';
 
 function getMoonPhase(date) {
-  const year = date.getFullYear();
-  const month = date.getMonth() + 1;
+  let year = date.getFullYear();
+  let month = date.getMonth() + 1;
   const day = date.getDate();
   let c, e, jd, b;
   if (month < 3) { year--; month += 12; }
