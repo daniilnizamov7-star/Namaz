@@ -14,7 +14,6 @@
   <link rel="apple-touch-icon" href="/icon.png">
   
   <script src="https://cdn.tailwindcss.com"></script>
-  
   <script data-goatcounter="https://namaz.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
   
   <style>
@@ -84,7 +83,7 @@
 </head>
 <body class="pb-8">
 
-<div id="offline-banner" class="hidden bg-yellow-500 text-white text-center text-xs py-1.5 font-medium sticky top-0 z-50 shadow-sm">📶 Офлайн-режим</div>
+<div id="offline-banner" class="hidden bg-yellow-500 text-white text-center text-xs py-1.5 font-medium sticky top-0 z-50 shadow-sm">📶 Офлайн-режим · Данные из кэша</div>
 
 <header class="bg-teal-800 text-white pt-8 pb-10 px-4 rounded-b-3xl shadow-lg">
   <div class="max-w-md mx-auto flex justify-between items-center">
@@ -98,7 +97,7 @@
           <span>...</span>
           <span id="moon-phase" class="text-sm">🌑</span>
         </div>
-        <button onclick="openInstallModal()" class="bg-teal-700/80 w-8 h-8 flex items-center justify-center rounded-full text-sm hover:bg-teal-600 transition">ℹ️</button>
+        <button onclick="openInstallModal()" class="bg-teal-700/80 w-8 h-8 flex items-center justify-center rounded-full text-sm hover:bg-teal-600 transition" aria-label="Как установить">ℹ️</button>
       </div>
       <button onclick="shareApp()" class="flex items-center gap-1 text-xs bg-teal-900/50 hover:bg-teal-900 px-2 py-1 rounded transition active:scale-95">📤 Поделиться</button>
     </div>
@@ -186,10 +185,17 @@ const prayers = [
   { key: 'isha', name: 'Иша', icon: '🌃', type: 'prayer' }
 ];
 const monthNames = ["янв","фев","мар","апр","май","июн","июл","авг","сен","окт","ноя","дек"];
-let currentData = null, scheduleData = [], currentMonthName = "";
+let currentData = null;
+let scheduleData = [];
+let currentMonthName = "";
+
+const API_URL = 'https://raw.githubusercontent.com/daniilnizamov7-star/Namaz/main/api/prayer-data.json';
+const CACHE_KEY = 'namaz_cache_v1';
 
 function getMoonPhase(date) {
-  const year = date.getFullYear(), month = date.getMonth() + 1, day = date.getDate();
+  const year = date.getFullYear();
+  const month = date.getMonth() + 1;
+  const day = date.getDate();
   let c, e, jd, b;
   if (month < 3) { year--; month += 12; }
   ++month;
@@ -200,26 +206,49 @@ function getMoonPhase(date) {
   b = parseInt(jd);
   jd -= b;
   b = Math.round(jd * 8);
-  const phases = ['🌑','🌒','🌓','🌔','','🌖','🌗','🌘'];
+  const phases = ['🌑','','🌓','','','🌖','','🌘'];
   return phases[b >= 8 ? 0 : b];
 }
 
 function loadAppData() {
-  fetch('/api/prayer-data.json')
-    .then(r => {
-      if (!r.ok) throw new Error('HTTP ' + r.status);
-      return r.json();
+  const todayStr = new Date().toDateString();
+  
+  fetch(API_URL + '?t=' + Date.now())
+    .then(response => {
+      if (!response.ok) throw new Error('Network error: ' + response.status);
+      return response.text();
     })
-    .then(data => {
-      scheduleData = data.schedule;
-      currentMonthName = data.monthName;
+    .then(rawText => {
+      const cleanText = rawText.replace(/\s+/g, ' ').trim();
+      const data = JSON.parse(cleanText);
+      
+      scheduleData = data.schedule || [];
+      currentMonthName = data.monthName || '';
+      
+      localStorage.setItem(CACHE_KEY, JSON.stringify({
+        date: todayStr,
+        schedule: scheduleData,
+        monthName: currentMonthName
+      }));
+      
+      console.log('✅ Данные загружены и сохранены в кэш');
       initApp();
     })
-    .catch(err => {
-      console.error('❌ Ошибка загрузки JSON:', err);
-      document.getElementById('today-full-date').textContent = 'Ошибка загрузки';
-      document.getElementById('today-hijri').textContent = 'Проверьте консоль (F12)';
-      document.getElementById('header-hijri').textContent = 'Нет данных';
+    .catch(error => {
+      console.warn('⚠️ Ошибка загрузки, используем кэш:', error);
+      const cached = localStorage.getItem(CACHE_KEY);
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        scheduleData = parsed.schedule || [];
+        currentMonthName = parsed.monthName || '';
+        document.getElementById('offline-banner').classList.remove('hidden');
+        console.log('✅ Данные загружены из кэша');
+        initApp();
+      } else {
+        document.getElementById('today-full-date').textContent = 'Ошибка';
+        document.getElementById('today-hijri').textContent = 'Нет интернета и кэша';
+        document.getElementById('header-hijri').textContent = 'Нет данных';
+      }
     });
 }
 
@@ -227,7 +256,15 @@ function initApp() {
   try {
     const today = new Date();
     const todayStr = today.getDate() + ' ' + monthNames[today.getMonth()];
-    currentData = scheduleData.find(item => item.date === todayStr) || scheduleData[0];
+    
+    currentData = scheduleData.find(function(item) { 
+      return item.date === todayStr; 
+    }) || scheduleData[0];
+    
+    if (!currentData) {
+      document.getElementById('today-full-date').textContent = 'Нет данных';
+      return;
+    }
     
     document.getElementById('today-full-date').textContent = 'Сегодня, ' + currentData.date;
     document.getElementById('today-hijri').textContent = currentData.d + ' ' + currentMonthName + ' 1447';
@@ -239,40 +276,63 @@ function initApp() {
     renderMonthlyList();
     setInterval(renderPrayers, 1000);
   } catch(e) {
-    console.error(e);
+    console.error('❌ Ошибка инициализации:', e);
     document.getElementById('today-full-date').textContent = 'Ошибка';
   }
 }
 
 function updateBackgroundGradient() {
   if(!currentData) return;
-  const now = new Date(), ct = now.getHours()*60 + now.getMinutes();
-  const [fH,fM] = currentData.fajr.split(':').map(Number);
-  const [sH,sM] = currentData.sunrise.split(':').map(Number);
-  const [dH,dM] = currentData.dhuhr.split(':').map(Number);
-  const [aH,aM] = currentData.asr.split(':').map(Number);
-  const [mH,mM] = currentData.maghrib.split(':').map(Number);
-  const [iH,iM] = currentData.isha.split(':').map(Number);
+  var now = new Date();
+  var ct = now.getHours()*60 + now.getMinutes();
+  
+  var fParts = currentData.fajr.split(':');
+  var sParts = currentData.sunrise.split(':');
+  var dParts = currentData.dhuhr.split(':');
+  var aParts = currentData.asr.split(':');
+  var mParts = currentData.maghrib.split(':');
+  var iParts = currentData.isha.split(':');
+  
+  var fajrTime = parseInt(fParts[0])*60 + parseInt(fParts[1]);
+  var sunriseTime = parseInt(sParts[0])*60 + parseInt(sParts[1]);
+  var dhuhrTime = parseInt(dParts[0])*60 + parseInt(dParts[1]);
+  var asrTime = parseInt(aParts[0])*60 + parseInt(aParts[1]);
+  var maghribTime = parseInt(mParts[0])*60 + parseInt(mParts[1]);
+  var ishaTime = parseInt(iParts[0])*60 + parseInt(iParts[1]);
   
   document.body.className = 'pb-8';
-  if (ct >= fH*60+fM && ct < sH*60+sM) document.body.classList.add('time-fajr');
-  else if (ct >= sH*60+sM && ct < dH*60+dM) document.body.classList.add('time-dhuhr');
-  else if (ct >= dH*60+dM && ct < aH*60+aM) document.body.classList.add('time-dhuhr');
-  else if (ct >= aH*60+aM && ct < mH*60+mM) document.body.classList.add('time-asr');
-  else if (ct >= mH*60+mM && ct < iH*60+iM) document.body.classList.add('time-maghrib');
-  else if (ct >= iH*60+iM) document.body.classList.add('time-isha');
-  else document.body.classList.add('time-night');
+  
+  if (ct >= fajrTime && ct < sunriseTime) {
+    document.body.classList.add('time-fajr');
+  } else if (ct >= sunriseTime && ct < dhuhrTime) {
+    document.body.classList.add('time-dhuhr');
+  } else if (ct >= dhuhrTime && ct < asrTime) {
+    document.body.classList.add('time-dhuhr');
+  } else if (ct >= asrTime && ct < maghribTime) {
+    document.body.classList.add('time-asr');
+  } else if (ct >= maghribTime && ct < ishaTime) {
+    document.body.classList.add('time-maghrib');
+  } else if (ct >= ishaTime) {
+    document.body.classList.add('time-isha');
+  } else {
+    document.body.classList.add('time-night');
+  }
 }
 
 function getNightThirds() {
   if (!currentData) return null;
-  const [iH,iM] = currentData.isha.split(':').map(Number);
-  const [fH,fM] = currentData.fajr.split(':').map(Number);
-  const ishaMin = iH*60+iM;
-  let fajrMin = fH*60+fM;
+  
+  var iParts = currentData.isha.split(':');
+  var fParts = currentData.fajr.split(':');
+  
+  var ishaMin = parseInt(iParts[0])*60 + parseInt(iParts[1]);
+  var fajrMin = parseInt(fParts[0])*60 + parseInt(fParts[1]);
+  
   if (fajrMin < ishaMin) fajrMin += 24*60;
-  const dur = fajrMin - ishaMin;
-  const third = dur / 3;
+  
+  var dur = fajrMin - ishaMin;
+  var third = dur / 3;
+  
   return {
     firstThirdEnd: ishaMin + third,
     secondThirdEnd: ishaMin + 2*third,
@@ -282,170 +342,311 @@ function getNightThirds() {
 
 function renderPrayers() {
   if(!currentData) return;
-  const container = document.getElementById('today-prayers');
-  const now = new Date(), ct = now.getHours()*60 + now.getMinutes();
-  const pKeys = prayers.filter(p => p.type === 'prayer').map(p => p.key);
-  let currentKey = null, nextKey = pKeys[0];
-  const [suH,suM] = currentData.sunrise.split(':').map(Number);
-  const sunrise = suH*60+suM;
-  const thirds = getNightThirds();
-  let nightPeriod = null;
+  
+  var container = document.getElementById('today-prayers');
+  var now = new Date();
+  var ct = now.getHours()*60 + now.getMinutes();
+  
+  var pKeys = prayers.filter(function(p) { return p.type === 'prayer'; }).map(function(p) { return p.key; });
+  var currentKey = null;
+  var nextKey = pKeys[0];
+  
+  var suParts = currentData.sunrise.split(':');
+  var sunrise = parseInt(suParts[0])*60 + parseInt(suParts[1]);
+  
+  var thirds = getNightThirds();
+  var nightPeriod = null;
   
   if (thirds) {
-    const [iH,iM] = currentData.isha.split(':').map(Number);
-    const ishaMin = iH*60+iM;
-    let adjCt = ct;
+    var iParts = currentData.isha.split(':');
+    var ishaMin = parseInt(iParts[0])*60 + parseInt(iParts[1]);
+    var adjCt = ct;
+    
     if (ct >= ishaMin || ct < sunrise) {
       if (ct < ishaMin) adjCt += 24*60;
+      
       if (adjCt < thirds.firstThirdEnd) nightPeriod = 'first';
       else if (adjCt < thirds.secondThirdEnd) nightPeriod = 'second';
       else nightPeriod = 'third';
     }
   }
   
-  for (const key of pKeys) {
-    const [h,m] = currentData[key].split(':').map(Number);
-    if (ct < h*60+m) { nextKey = key; break; }
+  for (var i = 0; i < pKeys.length; i++) {
+    var key = pKeys[i];
+    var parts = currentData[key].split(':');
+    var prayerMin = parseInt(parts[0])*60 + parseInt(parts[1]);
+    if (ct < prayerMin) { 
+      nextKey = key; 
+      break; 
+    }
   }
   
-  for (let i=0; i<pKeys.length-1; i++) {
-    const [h,m] = currentData[pKeys[i]].split(':').map(Number);
-    const [nh,nm] = currentData[pKeys[i+1]].split(':').map(Number);
-    if (ct >= h*60+m && ct < nh*60+nm) {
-      if (!(pKeys[i] === 'fajr' && ct >= sunrise)) currentKey = pKeys[i];
+  for (var j = 0; j < pKeys.length - 1; j++) {
+    var p1 = pKeys[j];
+    var p2 = pKeys[j+1];
+    var parts1 = currentData[p1].split(':');
+    var parts2 = currentData[p2].split(':');
+    var time1 = parseInt(parts1[0])*60 + parseInt(parts1[1]);
+    var time2 = parseInt(parts2[0])*60 + parseInt(parts2[1]);
+    
+    if (ct >= time1 && ct < time2) {
+      if (!(p1 === 'fajr' && ct >= sunrise)) {
+        currentKey = p1;
+      }
       break;
     }
   }
   
-  const [iH,iM] = currentData.isha.split(':').map(Number);
-  if (ct >= iH*60+iM) currentKey = 'isha';
+  var ishaParts = currentData.isha.split(':');
+  var ishaMinutes = parseInt(ishaParts[0])*60 + parseInt(ishaParts[1]);
+  if (ct >= ishaMinutes) currentKey = 'isha';
   
-  container.innerHTML = prayers.map(prayer => {
-    const [h,m] = currentData[prayer.key].split(':').map(Number);
-    const pMin = h*60+m;
-    let cls = '', extra = '';
+  var html = '';
+  for (var k = 0; k < prayers.length; k++) {
+    var prayer = prayers[k];
+    var timeParts = currentData[prayer.key].split(':');
+    var pMin = parseInt(timeParts[0])*60 + parseInt(timeParts[1]);
+    var cls = '';
+    var extra = '';
     
     if (prayer.key === 'sunrise') {
       if (ct >= sunrise && ct < sunrise+30) {
         cls = 'makruh';
-        extra = '<p class="text-xs text-red-500 mt-1">⏳ 30 мин нежелательно</p>';
-      } else if (ct > pMin) cls = 'passed';
+        extra = '<p class="text-xs text-red-500 mt-1 font-medium">⏳ 30 мин нежелательно</p>';
+      } else if (ct > pMin) {
+        cls = 'passed';
+      }
     } else if (prayer.type === 'prayer') {
-      const isCur = prayer.key === currentKey;
-      const isNext = prayer.key === nextKey;
-      const isPassed = ct > pMin;
-      const minsTo = pMin - ct;
-      const isSoon = minsTo > 0 && minsTo <= 10 && !isCur;
+      var isCur = prayer.key === currentKey;
+      var isNext = prayer.key === nextKey;
+      var isPassed = ct > pMin;
+      var minsTo = pMin - ct;
+      var isSoon = minsTo > 0 && minsTo <= 10 && !isCur;
       
-      if (prayer.key === 'isha' && ct >= iH*60+iM) {
+      if (prayer.key === 'isha' && ct >= ishaMinutes) {
         if (nightPeriod === 'first') {
           cls = 'next';
-          extra = '<p class="text-xs text-emerald-600 mt-1">🟢 1/3 ночи</p>';
+          extra = '<p class="text-xs text-emerald-600 mt-1 font-medium">🟢 1/3 ночи</p>';
         } else if (nightPeriod === 'second') {
           cls = 'isha-second-third';
-          extra = '<p class="text-xs text-orange-600 mt-1">🟠 2/3 ночи</p>';
-          const toThird = thirds.thirdThirdStart - ct;
-          if (toThird > 0 && toThird <= 30) extra = '<p class="text-xs text-red-600 font-bold mt-1">⏰ ' + Math.floor(toThird) + ' мин до макрух!</p>';
+          extra = '<p class="text-xs text-orange-600 mt-1 font-medium">🟠 2/3 ночи</p>';
+          var toThird = thirds.thirdThirdStart - ct;
+          if (toThird > 0 && toThird <= 30) {
+            extra = '<p class="text-xs text-red-600 mt-1 font-bold">⏰ ' + Math.floor(toThird) + ' мин до макрух!</p>';
+          }
         } else if (nightPeriod === 'third') {
           cls = 'isha-third-third';
-          extra = '<p class="text-xs text-red-600 mt-1">🔴 Макрух</p>';
+          extra = '<p class="text-xs text-red-600 mt-1 font-medium">🔴 Макрух</p>';
         }
       } else {
         if (isCur) cls = 'next';
         else if (isPassed) cls = 'passed';
+        
         if (isSoon && !isCur) cls = 'soon';
-        if (isNext && !isCur && !isSoon) extra = '<p class="text-xs text-emerald-600">Следующий</p>';
-        else if (isSoon) extra = '<p class="text-xs text-amber-600">⏰ Скоро (10 мин)</p>';
+        
+        if (isNext && !isCur && !isSoon) {
+          extra = '<p class="text-xs text-emerald-600 font-semibold">Следующий</p>';
+        } else if (isSoon) {
+          extra = '<p class="text-xs text-amber-600 font-semibold">⏰ Скоро (10 мин)</p>';
+        }
       }
-    } else if (prayer.type === 'prep' && ct > pMin) cls = 'passed';
+    } else if (prayer.type === 'prep' && ct > pMin) {
+      cls = 'passed';
+    }
     
-    const nCol = cls === 'next' ? 'text-emerald-800' : cls === 'makruh' ? 'text-red-700' : cls.includes('isha') ? (cls === 'isha-second-third' ? 'text-orange-800' : 'text-red-700') : cls === 'soon' ? 'text-amber-700' : 'text-gray-800';
-    const tCol = cls === 'next' ? 'text-emerald-700' : cls === 'makruh' ? 'text-red-600' : cls.includes('isha') ? (cls === 'isha-second-third' ? 'text-orange-600' : 'text-red-600') : cls === 'soon' ? 'text-amber-600' : 'text-teal-700';
+    var nCol = 'text-gray-800';
+    var tCol = 'text-teal-700';
     
-    return '<div class="prayer-card p-3 rounded-xl flex items-center justify-between ' + cls + '">' +
-      '<div class="flex items-center gap-3"><span class="text-2xl">' + prayer.icon + '</span>' +
-      '<div><p class="font-semibold text-sm ' + nCol + '">' + prayer.name + '</p>' +
-      (prayer.type === 'prep' ? '<p class="text-xs opacity-75">До рассвета</p>' : '') +
-      (prayer.type === 'info' && cls !== 'makruh' ? '<p class="text-xs opacity-75">Не намаз</p>' : '') +
-      extra + '</div></div>' +
-      '<div class="text-right"><p class="text-xl font-bold ' + tCol + '">' + currentData[prayer.key] + '</p></div></div>';
-  }).join('');
+    if (cls === 'next') { nCol = 'text-emerald-800'; tCol = 'text-emerald-700'; }
+    else if (cls === 'makruh') { nCol = 'text-red-700'; tCol = 'text-red-600'; }
+    else if (cls === 'isha-second-third') { nCol = 'text-orange-800'; tCol = 'text-orange-600'; }
+    else if (cls === 'isha-third-third') { nCol = 'text-red-700'; tCol = 'text-red-600'; }
+    else if (cls === 'soon') { nCol = 'text-amber-700'; tCol = 'text-amber-600'; }
+    
+    var prepText = prayer.type === 'prep' ? '<p class="text-xs opacity-75">До рассвета</p>' : '';
+    var infoText = (prayer.type === 'info' && cls !== 'makruh') ? '<p class="text-xs opacity-75">Не намаз</p>' : '';
+    
+    html += '<div class="prayer-card p-3 rounded-xl flex items-center justify-between ' + cls + '">' +
+      '<div class="flex items-center gap-3">' +
+        '<span class="text-2xl">' + prayer.icon + '</span>' +
+        '<div>' +
+          '<p class="font-semibold text-sm ' + nCol + '">' + prayer.name + '</p>' +
+          prepText + infoText + extra +
+        '</div>' +
+      '</div>' +
+      '<div class="text-right">' +
+        '<p class="text-xl font-bold ' + tCol + '">' + currentData[prayer.key] + '</p>' +
+      '</div>' +
+    '</div>';
+  }
   
+  container.innerHTML = html;
   updateCountdown(nextKey || 'fajr');
   updateBackgroundGradient();
 }
 
 function updateCountdown(key) {
   if(!currentData) return;
-  const now = new Date();
-  const [h,m] = currentData[key].split(':').map(Number);
-  let target = new Date();
+  
+  var now = new Date();
+  var parts = currentData[key].split(':');
+  var h = parseInt(parts[0]);
+  var m = parseInt(parts[1]);
+  
+  var target = new Date();
   target.setHours(h, m, 0, 0);
-  if (target <= now) target.setDate(target.getDate() + 1);
-  const diff = target - now;
-  const hrs = String(Math.floor(diff/3600000)).padStart(2,'0');
-  const mins = String(Math.floor((diff%3600000)/60000)).padStart(2,'0');
-  const secs = String(Math.floor((diff%60000)/1000)).padStart(2,'0');
-  document.getElementById('countdown').textContent = hrs + ':' + mins + ':' + secs;
+  
+  if (target <= now) {
+    target.setDate(target.getDate() + 1);
+  }
+  
+  var diff = target - now;
+  var hrs = Math.floor(diff/3600000);
+  var mins = Math.floor((diff%3600000)/60000);
+  var secs = Math.floor((diff%60000)/1000);
+  
+  var hrsStr = hrs < 10 ? '0' + hrs : '' + hrs;
+  var minsStr = mins < 10 ? '0' + mins : '' + mins;
+  var secsStr = secs < 10 ? '0' + secs : '' + secs;
+  
+  document.getElementById('countdown').textContent = hrsStr + ':' + minsStr + ':' + secsStr;
 }
 
 function renderMonthlyList() {
   if(!currentData || scheduleData.length === 0) return;
-  const today = new Date();
-  const todayStr = today.getDate() + ' ' + monthNames[today.getMonth()];
-  document.getElementById('prayer-list').innerHTML = scheduleData.map(item => {
-    const isToday = item.date === todayStr;
-    const isFri = item.day === 'Пт';
-    const rowC = 'flex justify-between items-center p-3 border-b border-gray-100 last:border-0 ' + 
-      (isToday ? 'bg-teal-50 border-l-4 border-l-teal-600' : isFri ? 'bg-amber-50 border-l-4 border-l-amber-500' : 'hover:bg-gray-50');
-    const numC = 'w-7 h-7 flex items-center justify-center rounded-full text-xs font-bold ' + 
-      (isToday ? 'bg-teal-600 text-white' : isFri ? 'bg-amber-200 text-amber-800' : 'bg-gray-100 text-gray-600');
-    return '<div class="' + rowC + '"><div class="flex items-center gap-3">' +
-      '<span class="' + numC + '">' + item.d + '</span>' +
-      '<div><p class="font-medium text-sm">' + item.date + ' <span class="text-gray-400">(' + item.day + ')</span></p>' +
-      (isFri && !isToday ? '<span class="text-amber-700 text-[10px] bg-amber-100 px-1.5 py-0.5 rounded">🕌 Джума</span>' : '') +
-      '</div></div><div class="flex gap-3 text-xs text-gray-600">' +
-      '<span>🌅 ' + item.fajr + '</span><span>🕌 ' + item.dhuhr + '</span><span>🌆 ' + item.maghrib + '</span></div></div>';
-  }).join('');
+  
+  var today = new Date();
+  var todayStr = today.getDate() + ' ' + monthNames[today.getMonth()];
+  var listEl = document.getElementById('prayer-list');
+  
+  var html = '';
+  for (var i = 0; i < scheduleData.length; i++) {
+    var item = scheduleData[i];
+    var isToday = item.date === todayStr;
+    var isFri = item.day === 'Пт';
+    
+    var rowClass = 'flex justify-between items-center p-3 border-b border-gray-100 last:border-0 ';
+    if (isToday) rowClass += 'bg-teal-50 border-l-4 border-l-teal-600';
+    else if (isFri) rowClass += 'bg-amber-50 border-l-4 border-l-amber-500';
+    else rowClass += 'hover:bg-gray-50';
+    
+    var numClass = 'w-7 h-7 flex items-center justify-center rounded-full text-xs font-bold ';
+    if (isToday) numClass += 'bg-teal-600 text-white';
+    else if (isFri) numClass += 'bg-amber-200 text-amber-800';
+    else numClass += 'bg-gray-100 text-gray-600';
+    
+    var jumaBadge = (isFri && !isToday) ? '<span class="text-amber-700 text-[10px] bg-amber-100 px-1.5 py-0.5 rounded font-bold">🕌 Джума</span>' : '';
+    
+    html += '<div class="' + rowClass + '">' +
+      '<div class="flex items-center gap-3">' +
+        '<span class="' + numClass + '">' + item.d + '</span>' +
+        '<div class="flex items-center flex-wrap gap-1">' +
+          '<p class="font-medium text-sm text-gray-800">' + item.date + '</p>' +
+          '<span class="text-gray-400 font-normal text-sm">(' + item.day + ')</span>' +
+          jumaBadge +
+        '</div>' +
+      '</div>' +
+      '<div class="flex gap-3 text-xs text-gray-600">' +
+        '<span>🌅 ' + item.fajr + '</span>' +
+        '<span>🕌 ' + item.dhuhr + '</span>' +
+        '<span>🌆 ' + item.maghrib + '</span>' +
+      '</div>' +
+    '</div>';
+  }
+  
+  listEl.innerHTML = html;
 }
 
 function enableCompass() {
-  const STATUS = document.getElementById('compass-status');
-  const BTN = document.getElementById('enable-compass-btn');
-  const RING = document.getElementById('compass-ring');
-  const ARROW = document.getElementById('compass-arrow');
-  const QIBLA = 214;
+  var STATUS = document.getElementById('compass-status');
+  var BTN = document.getElementById('enable-compass-btn');
+  var RING = document.getElementById('compass-ring');
+  var ARROW = document.getElementById('compass-arrow');
+  var QIBLA = 214;
   
   if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
     DeviceOrientationEvent.requestPermission()
-      .then(res => res === 'granted' ? start() : (STATUS.textContent = '⛔ Доступ запрещён'))
+      .then(function(res) {
+        if (res === 'granted') start();
+        else STATUS.textContent = '⛔ Доступ запрещён';
+      })
       .catch(console.error);
-  } else start();
+  } else {
+    start();
+  }
   
   function start() {
     BTN.classList.add('hidden');
     STATUS.textContent = '🔄 Калибровка...';
-    let hist = [];
-    const smooth = v => { hist.push(v); if(hist.length>3) hist.shift(); return hist.reduce((a,b)=>a+b,0)/hist.length; };
-    const handler = e => {
-      let h = e.webkitCompassHeading !== undefined ? e.webkitCompassHeading : (e.alpha !== null ? (360 - e.alpha) % 360 : null);
+    var hist = [];
+    
+    function smooth(v) { 
+      hist.push(v); 
+      if(hist.length>3) hist.shift(); 
+      var sum = 0;
+      for(var i=0; i<hist.length; i++) sum += hist[i];
+      return sum/hist.length; 
+    }
+    
+    function handler(e) {
+      var h = null;
+      if (e.webkitCompassHeading !== undefined) {
+        h = e.webkitCompassHeading;
+      } else if (e.alpha !== null) {
+        h = (360 - e.alpha) % 360;
+      }
+      
       if (h !== null) {
-        const s = smooth(h);
+        var s = smooth(h);
         RING.style.transform = 'rotate(' + (-s) + 'deg)';
         ARROW.style.transform = 'rotate(' + (QIBLA - s) + 'deg)';
-        if (STATUS.textContent.includes('Калибровка')) STATUS.textContent = '✅ Компас работает';
+        if (STATUS.textContent.indexOf('Калибровка') !== -1) {
+          STATUS.textContent = '✅ Компас работает';
+        }
       }
-    };
-    if ('ondeviceorientationabsolute' in window) window.addEventListener('deviceorientationabsolute', handler, {passive:true});
-    else window.addEventListener('deviceorientation', handler, {passive:true});
+    }
+    
+    if ('ondeviceorientationabsolute' in window) {
+      window.addEventListener('deviceorientationabsolute', handler, {passive:true});
+    } else {
+      window.addEventListener('deviceorientation', handler, {passive:true});
+    }
   }
 }
 
-function openInstallModal() { document.getElementById('install-modal').classList.remove('hidden'); }
-function closeInstallModal() { document.getElementById('install-modal').classList.add('hidden'); }
+function openInstallModal() { 
+  document.getElementById('install-modal').classList.remove('hidden'); 
+}
+
+function closeInstallModal() { 
+  document.getElementById('install-modal').classList.add('hidden'); 
+}
+
 function shareApp() {
-  if (navigator.share) navigator.share({title: 'Намаз Челябинск', text: 'Время намазов 🕌', url: location.href}).catch(console.error);
-  else navigator.clipboard.writeText(location.href).then(() => alert('Скопировано!'));
+  if (navigator.share) {
+    navigator.share({
+      title: 'Намаз Челябинск', 
+      text: 'Точное время намазов и Кибла 🕌', 
+      url: location.href
+    }).catch(console.error);
+  } else {
+    navigator.clipboard.writeText(location.href).then(function() {
+      alert('📋 Ссылка скопирована!');
+    });
+  }
+}
+
+window.addEventListener('online', function() {
+  document.getElementById('offline-banner').classList.add('hidden');
+  loadAppData();
+});
+
+window.addEventListener('offline', function() {
+  document.getElementById('offline-banner').classList.remove('hidden');
+});
+
+if (!navigator.onLine) {
+  document.getElementById('offline-banner').classList.remove('hidden');
 }
 
 loadAppData();
