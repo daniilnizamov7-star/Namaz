@@ -35,7 +35,7 @@
     .prayer-card.next .prayer-name { color: #047857; font-weight: 800; }
     .prayer-card.next .prayer-time { color: #047857; font-weight: 800; }
     
-    /* 🔴 Красное: время макрух (30 мин после восхода) */
+    /* 🔴 Красное: время макрух (30 мин после восхода И последняя 1/3 ночи) */
     .prayer-card.makruh { 
       background: #fef2f2; 
       border: 2px solid #fca5a5; 
@@ -43,6 +43,15 @@
     }
     .prayer-card.makruh .prayer-name { color: #b91c1c; font-weight: 700; }
     .prayer-card.makruh .prayer-time { color: #dc2626; font-weight: 700; }
+
+    /* 🟠 Оранжевое: вторая 1/3 ночи (можно, но не желательно) */
+    .prayer-card.night-second-third { 
+      background: #fff7ed; 
+      border: 2px solid #fdba74; 
+      box-shadow: 0 2px 10px rgba(249, 115, 22, 0.15);
+    }
+    .prayer-card.night-second-third .prayer-name { color: #c2410c; font-weight: 600; }
+    .prayer-card.night-second-third .prayer-time { color: #ea580c; font-weight: 600; }
 
     .fade-in { animation: fadeIn 0.4s ease; }
     @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
@@ -251,6 +260,32 @@
     } catch (e) { console.error(e); document.getElementById('today-full-date').textContent = 'Ошибка'; }
   }
 
+  // === РАСЧЁТ ТРЕТЕЙ НОЧИ (ХАНАФИТСКИЙ МАЗХАБ) ===
+  function getNightThirds() {
+    if (!currentData) return null;
+    
+    const [ishaH, ishaM] = currentData.isha.split(':').map(Number);
+    const [fajrH, fajrM] = currentData.fajr.split(':').map(Number);
+    
+    const ishaMinutes = ishaH * 60 + ishaM;
+    let fajrMinutes = fajrH * 60 + fajrM;
+    
+    // Если Фаджр раньше Иша (ночь переходит на следующий день)
+    if (fajrMinutes < ishaMinutes) {
+      fajrMinutes += 24 * 60; // Добавляем сутки
+    }
+    
+    const nightDuration = fajrMinutes - ishaMinutes;
+    const thirdDuration = nightDuration / 3;
+    
+    return {
+      firstThirdEnd: ishaMinutes + thirdDuration,      // Конец первой 1/3
+      secondThirdEnd: ishaMinutes + (2 * thirdDuration), // Конец второй 1/3
+      thirdThirdStart: secondThirdEnd,                    // Начало последней 1/3
+      nightDuration: nightDuration
+    };
+  }
+
   // === ЛОГИКА ОТОБРАЖЕНИЯ ===
   function renderPrayers() {
     if(!currentData) return;
@@ -264,6 +299,29 @@
 
     const [sunH, sunM] = currentData.sunrise.split(':').map(Number);
     const sunriseTime = sunH * 60 + sunM;
+
+    // Получаем трети ночи
+    const thirds = getNightThirds();
+    let nightPeriod = null; // 'first', 'second', 'third', или null
+    
+    if (thirds) {
+      const [ishaH, ishaM] = currentData.isha.split(':').map(Number);
+      const ishaMinutes = ishaH * 60 + ishaM;
+      let currentTimeAdjusted = currentTime;
+      
+      // Если сейчас ночь (после Иша)
+      if (currentTime >= ishaMinutes || currentTime < (thirds.firstThirdEnd > 24*60 ? thirds.firstThirdEnd - 24*60 : thirds.firstThirdEnd)) {
+        if (currentTime < ishaMinutes) currentTimeAdjusted += 24 * 60;
+        
+        if (currentTimeAdjusted < thirds.firstThirdEnd) {
+          nightPeriod = 'first';
+        } else if (currentTimeAdjusted < thirds.secondThirdEnd) {
+          nightPeriod = 'second';
+        } else {
+          nightPeriod = 'third';
+        }
+      }
+    }
 
     for (const key of prayerKeys) {
       const [h, m] = currentData[key].split(':').map(Number);
@@ -302,6 +360,29 @@
         if (prayer.key === nextKey && prayer.key !== currentKey) extraHtml = '<p class="text-xs text-emerald-600 font-semibold">Следующий</p>';
       } else if (prayer.type === 'prep' && currentTime > pMin) {
         statusClass = 'passed';
+      }
+
+      // === ДОБАВЛЯЕМ ИНФОРМАЦИЮ О ТРЕТЯХ НОЧИ ДЛЯ ИША ===
+      if (prayer.key === 'isha' && thirds) {
+        const [ishaH, ishaM] = currentData.isha.split(':').map(Number);
+        const ishaMinutes = ishaH * 60 + ishaM;
+        
+        if (currentTime >= ishaMinutes) {
+          if (nightPeriod === 'first') {
+            extraHtml = '<p class="text-xs text-emerald-600 font-medium mt-1">🟢 Лучшее время (1/3 ночи)</p>';
+          } else if (nightPeriod === 'second') {
+            extraHtml = '<p class="text-xs text-orange-600 font-medium mt-1">🟠 Можно, но не желательно (2/3)</p>';
+          } else if (nightPeriod === 'third') {
+            extraHtml = '<p class="text-xs text-red-600 font-medium mt-1">🔴 Макрух (последняя 1/3)</p>';
+          }
+          
+          // Предупреждение за 30 минут до последней трети
+          const timeToThird = thirds.thirdThirdStart - currentTime;
+          if (timeToThird > 0 && timeToThird <= 30 && nightPeriod === 'second') {
+            const minsLeft = Math.floor(timeToThird);
+            extraHtml = `<p class="text-xs text-red-600 font-bold mt-1">⏰ Осталось ${minsLeft} мин до макрух!</p>`;
+          }
+        }
       }
 
       const nCol = statusClass === 'next' ? 'text-emerald-800' : statusClass === 'makruh' ? 'text-red-700' : 'text-gray-800';
