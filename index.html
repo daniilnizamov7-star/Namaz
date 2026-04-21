@@ -105,6 +105,19 @@
 </header>
 
 <main class="max-w-md mx-auto px-4 -mt-6">
+  
+  <!--  БАННЕР КУРБАН БАЙРАМ -->
+  <div class="bg-gradient-to-r from-emerald-50 to-teal-50 border border-emerald-100 rounded-2xl p-4 shadow-sm mb-4 flex items-center justify-between relative overflow-hidden fade-in">
+    <div class="absolute -right-2 -bottom-2 text-6xl opacity-10 select-none pointer-events-none">🕌</div>
+    <div class="relative z-10">
+      <p class="font-bold text-emerald-800 text-sm">🌙 Курбан Байрам</p>
+      <p class="text-xs text-emerald-600 mt-0.5 font-medium">27 мая (Вторник)</p>
+      <p class="text-[10px] text-emerald-500 mt-1">Такъаббаль Аллаху минна ва минкум</p>
+    </div>
+    <div class="relative z-10 text-3xl ml-2">✨</div>
+  </div>
+  <!-- КОНЕЦ БАННЕРА -->
+
   <div class="card p-5 mb-4 fade-in">
     <div class="flex justify-between items-center mb-4">
       <div>
@@ -153,9 +166,6 @@
 
   <div class="text-center text-xs text-gray-400 px-4 pb-6 pt-4">
     <p>Данные: ЦДУМ России / РДУМ Челябинской обл.</p>
-    <p class="mt-2 text-gray-300 leading-tight">
-  ⚠️ Время намазов указано справочно. Для обязательств сверяйтесь с расписанием местной мечети.
-    </p>
     <div class="mt-6 pt-4 border-t border-gray-200">
       <p class="text-gray-500 mb-3 font-medium text-sm">Связь: @Aslyamov74 | 8 (991) 174-51-13</p>
       <a href="https://nizamov-tech.vercel.app/" target="_blank" class="inline-flex items-center gap-2 text-teal-600 hover:text-teal-800 font-medium text-sm">🚀 Еще проекты</a>
@@ -171,7 +181,7 @@
       <button onclick="closeInstallModal()" class="text-gray-400 text-2xl">&times;</button>
     </div>
     <div class="space-y-3 text-sm">
-      <div class="bg-blue-50 p-3 rounded"><strong>Android (chrome ):</strong> Меню (⋮) → "Добавить на главный экран"</div>
+      <div class="bg-blue-50 p-3 rounded"><strong>Android:</strong> Меню (⋮) → "Добавить на главный экран"</div>
       <div class="bg-gray-50 p-3 rounded"><strong>iPhone:</strong> Поделиться (⬆️) → "На экран Домой"</div>
     </div>
   </div>
@@ -305,37 +315,24 @@ function updateBackgroundGradient() {
   
   document.body.className = 'pb-8';
   
-  if (ct >= fajrTime && ct < sunriseTime) {
-    document.body.classList.add('time-fajr');
-  } else if (ct >= sunriseTime && ct < dhuhrTime) {
-    document.body.classList.add('time-dhuhr');
-  } else if (ct >= dhuhrTime && ct < asrTime) {
-    document.body.classList.add('time-dhuhr');
-  } else if (ct >= asrTime && ct < maghribTime) {
-    document.body.classList.add('time-asr');
-  } else if (ct >= maghribTime && ct < ishaTime) {
-    document.body.classList.add('time-maghrib');
-  } else if (ct >= ishaTime) {
-    document.body.classList.add('time-isha');
-  } else {
-    document.body.classList.add('time-night');
-  }
+  if (ct >= fajrTime && ct < sunriseTime) document.body.classList.add('time-fajr');
+  else if (ct >= sunriseTime && ct < dhuhrTime) document.body.classList.add('time-dhuhr');
+  else if (ct >= dhuhrTime && ct < asrTime) document.body.classList.add('time-dhuhr');
+  else if (ct >= asrTime && ct < maghribTime) document.body.classList.add('time-asr');
+  else if (ct >= maghribTime && ct < ishaTime) document.body.classList.add('time-maghrib');
+  else if (ct >= ishaTime) document.body.classList.add('time-isha');
+  else document.body.classList.add('time-night');
 }
 
 function getNightThirds() {
   if (!currentData) return null;
-  
   var iParts = currentData.isha.split(':');
   var fParts = currentData.fajr.split(':');
-  
   var ishaMin = parseInt(iParts[0])*60 + parseInt(iParts[1]);
   var fajrMin = parseInt(fParts[0])*60 + parseInt(fParts[1]);
-  
   if (fajrMin < ishaMin) fajrMin += 24*60;
-  
   var dur = fajrMin - ishaMin;
   var third = dur / 3;
-  
   return {
     firstThirdEnd: ishaMin + third,
     secondThirdEnd: ishaMin + 2*third,
@@ -364,10 +361,8 @@ function renderPrayers() {
     var iParts = currentData.isha.split(':');
     var ishaMin = parseInt(iParts[0])*60 + parseInt(iParts[1]);
     var adjCt = ct;
-    
     if (ct >= ishaMin || ct < sunrise) {
       if (ct < ishaMin) adjCt += 24*60;
-      
       if (adjCt < thirds.firstThirdEnd) nightPeriod = 'first';
       else if (adjCt < thirds.secondThirdEnd) nightPeriod = 'second';
       else nightPeriod = 'third';
@@ -378,10 +373,7 @@ function renderPrayers() {
     var key = pKeys[i];
     var parts = currentData[key].split(':');
     var prayerMin = parseInt(parts[0])*60 + parseInt(parts[1]);
-    if (ct < prayerMin) { 
-      nextKey = key; 
-      break; 
-    }
+    if (ct < prayerMin) { nextKey = key; break; }
   }
   
   for (var j = 0; j < pKeys.length - 1; j++) {
@@ -391,11 +383,8 @@ function renderPrayers() {
     var parts2 = currentData[p2].split(':');
     var time1 = parseInt(parts1[0])*60 + parseInt(parts1[1]);
     var time2 = parseInt(parts2[0])*60 + parseInt(parts2[1]);
-    
     if (ct >= time1 && ct < time2) {
-      if (!(p1 === 'fajr' && ct >= sunrise)) {
-        currentKey = p1;
-      }
+      if (!(p1 === 'fajr' && ct >= sunrise)) currentKey = p1;
       break;
     }
   }
@@ -419,47 +408,47 @@ function renderPrayers() {
       } else if (ct > pMin) {
         cls = 'passed';
       }
-    } else if (prayer.type === 'prayer') {
+    } 
+    else if (prayer.key === 'isha' && ct >= ishaMinutes) {
+      if (nightPeriod === 'first') {
+        cls = 'next';
+        extra = '<p class="text-xs text-emerald-600 mt-1 font-medium">🟢 1/3 ночи</p>';
+      } else if (nightPeriod === 'second') {
+        cls = 'isha-second-third';
+        extra = '<p class="text-xs text-orange-600 mt-1 font-medium">🟠 2/3 ночи</p>';
+        var toThird = thirds.thirdThirdStart - ct;
+        if (toThird > 0 && toThird <= 30) {
+          extra = '<p class="text-xs text-red-600 mt-1 font-bold">⏰ ' + Math.floor(toThird) + ' мин до макрух!</p>';
+        }
+      } else {
+        cls = 'isha-third-third';
+        extra = '<p class="text-xs text-red-600 mt-1 font-medium">🔴 Макрух</p>';
+      }
+    }
+    else if (prayer.type === 'prayer') {
       var isCur = prayer.key === currentKey;
       var isNext = prayer.key === nextKey;
       var isPassed = ct > pMin;
       var minsTo = pMin - ct;
       var isSoon = minsTo > 0 && minsTo <= 10 && !isCur;
+
+      if (isCur) cls = 'next';
+      else if (isPassed) cls = 'passed';
       
-      if (prayer.key === 'isha' && ct >= ishaMinutes) {
-        if (nightPeriod === 'first') {
-          cls = 'next';
-          extra = '<p class="text-xs text-emerald-600 mt-1 font-medium">🟢 1/3 ночи, лучшее время</p>';
-        } else if (nightPeriod === 'second') {
-          cls = 'isha-second-third';
-          extra = '<p class="text-xs text-orange-600 mt-1 font-medium">🟠 2/3 ночи</p>';
-          var toThird = thirds.thirdThirdStart - ct;
-          if (toThird > 0 && toThird <= 30) {
-            extra = '<p class="text-xs text-red-600 mt-1 font-bold">⏰ ' + Math.floor(toThird) + ' мин до макрух!</p>';
-          }
-        } else if (nightPeriod === 'third') {
-          cls = 'isha-third-third';
-          extra = '<p class="text-xs text-red-600 mt-1 font-medium">🔴 Макрух</p>';
-        }
-      } else {
-        if (isCur) cls = 'next';
-        else if (isPassed) cls = 'passed';
-        
-        if (isSoon && !isCur) cls = 'soon';
-        
-        if (isNext && !isCur && !isSoon) {
-          extra = '<p class="text-xs text-emerald-600 font-semibold">Следующий</p>';
-        } else if (isSoon) {
-          extra = '<p class="text-xs text-amber-600 font-semibold">⏰ Скоро (10 мин)</p>';
-        }
+      if (isSoon && !isCur) cls = 'soon';
+      
+      if (isNext && !isCur && !isSoon) {
+        extra = '<p class="text-xs text-emerald-600 font-semibold">Следующий</p>';
+      } else if (isSoon) {
+        extra = '<p class="text-xs text-amber-600 font-semibold">⏰ Скоро (10 мин)</p>';
       }
-    } else if (prayer.type === 'prep' && ct > pMin) {
+    }
+    else if (prayer.type === 'prep' && ct > pMin) {
       cls = 'passed';
     }
     
     var nCol = 'text-gray-800';
     var tCol = 'text-teal-700';
-    
     if (cls === 'next') { nCol = 'text-emerald-800'; tCol = 'text-emerald-700'; }
     else if (cls === 'makruh') { nCol = 'text-red-700'; tCol = 'text-red-600'; }
     else if (cls === 'isha-second-third') { nCol = 'text-orange-800'; tCol = 'text-orange-600'; }
@@ -490,56 +479,42 @@ function renderPrayers() {
 
 function updateCountdown(key) {
   if(!currentData) return;
-  
   var now = new Date();
   var parts = currentData[key].split(':');
   var h = parseInt(parts[0]);
   var m = parseInt(parts[1]);
-  
   var target = new Date();
   target.setHours(h, m, 0, 0);
-  
-  if (target <= now) {
-    target.setDate(target.getDate() + 1);
-  }
-  
+  if (target <= now) target.setDate(target.getDate() + 1);
   var diff = target - now;
   var hrs = Math.floor(diff/3600000);
   var mins = Math.floor((diff%3600000)/60000);
   var secs = Math.floor((diff%60000)/1000);
-  
   var hrsStr = hrs < 10 ? '0' + hrs : '' + hrs;
   var minsStr = mins < 10 ? '0' + mins : '' + mins;
   var secsStr = secs < 10 ? '0' + secs : '' + secs;
-  
   document.getElementById('countdown').textContent = hrsStr + ':' + minsStr + ':' + secsStr;
 }
 
 function renderMonthlyList() {
   if(!currentData || scheduleData.length === 0) return;
-  
   var today = new Date();
   var todayStr = today.getDate() + ' ' + monthNames[today.getMonth()];
   var listEl = document.getElementById('prayer-list');
-  
   var html = '';
   for (var i = 0; i < scheduleData.length; i++) {
     var item = scheduleData[i];
     var isToday = item.date === todayStr;
     var isFri = item.day === 'Пт';
-    
     var rowClass = 'flex justify-between items-center p-3 border-b border-gray-100 last:border-0 ';
     if (isToday) rowClass += 'bg-teal-50 border-l-4 border-l-teal-600';
     else if (isFri) rowClass += 'bg-amber-50 border-l-4 border-l-amber-500';
     else rowClass += 'hover:bg-gray-50';
-    
     var numClass = 'w-7 h-7 flex items-center justify-center rounded-full text-xs font-bold ';
     if (isToday) numClass += 'bg-teal-600 text-white';
     else if (isFri) numClass += 'bg-amber-200 text-amber-800';
     else numClass += 'bg-gray-100 text-gray-600';
-    
     var jumaBadge = (isFri && !isToday) ? '<span class="text-amber-700 text-[10px] bg-amber-100 px-1.5 py-0.5 rounded font-bold">🕌 Джума</span>' : '';
-    
     html += '<div class="' + rowClass + '">' +
       '<div class="flex items-center gap-3">' +
         '<span class="' + numClass + '">' + item.d + '</span>' +
@@ -556,7 +531,6 @@ function renderMonthlyList() {
       '</div>' +
     '</div>';
   }
-  
   listEl.innerHTML = html;
 }
 
@@ -566,91 +540,42 @@ function enableCompass() {
   var RING = document.getElementById('compass-ring');
   var ARROW = document.getElementById('compass-arrow');
   var QIBLA = 214;
-  
   if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
     DeviceOrientationEvent.requestPermission()
-      .then(function(res) {
-        if (res === 'granted') start();
-        else STATUS.textContent = '⛔ Доступ запрещён';
-      })
+      .then(function(res) { if (res === 'granted') start(); else STATUS.textContent = '⛔ Доступ запрещён'; })
       .catch(console.error);
-  } else {
-    start();
-  }
-  
+  } else { start(); }
   function start() {
     BTN.classList.add('hidden');
     STATUS.textContent = '🔄 Калибровка...';
     var hist = [];
-    
-    function smooth(v) { 
-      hist.push(v); 
-      if(hist.length>3) hist.shift(); 
-      var sum = 0;
-      for(var i=0; i<hist.length; i++) sum += hist[i];
-      return sum/hist.length; 
-    }
-    
+    function smooth(v) { hist.push(v); if(hist.length>3) hist.shift(); var sum=0; for(var i=0;i<hist.length;i++) sum+=hist[i]; return sum/hist.length; }
     function handler(e) {
       var h = null;
-      if (e.webkitCompassHeading !== undefined) {
-        h = e.webkitCompassHeading;
-      } else if (e.alpha !== null) {
-        h = (360 - e.alpha) % 360;
-      }
-      
+      if (e.webkitCompassHeading !== undefined) h = e.webkitCompassHeading;
+      else if (e.alpha !== null) h = (360 - e.alpha) % 360;
       if (h !== null) {
         var s = smooth(h);
         RING.style.transform = 'rotate(' + (-s) + 'deg)';
         ARROW.style.transform = 'rotate(' + (QIBLA - s) + 'deg)';
-        if (STATUS.textContent.indexOf('Калибровка') !== -1) {
-          STATUS.textContent = '✅ Компас работает';
-        }
+        if (STATUS.textContent.indexOf('Калибровка') !== -1) STATUS.textContent = '✅ Компас работает';
       }
     }
-    
-    if ('ondeviceorientationabsolute' in window) {
-      window.addEventListener('deviceorientationabsolute', handler, {passive:true});
-    } else {
-      window.addEventListener('deviceorientation', handler, {passive:true});
-    }
+    if ('ondeviceorientationabsolute' in window) window.addEventListener('deviceorientationabsolute', handler, {passive:true});
+    else window.addEventListener('deviceorientation', handler, {passive:true});
   }
 }
 
-function openInstallModal() { 
-  document.getElementById('install-modal').classList.remove('hidden'); 
-}
-
-function closeInstallModal() { 
-  document.getElementById('install-modal').classList.add('hidden'); 
-}
-
+function openInstallModal() { document.getElementById('install-modal').classList.remove('hidden'); }
+function closeInstallModal() { document.getElementById('install-modal').classList.add('hidden'); }
 function shareApp() {
-  if (navigator.share) {
-    navigator.share({
-      title: 'Намаз Челябинск', 
-      text: 'Точное время намазов и Кибла 🕌', 
-      url: location.href
-    }).catch(console.error);
-  } else {
-    navigator.clipboard.writeText(location.href).then(function() {
-      alert('📋 Ссылка скопирована!');
-    });
-  }
+  if (navigator.share) navigator.share({title: 'Намаз Челябинск', text: 'Точное время намазов и Кибла 🕌', url: location.href}).catch(console.error);
+  else navigator.clipboard.writeText(location.href).then(function(){ alert('📋 Ссылка скопирована!'); });
 }
 
-window.addEventListener('online', function() {
-  document.getElementById('offline-banner').classList.add('hidden');
-  loadAppData();
-});
-
-window.addEventListener('offline', function() {
-  document.getElementById('offline-banner').classList.remove('hidden');
-});
-
-if (!navigator.onLine) {
-  document.getElementById('offline-banner').classList.remove('hidden');
-}
+window.addEventListener('online', function() { document.getElementById('offline-banner').classList.add('hidden'); loadAppData(); });
+window.addEventListener('offline', function() { document.getElementById('offline-banner').classList.remove('hidden'); });
+if (!navigator.onLine) document.getElementById('offline-banner').classList.remove('hidden');
 
 loadAppData();
 </script>
