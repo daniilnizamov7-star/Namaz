@@ -34,6 +34,9 @@
     .prayer-card.makruh { background: #fef2f2; border: 2px solid #fca5a5; box-shadow: 0 2px 10px rgba(239, 68, 68, 0.15); }
     .prayer-card.makruh .prayer-name { color: #b91c1c; font-weight: 700; }
     .prayer-card.makruh .prayer-time { color: #dc2626; font-weight: 700; }
+    .prayer-card.isha-first-third { background: #ecfdf5; border: 2px solid #10b981; box-shadow: 0 2px 10px rgba(16, 185, 129, 0.15); }
+    .prayer-card.isha-first-third .prayer-name { color: #047857; font-weight: 700; }
+    .prayer-card.isha-first-third .prayer-time { color: #059669; font-weight: 700; }
     .prayer-card.isha-second-third { background: #fff7ed; border: 2px solid #fdba74; box-shadow: 0 2px 10px rgba(249, 115, 22, 0.15); }
     .prayer-card.isha-second-third .prayer-name { color: #c2410c; font-weight: 700; }
     .prayer-card.isha-second-third .prayer-time { color: #ea580c; font-weight: 700; }
@@ -133,7 +136,6 @@
   </div>
 </main>
 
-<!-- Модальное окно установки -->
 <div id="install-modal" class="fixed inset-0 z-[100] hidden">
   <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" onclick="closeInstallModal()"></div>
   <div class="absolute bottom-0 left-0 right-0 bg-white rounded-t-3xl p-6">
@@ -148,7 +150,6 @@
   </div>
 </div>
 
-<!-- 🔗 Модальное окно "Поделиться" с QR-кодом -->
 <div id="share-modal" class="fixed inset-0 z-[110] hidden">
   <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" onclick="closeShareModal()"></div>
   <div class="absolute bottom-0 left-0 right-0 bg-white rounded-t-3xl p-6 animate-slide-up md:bottom-auto md:top-1/2 md:-translate-y-1/2 md:mx-auto md:max-w-sm md:rounded-2xl">
@@ -156,24 +157,16 @@
       <h3 class="text-lg font-bold text-gray-900">📤 Поделиться приложением</h3>
       <button onclick="closeShareModal()" class="text-gray-400 hover:text-gray-600 text-2xl leading-none">&times;</button>
     </div>
-    
     <p class="text-sm text-gray-600 mb-4">Отправь ссылку другу или покажи QR-код:</p>
-    
-    <!-- QR Code -->
     <div id="qrcode" class="bg-gray-50 p-4 rounded-xl flex justify-center"></div>
-    
-    <!-- Ссылка -->
     <div class="flex items-center gap-2 bg-gray-100 rounded-lg p-3 mb-4">
       <input type="text" id="share-url" readonly class="flex-1 bg-transparent text-sm text-gray-700 outline-none" value="">
       <button onclick="copyShareLink()" class="text-teal-600 hover:text-teal-800 text-sm font-semibold whitespace-nowrap">📋 Копировать</button>
     </div>
-    
-    <!-- Кнопки -->
     <div class="grid grid-cols-2 gap-3">
       <button onclick="nativeShare()" class="px-4 py-3 bg-teal-600 text-white rounded-xl font-medium hover:bg-teal-700 transition">📱 Поделиться</button>
       <button onclick="closeShareModal()" class="px-4 py-3 bg-gray-100 text-gray-700 rounded-xl font-medium hover:bg-gray-200 transition">Закрыть</button>
     </div>
-    
     <p class="text-[10px] text-gray-400 text-center mt-4">QR-код ведёт на это приложение</p>
   </div>
 </div>
@@ -204,7 +197,7 @@ function getMoonPhase(date) {
   b = parseInt(jd);
   jd -= b;
   b = Math.round(jd * 8);
-  const phases = ['🌑','','🌓','','','🌖','',''];
+  const phases = ['🌑','','','','','🌖','',''];
   return phases[b >= 8 ? 0 : b];
 }
 
@@ -288,30 +281,35 @@ function renderPrayers() {
   var suParts = currentData.sunrise.split(':'), sunrise = parseInt(suParts[0])*60 + parseInt(suParts[1]);
   var fParts = currentData.fajr.split(':'), fajrTime = parseInt(fParts[0])*60 + parseInt(fParts[1]);
   var thirds = getNightThirds(), nightPeriod = null;
+  
   if (thirds) {
     var iParts = currentData.isha.split(':'), ishaMin = parseInt(iParts[0])*60 + parseInt(iParts[1]), adjCt = ct;
-    if (ct >= ishaMin || ct < sunrise) {
+    if (ct >= ishaMin || ct < fajrTime) {
       if (ct < ishaMin) adjCt += 24*60;
       if (adjCt < thirds.firstThirdEnd) nightPeriod = 'first';
       else if (adjCt < thirds.secondThirdEnd) nightPeriod = 'second';
       else nightPeriod = 'third';
     }
   }
+  
   for (var i = 0; i < pKeys.length; i++) {
     var key = pKeys[i], parts = currentData[key].split(':'), prayerMin = parseInt(parts[0])*60 + parseInt(parts[1]);
     if (ct < prayerMin) { nextKey = key; break; }
   }
+  
   for (var j = 0; j < pKeys.length - 1; j++) {
     var p1 = pKeys[j], p2 = pKeys[j+1], parts1 = currentData[p1].split(':'), parts2 = currentData[p2].split(':');
     var time1 = parseInt(parts1[0])*60 + parseInt(parts1[1]), time2 = parseInt(parts2[0])*60 + parseInt(parts2[1]);
     if (ct >= time1 && ct < time2) { if (!(p1 === 'fajr' && ct >= sunrise)) currentKey = p1; break; }
   }
+  
   var ishaParts = currentData.isha.split(':'), ishaMinutes = parseInt(ishaParts[0])*60 + parseInt(ishaParts[1]);
   if (ct >= ishaMinutes && ct < fajrTime) currentKey = 'isha';
   
   var html = '';
   for (var k = 0; k < prayers.length; k++) {
     var prayer = prayers[k], timeParts = currentData[prayer.key].split(':'), pMin = parseInt(timeParts[0])*60 + parseInt(timeParts[1]), cls = '', extra = '';
+    
     if (prayer.key === 'sunrise') {
       if (ct >= sunrise && ct < sunrise+30) { cls = 'makruh'; extra = '<p class="text-xs text-red-500 mt-1 font-medium">⏳ 30 мин нежелательно</p>'; }
       else if (ct > pMin) cls = 'passed';
@@ -320,14 +318,20 @@ function renderPrayers() {
       if (ct < ishaMinutes) {
         if (prayer.key === nextKey) extra = '<p class="text-xs text-emerald-600 font-semibold">Следующий</p>';
       } else {
-        if (nightPeriod === 'first') { cls = 'next'; extra = '<p class="text-xs text-emerald-600 mt-1 font-medium">🟢 1/3 ночи</p>'; }
+        if (nightPeriod === 'first') { 
+          cls = 'isha-first-third'; 
+          extra = '<p class="text-xs text-emerald-600 mt-1 font-medium">🟢 1/3 ночи, лучшее время</p>'; 
+        }
         else if (nightPeriod === 'second') {
           cls = 'isha-second-third';
-          extra = '<p class="text-xs text-orange-600 mt-1 font-medium">🟠 2/3 ночи</p>';
+          extra = '<p class="text-xs text-orange-600 mt-1 font-medium">🟠 2/3 ночи, поторопись</p>';
           var toThird = thirds.thirdThirdStart - ct;
           if (toThird > 0 && toThird <= 30) extra = '<p class="text-xs text-red-600 mt-1 font-bold">⏰ ' + Math.floor(toThird) + ' мин до макрух!</p>';
         }
-        else { cls = 'isha-third-third'; extra = '<p class="text-xs text-red-600 mt-1 font-medium">🔴 Макрух</p>'; }
+        else { 
+          cls = 'isha-third-third'; 
+          extra = '<p class="text-xs text-red-600 mt-1 font-medium">🔴 3/3, макрух</p>'; 
+        }
       }
     }
     else if (prayer.type === 'prayer') {
@@ -339,12 +343,13 @@ function renderPrayers() {
       else if (isSoon) extra = '<p class="text-xs text-amber-600 font-semibold">⏰ Скоро (10 мин)</p>';
     }
     else if (prayer.type === 'prep' && ct > pMin) cls = 'passed';
+    
     var nCol = 'text-gray-800', tCol = 'text-teal-700';
-    if (cls === 'next') { nCol = 'text-emerald-800'; tCol = 'text-emerald-700'; }
-    else if (cls === 'makruh') { nCol = 'text-red-700'; tCol = 'text-red-600'; }
+    if (cls === 'next' || cls === 'isha-first-third') { nCol = 'text-emerald-800'; tCol = 'text-emerald-700'; }
+    else if (cls === 'makruh' || cls === 'isha-third-third') { nCol = 'text-red-700'; tCol = 'text-red-600'; }
     else if (cls === 'isha-second-third') { nCol = 'text-orange-800'; tCol = 'text-orange-600'; }
-    else if (cls === 'isha-third-third') { nCol = 'text-red-700'; tCol = 'text-red-600'; }
     else if (cls === 'soon') { nCol = 'text-amber-700'; tCol = 'text-amber-600'; }
+    
     var prepText = prayer.type === 'prep' ? '<p class="text-xs opacity-75">До рассвета</p>' : '';
     var infoText = (prayer.type === 'info' && cls !== 'makruh') ? '<p class="text-xs opacity-75">Не намаз</p>' : '';
     html += '<div class="prayer-card p-3 rounded-xl flex items-center justify-between ' + cls + '">' +
@@ -414,7 +419,6 @@ function enableCompass() {
   }
 }
 
-// === МОДАЛЬНЫЕ ОКНА ===
 function openInstallModal() { document.getElementById('install-modal').classList.remove('hidden'); }
 function closeInstallModal() { document.getElementById('install-modal').classList.add('hidden'); }
 
@@ -423,52 +427,31 @@ function openShareModal() {
   const urlInput = document.getElementById('share-url');
   const qrContainer = document.getElementById('qrcode');
   const appUrl = window.location.href;
-  
   urlInput.value = appUrl;
   qrContainer.innerHTML = '';
-  
-  // Генерируем QR-код
   if (typeof QRCode !== 'undefined') {
-    new QRCode(qrContainer, {
-      text: appUrl,
-      width: 180,
-      height: 180,
-      correctLevel: QRCode.CorrectLevel.M
-    });
+    new QRCode(qrContainer, { text: appUrl, width: 180, height: 180, correctLevel: QRCode.CorrectLevel.M });
   }
-  
   modal.classList.remove('hidden');
 }
 
-function closeShareModal() {
-  document.getElementById('share-modal').classList.add('hidden');
-}
-
+function closeShareModal() { document.getElementById('share-modal').classList.add('hidden'); }
 function copyShareLink() {
   const urlInput = document.getElementById('share-url');
   urlInput.select();
   document.execCommand('copy');
   alert('📋 Ссылка скопирована!');
 }
-
 function nativeShare() {
   const appUrl = window.location.href;
   if (navigator.share) {
-    navigator.share({
-      title: 'Намаз Челябинск',
-      text: 'Точное время намазов и Кибла 🕌',
-      url: appUrl
-    }).catch(console.error);
+    navigator.share({ title: 'Намаз Челябинск', text: 'Точное время намазов и Кибла 🕌', url: appUrl }).catch(console.error);
   } else {
     copyShareLink();
   }
 }
+function shareApp() { openShareModal(); }
 
-function shareApp() {
-  openShareModal();
-}
-
-// === СОБЫТИЯ ===
 window.addEventListener('online', function() { document.getElementById('offline-banner').classList.add('hidden'); loadAppData(); });
 window.addEventListener('offline', function() { document.getElementById('offline-banner').classList.remove('hidden'); });
 if (!navigator.onLine) document.getElementById('offline-banner').classList.remove('hidden');
