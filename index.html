@@ -43,6 +43,9 @@
     .prayer-card.isha-third-third { background: #fef2f2; border: 2px solid #fca5a5; box-shadow: 0 2px 10px rgba(239, 68, 68, 0.15); }
     .prayer-card.isha-third-third .prayer-name { color: #b91c1c; font-weight: 700; }
     .prayer-card.isha-third-third .prayer-time { color: #dc2626; font-weight: 700; }
+    .prayer-card.isha-previous { background: #f0fdf4; border: 1px dashed #10b981; }
+    .prayer-card.isha-previous .prayer-name { color: #047857; font-weight: 600; }
+    .prayer-card.isha-previous .prayer-time { color: #059669; font-weight: 600; }
     .fade-in { animation: fadeIn 0.4s ease; }
     @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
     .countdown-digit { font-variant-numeric: tabular-nums; }
@@ -264,13 +267,31 @@ function updateBackgroundGradient() {
   else document.body.classList.add('time-night');
 }
 
-function getNightThirds() {
-  if (!currentData) return null;
-  var iParts = currentData.isha.split(':'), fParts = currentData.fajr.split(':');
+function getNightThirds(data) {
+  if (!data) return null;
+  var iParts = data.isha.split(':'), fParts = data.fajr.split(':');
   var ishaMin = parseInt(iParts[0])*60 + parseInt(iParts[1]), fajrMin = parseInt(fParts[0])*60 + parseInt(fParts[1]);
   if (fajrMin < ishaMin) fajrMin += 24*60;
   var dur = fajrMin - ishaMin, third = dur / 3;
-  return { firstThirdEnd: ishaMin + third, secondThirdEnd: ishaMin + 2*third, thirdThirdStart: ishaMin + 2*third };
+  return { firstThirdEnd: ishaMin + third, secondThirdEnd: ishaMin + 2*third, thirdThirdStart: ishaMin + 2*third, ishaMin: ishaMin };
+}
+
+function renderPrayerCard(prayer, timeStr, cls, extra, isNight, nightPeriod, thirds) {
+  var timeParts = timeStr.split(':'), pMin = parseInt(timeParts[0])*60 + parseInt(timeParts[1]);
+  var nCol = 'text-gray-800', tCol = 'text-teal-700';
+  if (cls === 'next' || cls === 'isha-first-third') { nCol = 'text-emerald-800'; tCol = 'text-emerald-700'; }
+  else if (cls === 'makruh' || cls === 'isha-third-third') { nCol = 'text-red-700'; tCol = 'text-red-600'; }
+  else if (cls === 'isha-second-third') { nCol = 'text-orange-800'; tCol = 'text-orange-600'; }
+  else if (cls === 'soon') { nCol = 'text-amber-700'; tCol = 'text-amber-600'; }
+  else if (cls === 'isha-previous') { nCol = 'text-teal-600'; tCol = 'text-teal-600'; }
+  
+  var prepText = prayer.type === 'prep' ? '<p class="text-xs opacity-75">До рассвета</p>' : '';
+  var infoText = (prayer.type === 'info' && cls !== 'makruh') ? '<p class="text-xs opacity-75">Не намаз</p>' : '';
+  
+  return '<div class="prayer-card p-3 rounded-xl flex items-center justify-between ' + cls + '">' +
+    '<div class="flex items-center gap-3"><span class="text-2xl">' + prayer.icon + '</span><div>' +
+    '<p class="font-semibold text-sm ' + nCol + '">' + prayer.name + '</p>' + prepText + infoText + extra + '</div></div>' +
+    '<div class="text-right"><p class="text-xl font-bold ' + tCol + '">' + timeStr + '</p></div></div>';
 }
 
 function renderPrayers() {
@@ -281,64 +302,80 @@ function renderPrayers() {
   var suParts = currentData.sunrise.split(':'), sunrise = parseInt(suParts[0])*60 + parseInt(suParts[1]);
   var fParts = currentData.fajr.split(':'), fajrTime = parseInt(fParts[0])*60 + parseInt(fParts[1]);
   var iParts = currentData.isha.split(':'), ishaMinutes = parseInt(iParts[0])*60 + parseInt(iParts[1]);
-  var thirds = getNightThirds(), nightPeriod = null;
   
-  // 🔧 ИСПРАВЛЕНИЕ: Проверяем, в ночном ли мы периоде (между Иша и Фаджр)
-  var isNightTime = (ct >= ishaMinutes) || (ct < fajrTime);
+  // 🔧 ОПРЕДЕЛЯЕМ: сейчас ночь (после полуночи, до Фаджр)?
+  var isPastMidnight = (ct < fajrTime);
   
-  if (thirds && isNightTime) {
-    var adjCt = ct;
-    // Если сейчас до Фаджр (после полуночи), добавляем 24 часа для правильного расчета
-    if (ct < fajrTime) adjCt += 24*60;
-    
+  var thirds = getNightThirds(currentData);
+  var nightPeriod = null;
+  
+  if (thirds && isPastMidnight) {
+    var adjCt = ct + 24*60; // Добавляем 24 часа для правильного расчета
     if (adjCt < thirds.firstThirdEnd) nightPeriod = 'first';
     else if (adjCt < thirds.secondThirdEnd) nightPeriod = 'second';
     else nightPeriod = 'third';
   }
   
+  // Определяем следующий намаз (для дня)
   for (var i = 0; i < pKeys.length; i++) {
     var key = pKeys[i], parts = currentData[key].split(':'), prayerMin = parseInt(parts[0])*60 + parseInt(parts[1]);
     if (ct < prayerMin) { nextKey = key; break; }
   }
   
+  // Определяем текущий намаз (для дня)
   for (var j = 0; j < pKeys.length - 1; j++) {
     var p1 = pKeys[j], p2 = pKeys[j+1], parts1 = currentData[p1].split(':'), parts2 = currentData[p2].split(':');
     var time1 = parseInt(parts1[0])*60 + parseInt(parts1[1]), time2 = parseInt(parts2[0])*60 + parseInt(parts2[1]);
     if (ct >= time1 && ct < time2) { if (!(p1 === 'fajr' && ct >= sunrise)) currentKey = p1; break; }
   }
   
-  // Иша считается "текущей" если мы в ночном периоде
-  if (isNightTime) currentKey = 'isha';
-  
   var html = '';
+  
+  // 🔧 ЕСЛИ ПОСЛЕ ПОЛУНОЧИ — ПОКАЗЫВАЕМ ИШУ ПРЕДЫДУЩЕГО ДНЯ СВЕРХУ
+  if (isPastMidnight && thirds) {
+    var extraNight = '';
+    var clsNight = 'isha-previous';
+    if (nightPeriod === 'first') { 
+      clsNight = 'isha-first-third'; 
+      extraNight = '<p class="text-xs text-emerald-600 mt-1 font-medium">🟢 1/3 ночи, лучшее время</p>'; 
+    }
+    else if (nightPeriod === 'second') {
+      clsNight = 'isha-second-third';
+      extraNight = '<p class="text-xs text-orange-600 mt-1 font-medium">🟠 2/3 ночи, поторопись</p>';
+      var toThird = thirds.thirdThirdStart - (ct + 24*60);
+      if (toThird > 0 && toThird <= 30) extraNight = '<p class="text-xs text-red-600 mt-1 font-bold">⏰ ' + Math.floor(toThird) + ' мин до макрух!</p>';
+    }
+    else { 
+      clsNight = 'isha-third-third'; 
+      extraNight = '<p class="text-xs text-red-600 mt-1 font-medium">🔴 3/3, макрух</p>'; 
+    }
+    
+    html += renderPrayerCard(
+      { key: 'isha', name: 'Иша (вчера)', icon: '🌃', type: 'prayer' }, 
+      currentData.isha, 
+      clsNight, 
+      extraNight,
+      true, nightPeriod, thirds
+    );
+  }
+  
+  // Рендерим все намазы дня
   for (var k = 0; k < prayers.length; k++) {
-    var prayer = prayers[k], timeParts = currentData[prayer.key].split(':'), pMin = parseInt(timeParts[0])*60 + parseInt(timeParts[1]), cls = '', extra = '';
+    var prayer = prayers[k];
+    
+    // Если это Иша и мы после полуночи — показываем новый Иша на своем месте (вечером)
+    if (prayer.key === 'isha' && isPastMidnight) {
+      // Новый Иша — просто показываем время, без выделения (пока не вечер)
+      html += renderPrayerCard(prayer, currentData.isha, '', '', false, null, null);
+      continue;
+    }
+    
+    var cls = '', extra = '';
+    var timeParts = currentData[prayer.key].split(':'), pMin = parseInt(timeParts[0])*60 + parseInt(timeParts[1]);
     
     if (prayer.key === 'sunrise') {
       if (ct >= sunrise && ct < sunrise+30) { cls = 'makruh'; extra = '<p class="text-xs text-red-500 mt-1 font-medium">⏳ 30 мин нежелательно</p>'; }
       else if (ct > pMin) cls = 'passed';
-    }
-    else if (prayer.key === 'isha') {
-      if (!isNightTime) {
-        // День, Иша ещё не наступила
-        if (prayer.key === nextKey) extra = '<p class="text-xs text-emerald-600 font-semibold">Следующий</p>';
-      } else {
-        // Ночь — показываем трети
-        if (nightPeriod === 'first') { 
-          cls = 'isha-first-third'; 
-          extra = '<p class="text-xs text-emerald-600 mt-1 font-medium">🟢 1/3 ночи, лучшее время</p>'; 
-        }
-        else if (nightPeriod === 'second') {
-          cls = 'isha-second-third';
-          extra = '<p class="text-xs text-orange-600 mt-1 font-medium">🟠 2/3 ночи, поторопись</p>';
-          var toThird = thirds.thirdThirdStart - ct;
-          if (toThird > 0 && toThird <= 30) extra = '<p class="text-xs text-red-600 mt-1 font-bold">⏰ ' + Math.floor(toThird) + ' мин до макрух!</p>';
-        }
-        else { 
-          cls = 'isha-third-third'; 
-          extra = '<p class="text-xs text-red-600 mt-1 font-medium">🔴 3/3, макрух</p>'; 
-        }
-      }
     }
     else if (prayer.type === 'prayer') {
       var isCur = prayer.key === currentKey, isNext = prayer.key === nextKey, isPassed = ct > pMin, minsTo = pMin - ct, isSoon = minsTo > 0 && minsTo <= 10 && !isCur;
@@ -350,19 +387,9 @@ function renderPrayers() {
     }
     else if (prayer.type === 'prep' && ct > pMin) cls = 'passed';
     
-    var nCol = 'text-gray-800', tCol = 'text-teal-700';
-    if (cls === 'next' || cls === 'isha-first-third') { nCol = 'text-emerald-800'; tCol = 'text-emerald-700'; }
-    else if (cls === 'makruh' || cls === 'isha-third-third') { nCol = 'text-red-700'; tCol = 'text-red-600'; }
-    else if (cls === 'isha-second-third') { nCol = 'text-orange-800'; tCol = 'text-orange-600'; }
-    else if (cls === 'soon') { nCol = 'text-amber-700'; tCol = 'text-amber-600'; }
-    
-    var prepText = prayer.type === 'prep' ? '<p class="text-xs opacity-75">До рассвета</p>' : '';
-    var infoText = (prayer.type === 'info' && cls !== 'makruh') ? '<p class="text-xs opacity-75">Не намаз</p>' : '';
-    html += '<div class="prayer-card p-3 rounded-xl flex items-center justify-between ' + cls + '">' +
-      '<div class="flex items-center gap-3"><span class="text-2xl">' + prayer.icon + '</span><div>' +
-      '<p class="font-semibold text-sm ' + nCol + '">' + prayer.name + '</p>' + prepText + infoText + extra + '</div></div>' +
-      '<div class="text-right"><p class="text-xl font-bold ' + tCol + '">' + currentData[prayer.key] + '</p></div></div>';
+    html += renderPrayerCard(prayer, currentData[prayer.key], cls, extra, false, null, null);
   }
+  
   container.innerHTML = html;
   updateCountdown(nextKey || 'fajr');
   updateBackgroundGradient();
