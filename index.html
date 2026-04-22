@@ -43,7 +43,7 @@
     .prayer-card.isha-third-third { background: #fef2f2; border: 2px solid #fca5a5; box-shadow: 0 2px 10px rgba(239, 68, 68, 0.15); }
     .prayer-card.isha-third-third .prayer-name { color: #b91c1c; font-weight: 700; }
     .prayer-card.isha-third-third .prayer-time { color: #dc2626; font-weight: 700; }
-    .prayer-card.isha-previous { background: #f0fdf4; border: 1px dashed #10b981; }
+    .prayer-card.isha-previous { background: #f0fdf4; border: 1px dashed #10b981; opacity: 0.9; }
     .prayer-card.isha-previous .prayer-name { color: #047857; font-weight: 600; }
     .prayer-card.isha-previous .prayer-time { color: #059669; font-weight: 600; }
     .fade-in { animation: fadeIn 0.4s ease; }
@@ -306,6 +306,15 @@ function renderPrayers() {
   // 🔧 ОПРЕДЕЛЯЕМ: сейчас ночь (после полуночи, до Фаджр)?
   var isPastMidnight = (ct < fajrTime);
   
+  // 🔧 ИЩЕМ ДАННЫЕ ВЧЕРАШНЕГО ДНЯ
+  var yesterday = new Date();
+  yesterday.setDate(yesterday.getDate() - 1);
+  var yesterdayStr = yesterday.getDate() + ' ' + monthNames[yesterday.getMonth()];
+  var yesterdayData = scheduleData.find(item => item.date === yesterdayStr);
+  
+  // Если нашли вчера, берем его Иша, иначе fallback на сегодня
+  var prevIshaTime = yesterdayData ? yesterdayData.isha : currentData.isha;
+
   var thirds = getNightThirds(currentData);
   var nightPeriod = null;
   
@@ -350,9 +359,10 @@ function renderPrayers() {
       extraNight = '<p class="text-xs text-red-600 mt-1 font-medium">🔴 3/3, макрух</p>'; 
     }
     
+    // Используем prevIshaTime (время вчерашней иша)
     html += renderPrayerCard(
       { key: 'isha', name: 'Иша (вчера)', icon: '🌃', type: 'prayer' }, 
-      currentData.isha, 
+      prevIshaTime, 
       clsNight, 
       extraNight,
       true, nightPeriod, thirds
