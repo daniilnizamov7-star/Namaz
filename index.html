@@ -223,10 +223,16 @@
     <input type="text" id="feedback-name" placeholder="Ваше имя (необязательно)" class="w-full border border-gray-200 rounded-xl p-3 text-sm text-gray-700 focus:outline-none focus:border-teal-400 mb-4" />
 
     <div class="grid grid-cols-2 gap-3">
-      <button onclick="sendFeedback()" class="py-3 bg-teal-600 text-white rounded-xl font-semibold text-sm">📤 Отправить</button>
-      <button onclick="closeFeedbackModal()" class="py-3 bg-gray-100 text-gray-600 rounded-xl font-semibold text-sm">Отмена</button>
+      <button onclick="sendFeedback('tg')" class="py-3 bg-teal-600 text-white rounded-xl font-semibold text-sm flex items-center justify-center gap-1.5">
+        ✈️ Telegram
+      </button>
+      <button onclick="sendFeedback('vk')" class="py-3 bg-blue-600 text-white rounded-xl font-semibold text-sm flex items-center justify-center gap-1.5">
+        🔵 ВКонтакте
+      </button>
     </div>
+    <button onclick="closeFeedbackModal()" class="w-full mt-2 py-2.5 bg-gray-100 text-gray-600 rounded-xl font-semibold text-sm">Отмена</button>
     <p class="text-[10px] text-gray-400 text-center mt-3" id="feedback-status"></p>
+    <p class="text-[10px] text-gray-400 text-center mt-1">Нет Telegram? <a href="https://vk.ru/nizam7" target="_blank" class="text-teal-600 underline">Написать ВКонтакте</a></p>
   </div>
 </div>
 
@@ -589,7 +595,7 @@ function toggleTag(btn) {
   btn.classList.toggle('text-teal-700');
 }
 
-async function sendFeedback() {
+async function sendFeedback(channel) {
   const tags = [...document.querySelectorAll('#feedback-tags button.border-teal-500')].map(b => b.textContent.trim()).join(', ');
   const text = document.getElementById('feedback-text').value.trim();
   const name = document.getElementById('feedback-name').value.trim();
@@ -597,7 +603,22 @@ async function sendFeedback() {
 
   if (!text && !tags) { status.textContent = '⚠️ Напишите что-нибудь или выберите тему'; return; }
 
-  const msg = [
+  const lines = [
+    name ? `👤 ${name}` : '👤 Аноним',
+    tags ? `Темы: ${tags}` : '',
+    text || '',
+  ].filter(Boolean).join('\n');
+
+  if (channel === 'vk') {
+    const vkMsg = encodeURIComponent(`💬 Отзыв — Намаз Челябинск:\n${lines}`);
+    window.open(`https://vk.me/nizam7?ref=app&message=${vkMsg}`, '_blank');
+    status.textContent = '✅ Открываем ВКонтакте...';
+    setTimeout(closeFeedbackModal, 1500);
+    return;
+  }
+
+  // Telegram
+  const tgMsg = [
     '💬 *Новый отзыв — Намаз Челябинск*',
     name ? `👤 ${name}` : '👤 Аноним',
     tags ? `🏷 Темы: ${tags}` : '',
@@ -610,7 +631,7 @@ async function sendFeedback() {
     const res = await fetch(`https://api.telegram.org/bot${TG_BOT_TOKEN}/sendMessage`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ chat_id: TG_CHAT_ID, text: msg, parse_mode: 'Markdown' })
+      body: JSON.stringify({ chat_id: TG_CHAT_ID, text: tgMsg, parse_mode: 'Markdown' })
     });
     const data = await res.json();
     if (data.ok) {
@@ -622,10 +643,10 @@ async function sendFeedback() {
       });
       setTimeout(closeFeedbackModal, 2000);
     } else {
-      status.textContent = '❌ Ошибка. Напишите напрямую: @Aslyamov74';
+      status.innerHTML = '❌ Ошибка. Попробуйте кнопку ВКонтакте 👆';
     }
   } catch {
-    status.textContent = '❌ Нет интернета. Напишите: @Aslyamov74';
+    status.innerHTML = '❌ Нет интернета. Попробуйте кнопку ВКонтакте 👆';
   }
 }
 
