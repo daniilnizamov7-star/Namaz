@@ -201,38 +201,30 @@
   <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" onclick="closeFeedbackModal()"></div>
   <div class="absolute bottom-0 left-0 right-0 bg-white rounded-t-3xl p-6">
     <div class="flex justify-between items-center mb-2">
-      <h3 class="text-lg font-bold">💬 Ваше мнение</h3>
+      <h3 class="text-lg font-bold">💬 Написать нам</h3>
       <button onclick="closeFeedbackModal()" class="text-gray-400 text-2xl leading-none">&times;</button>
     </div>
-    <p class="text-sm text-gray-500 mb-4">Что добавить? Что неудобно? Напишите — я читаю каждое сообщение</p>
+    <p class="text-sm text-gray-500 mb-5">Что добавить? Что неудобно? Напишите напрямую — читаю каждое сообщение 🤲</p>
 
-    <!-- Быстрые варианты -->
-    <div class="grid grid-cols-2 gap-2 mb-4" id="feedback-tags">
-      <button onclick="toggleTag(this)" class="py-2 px-3 border border-gray-200 rounded-lg text-xs text-gray-600 text-left hover:border-teal-400 hover:bg-teal-50 transition">📍 Другой город</button>
-      <button onclick="toggleTag(this)" class="py-2 px-3 border border-gray-200 rounded-lg text-xs text-gray-600 text-left hover:border-teal-400 hover:bg-teal-50 transition">🔔 Уведомления</button>
-      <button onclick="toggleTag(this)" class="py-2 px-3 border border-gray-200 rounded-lg text-xs text-gray-600 text-left hover:border-teal-400 hover:bg-teal-50 transition">📿 Зикры</button>
-      <button onclick="toggleTag(this)" class="py-2 px-3 border border-gray-200 rounded-lg text-xs text-gray-600 text-left hover:border-teal-400 hover:bg-teal-50 transition">🤲 Дуа</button>
-      <button onclick="toggleTag(this)" class="py-2 px-3 border border-gray-200 rounded-lg text-xs text-gray-600 text-left hover:border-teal-400 hover:bg-teal-50 transition">📖 Коран</button>
-      <button onclick="toggleTag(this)" class="py-2 px-3 border border-gray-200 rounded-lg text-xs text-gray-600 text-left hover:border-teal-400 hover:bg-teal-50 transition">🐞 Нашёл баг</button>
-    </div>
+    <a href="https://t.me/Aslyamov74" target="_blank" onclick="closeFeedbackModal()" class="flex items-center gap-3 w-full py-4 px-4 bg-sky-500 text-white rounded-xl font-semibold text-sm mb-3 active:scale-95 transition">
+      <span class="text-2xl">✈️</span>
+      <div class="text-left">
+        <div class="font-bold">Telegram</div>
+        <div class="text-xs opacity-80">@Aslyamov74</div>
+      </div>
+      <span class="ml-auto opacity-60">›</span>
+    </a>
 
-    <!-- Текстовое поле -->
-    <textarea id="feedback-text" placeholder="Напишите подробнее..." class="w-full border border-gray-200 rounded-xl p-3 text-sm text-gray-700 resize-none h-24 focus:outline-none focus:border-teal-400 mb-3"></textarea>
+    <a href="https://vk.ru/nizam7" target="_blank" onclick="closeFeedbackModal()" class="flex items-center gap-3 w-full py-4 px-4 bg-blue-600 text-white rounded-xl font-semibold text-sm mb-4 active:scale-95 transition">
+      <span class="text-2xl">🔵</span>
+      <div class="text-left">
+        <div class="font-bold">ВКонтакте</div>
+        <div class="text-xs opacity-80">vk.ru/nizam7</div>
+      </div>
+      <span class="ml-auto opacity-60">›</span>
+    </a>
 
-    <!-- Имя (необязательно) -->
-    <input type="text" id="feedback-name" placeholder="Ваше имя (необязательно)" class="w-full border border-gray-200 rounded-xl p-3 text-sm text-gray-700 focus:outline-none focus:border-teal-400 mb-4" />
-
-    <div class="grid grid-cols-2 gap-3">
-      <button onclick="sendFeedback('tg')" class="py-3 bg-teal-600 text-white rounded-xl font-semibold text-sm flex items-center justify-center gap-1.5">
-        ✈️ Telegram
-      </button>
-      <button onclick="sendFeedback('vk')" class="py-3 bg-blue-600 text-white rounded-xl font-semibold text-sm flex items-center justify-center gap-1.5">
-        🔵 ВКонтакте
-      </button>
-    </div>
-    <button onclick="closeFeedbackModal()" class="w-full mt-2 py-2.5 bg-gray-100 text-gray-600 rounded-xl font-semibold text-sm">Отмена</button>
-    <p class="text-[10px] text-gray-400 text-center mt-3" id="feedback-status"></p>
-    <p class="text-[10px] text-gray-400 text-center mt-1">Нет Telegram? <a href="https://vk.ru/nizam7" target="_blank" class="text-teal-600 underline">Написать ВКонтакте</a></p>
+    <button onclick="closeFeedbackModal()" class="w-full py-3 bg-gray-100 text-gray-600 rounded-xl font-semibold text-sm">Закрыть</button>
   </div>
 </div>
 
