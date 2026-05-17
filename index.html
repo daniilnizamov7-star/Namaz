@@ -215,6 +215,8 @@
       border-radius: 1.5rem;
       padding: 1.75rem;
       max-width: 400px; width: 100%;
+      max-height: 88vh;
+      overflow-y: auto;
       text-align: center;
       box-shadow: 0 24px 64px rgba(0,0,0,0.5);
       border: 1px solid var(--border);
@@ -1007,6 +1009,23 @@
     </div>
   </div>
 
+  <!-- Модалка нового хиджрийского месяца -->
+  <div id="new-month-modal" class="modal-overlay">
+    <div class="modal-card" style="border-color:rgba(167,139,250,0.4)">
+      <div class="modal-icon">🌙</div>
+      <div class="modal-title" style="color:#a78bfa" id="new-month-title">Новый месяц!</div>
+      <div class="modal-text" id="new-month-body">Начался новый хиджрийский месяц. Прочитай дуа при виде нового полумесяца.</div>
+      <div class="modal-hadith" style="border-left-color:#a78bfa;background:rgba(167,139,250,0.08)">
+        <p style="font-size:1rem;direction:rtl;text-align:right;color:#a78bfa;line-height:2;font-family:'Amiri',serif;font-style:normal">اللَّهُمَّ أَهِلَّهُ عَلَيْنَا بِالْيُمْنِ وَالْإِيمَانِ وَالسَّلَامَةِ وَالْإِسْلَامِ، رَبِّي وَرَبُّكَ اللَّه</p>
+        <p style="margin-top:0.5rem;font-style:normal">АллахуммА ахиллаху `аляйна биль-юмни валь-иман, вас-салямати валь-ислям, Рабби ва Раббукалла</p>
+        <p style="margin-top:0.4rem;font-size:0.82rem;color:var(--text2);font-style:normal">О Аллах! Пусть этот месяц принесёт нам счастье, веру, мир и ислам. Мой Господь и Господь твой — Аллах.</p>
+        <cite>📚 Тирмизи, 3451; Ахмад, 1397</cite>
+      </div>
+      <button class="btn" style="background:linear-gradient(135deg,#a78bfa,#7c3aed);box-shadow:0 4px 16px rgba(167,139,250,0.35);color:#fff;margin-bottom:0.5rem" onclick="closeNewMonthModal()">🤲 Прочитал дуа</button>
+      <button class="btn-close" onclick="closeNewMonthModal()">Закрыть</button>
+    </div>
+  </div>
+
   <!-- Dua Collection Modal -->
   <div id="dua-modal" class="modal-overlay">
     <div class="modal-card" style="border-color: var(--accent); text-align: left; max-height: 80vh; display: flex; flex-direction: column;">      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
@@ -1710,6 +1729,27 @@
     };
 
     // === DATA LOADER ===
+
+    // Извлекает {schedule, monthName} из json любого формата:
+    // Старый: { monthName, schedule: [...] }
+    // Новый:  { months: [{ monthName, schedule: [...] }, ...] }
+    const extractScheduleForToday = (json, todayStr) => {
+      // Новый формат — months[]
+      if (json.months && Array.isArray(json.months)) {
+        for (const month of json.months) {
+          const entry = month.schedule?.find(item => item.date === todayStr);
+          if (entry) return { entry, schedule: month.schedule, monthName: month.monthName || '—' };
+        }
+        return null;
+      }
+      // Старый формат — плоский schedule
+      if (json.schedule && Array.isArray(json.schedule)) {
+        const entry = json.schedule.find(item => item.date === todayStr);
+        if (entry) return { entry, schedule: json.schedule, monthName: json.monthName || '—' };
+      }
+      return null;
+    };
+
     const loadData = async () => {
       const realTodayISO = getTodayISO();
       const realTodayStr = getTodayStr();
@@ -1743,21 +1783,22 @@
         if (!res.ok) throw new Error('HTTP ' + res.status);
 
         const json = await res.json();
-        const entry = json.schedule?.find(item => item.date === realTodayStr);
-        if (entry) {
+        const found = extractScheduleForToday(json, realTodayStr);
+        if (found) {
+          const { entry, schedule, monthName } = found;
           const timings = {};
           PRAYERS.forEach(k => { if (entry[k]) timings[k] = entry[k]; });
           if (Object.keys(timings).length >= 4) {
             localStorage.setItem(CACHE_KEY, JSON.stringify({
               timings,
-              schedule: json.schedule,
+              schedule,
               hijriDay: entry.d,
-              hijriMonth: json.monthName || '—',
+              hijriMonth: monthName,
               cachedDate: realTodayISO,
               date: realTodayISO,
               timestamp: Date.now()
             }));
-            return { timings, hijriDay: entry.d, hijriMonth: json.monthName || '—' };
+            return { timings, hijriDay: entry.d, hijriMonth: monthName };
           }
         }
         throw new Error('No entry for today');
@@ -1769,7 +1810,6 @@
             const timings = {};
             PRAYERS.forEach(k => { if (entry[k]) timings[k] = entry[k]; });
             if (Object.keys(timings).length >= 4) {
-              // Обновляем кэш с сегодняшней датой
               localStorage.setItem(CACHE_KEY, JSON.stringify({
                 ...parsedCache,
                 timings,
@@ -1853,6 +1893,39 @@
       const now = new Date(), currentMins = now.getHours() * 60 + now.getMinutes();
       const getMins = (k) => { if (!timings[k]) return 0; const [h, m] = timings[k].split(':').map(Number); return h * 60 + m; };
       return currentMins >= (getMins('sunrise') + 30) && currentMins < getMins('dhuhr');
+    };
+
+    // === НОВЫЙ МЕСЯЦ ===
+    const NM_KEY = 'new_month_shown_v1';
+    const checkNewMonth = (hijriDay, hijriMonth) => {
+      if (!hijriDay || !hijriMonth || hijriMonth === '—') return;
+      // Показываем только в первые 3 дня нового месяца (d=1,2,3)
+      if (hijriDay > 3) return;
+      const shownKey = `${hijriMonth}`;
+      try {
+        const shown = JSON.parse(localStorage.getItem(NM_KEY)) || {};
+        if (shown[shownKey]) return; // Уже показывали для этого месяца
+      } catch { return; }
+      // Небольшая задержка чтобы UI успел отрисоваться
+      setTimeout(() => {
+        const modal = document.getElementById('new-month-modal');
+        const title = document.getElementById('new-month-title');
+        const body = document.getElementById('new-month-body');
+        if (!modal) return;
+        if (title) title.textContent = `🌙 ${hijriMonth} — новый месяц!`;
+        if (body) body.textContent = `Начался ${hijriMonth}. Прочитай дуа при виде нового полумесяца — это сунна Пророка ﷺ.`;
+        // Записываем флаг только когда модалка реально показана
+        try {
+          const shown = JSON.parse(localStorage.getItem(NM_KEY)) || {};
+          shown[shownKey] = true;
+          localStorage.setItem(NM_KEY, JSON.stringify(shown));
+        } catch {}
+        modal.classList.add('show');
+        if (navigator.vibrate) navigator.vibrate([80, 40, 80]);
+      }, 1500);
+    };
+    window.closeNewMonthModal = () => {
+      document.getElementById('new-month-modal').classList.remove('show');
     };
 
     // === MODALS ===
@@ -2163,7 +2236,6 @@
         const currentDay = getPrayerDayISO();
         if (currentDay !== lastPrayerDay) {
           lastPrayerDay = currentDay;
-          console.log('📅 Намаз-день сменился, перезагружаю данные...');
           localStorage.removeItem(CACHE_KEY);
           const { timings, hijriDay, hijriMonth } = await loadData();
           appTimings = timings;
@@ -2332,7 +2404,6 @@
       setInterval(() => {
         const n = new Date();
         if (n.getHours() === 0 && n.getMinutes() <= 1) {
-          console.log('🌙 Midnight reload');
           localStorage.removeItem(CACHE_KEY); // чистим кэш чтобы загрузить новое расписание
           location.reload();
         }
@@ -2347,7 +2418,6 @@
             const cacheDate = cached.cachedDate || cached.date;
             const today = getTodayISO();
             if (cacheDate && cacheDate !== today) {
-              console.log('📅 New day detected, reloading...');
               localStorage.removeItem(CACHE_KEY);
               location.reload();
             }
@@ -2362,7 +2432,9 @@
       if (savedTheme === 'light') { document.documentElement.classList.add('light-mode'); document.querySelectorAll('.theme-btn').forEach(btn => btn.textContent = '🌞'); }
       
       const today = new Date();
-      document.getElementById('date').textContent = today.toLocaleDateString('ru-RU', { weekday: 'long', day: 'numeric', month: 'long' });
+      const dateStr = today.toLocaleDateString('ru-RU', { weekday: 'long', day: 'numeric', month: 'long' });
+      document.getElementById('date').textContent = dateStr;
+      const d2 = document.getElementById('date2'); if (d2) d2.textContent = dateStr;
       
       try {
         const kurban = getKurbanBayramDate(today.getFullYear());
@@ -2374,9 +2446,7 @@
       const todayISO = getPrayerDayISO();
 
       // Если новый день — сбрасываем все намазы
-      console.log('🔍 appState.date:', appState.date, '| todayISO:', todayISO);
       if (appState.date !== todayISO) {
-        console.log('🔄 Сброс намазов — новый день');
         appState.completed = {};
         appState.date = todayISO;
         localStorage.removeItem('zikr_state_v1');
@@ -2405,6 +2475,7 @@
         document.getElementById('hijri-date').textContent = '—';
       }
 
+      checkNewMonth(data.hijriDay, data.hijriMonth);
       renderList(appTimings, appState.completed);
       startTimer();
       startMidnightCheck();      setInterval(() => renderList(appTimings, appState.completed), 30000);
