@@ -1087,11 +1087,14 @@
     const applyUserName = (name) => {
       const el = document.getElementById('greeting-name');
       if (el) el.textContent = name ? `${name}` : 'Осознанность';
-      // Приветствие в зависимости от времени
       const h = new Date().getHours();
       const greet = h < 6 ? 'Ночь' : h < 12 ? 'Доброе утро' : h < 17 ? 'Добрый день' : h < 21 ? 'Добрый вечер' : 'Доброй ночи';
       const dateEl = document.getElementById('date');
-      if (dateEl && name) dateEl.textContent = `${name} • ${dateEl.textContent}`;
+      // Храним оригинальный текст даты чтобы не дописывать имя несколько раз
+      if (dateEl && name) {
+        if (!dateEl.dataset.base) dateEl.dataset.base = dateEl.textContent;
+        dateEl.textContent = `${greet}, ${name} • ${dateEl.dataset.base}`;
+      }
     };
     const checkOnboard = () => {
       const name = getUserName();
@@ -1452,11 +1455,17 @@
     // === СТРИК (дней подряд) ===
     const STREAK_KEY = 'prayer_streak_v1';
     const FARZ = ['fajr','dhuhr','asr','maghrib','isha'];
+    const getCalendarISO = () => {
+      const d = new Date();
+      return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+    };
     const calcStreak = () => {
       try {
         const saved = JSON.parse(localStorage.getItem(STREAK_KEY)) || { count:0, lastDate:'' };
-        const today = getPrayerDayISO(); // намаз-день: до Фаджра = вчера
-        const yesterday = (() => { const d = getPrayerDayDate(); d.setDate(d.getDate()-1); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); })();
+        // Стрик считаем по календарному дню, а не намаз-дню
+        // Иначе до Фаджра "сегодня" = вчера и стрик ломается
+        const today = getCalendarISO();
+        const yesterday = (() => { const d = new Date(); d.setDate(d.getDate()-1); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); })();
         const state = JSON.parse(localStorage.getItem(STORAGE_KEY)) || { completed:{} };
         const allDone = FARZ.every(p => state.completed[p]);
 
@@ -1653,6 +1662,7 @@
 
     // === CONFIG ===
     const API_URL = 'https://raw.githubusercontent.com/daniilnizamov7-star/Namaz/main/api/prayer-data.json';
+    const APP_VERSION = 'v2'; // поднять при каждом обновлении данных/формата
     const STORAGE_KEY = 'prayer_tracker_v1';
     const CACHE_KEY = 'prayer_cache_v1';
     const DUA_KEY = 'dua_collection_v1';
@@ -1661,7 +1671,18 @@
     const NAMES = { fajr: 'Фаджр', sunrise: 'Восход', dhuhr: 'Зухр', asr: 'Аср', maghrib: 'Магриб', isha: 'Иша' };
     const MONTHS = ['янв','фев','мар','апр','май','июн','июл','авг','сен','окт','ноя','дек'];
     const FALLBACK = { fajr: "03:48", sunrise: "05:26", dhuhr: "12:49", asr: "17:03", maghrib: "20:12", isha: "21:50" };
-    
+
+    // Сброс кэша при обновлении версии приложения
+    (() => {
+      try {
+        const savedVer = localStorage.getItem('app_version');
+        if (savedVer !== APP_VERSION) {
+          localStorage.removeItem(CACHE_KEY);
+          localStorage.setItem('app_version', APP_VERSION);
+        }
+      } catch {}
+    })();
+
     let appTimings = null, appState = null, timerInterval = null;
     let zikrPhase = 0, zikrCount = 0, zikrPrayerName = '';
     let dhuhaModalShown = false;
@@ -1730,39 +1751,17 @@
     };
 
     // === DATA LOADER ===
-
-    // Извлекает {schedule, monthName} из json любого формата:
-    // Старый: { monthName, schedule: [...] }
-    // Новый:  { months: [{ monthName, schedule: [...] }, ...] }
-    const extractScheduleForToday = (json, todayStr) => {
-      // Новый формат — months[]
-      if (json.months && Array.isArray(json.months)) {
-        for (const month of json.months) {
-          const entry = month.schedule?.find(item => item.date === todayStr);
-          if (entry) return { entry, schedule: month.schedule, monthName: month.monthName || '—' };
-        }
-        return null;
-      }
-      // Старый формат — плоский schedule
-      if (json.schedule && Array.isArray(json.schedule)) {
-        const entry = json.schedule.find(item => item.date === todayStr);
-        if (entry) return { entry, schedule: json.schedule, monthName: json.monthName || '—' };
-      }
-      return null;
-    };
-
     const loadData = async () => {
       const realTodayISO = getTodayISO();
       const realTodayStr = getTodayStr();
 
-      // Парсим кэш один раз
       let parsedCache = null;
       try {
         const raw = localStorage.getItem(CACHE_KEY);
         if (raw) parsedCache = JSON.parse(raw);
       } catch (e) { console.warn('Cache parse error:', e); }
 
-      // Миграция: старый кэш без schedule — удаляем, загружаем заново
+      // Сброс кэша если нет schedule
       if (parsedCache && !parsedCache.schedule) {
         localStorage.removeItem(CACHE_KEY);
         parsedCache = null;
@@ -1784,27 +1783,26 @@
         if (!res.ok) throw new Error('HTTP ' + res.status);
 
         const json = await res.json();
-        const found = extractScheduleForToday(json, realTodayStr);
-        if (found) {
-          const { entry, schedule, monthName } = found;
+        const entry = json.schedule?.find(item => item.date === realTodayStr);
+        if (entry) {
           const timings = {};
           PRAYERS.forEach(k => { if (entry[k]) timings[k] = entry[k]; });
           if (Object.keys(timings).length >= 4) {
             localStorage.setItem(CACHE_KEY, JSON.stringify({
               timings,
-              schedule,
+              schedule: json.schedule,
               hijriDay: entry.d,
-              hijriMonth: monthName,
+              hijriMonth: entry.hijriMonth || json.monthName || '—',
               cachedDate: realTodayISO,
               date: realTodayISO,
               timestamp: Date.now()
             }));
-            return { timings, hijriDay: entry.d, hijriMonth: monthName };
+            return { timings, hijriDay: entry.d, hijriMonth: entry.hijriMonth || json.monthName || '—' };
           }
         }
         throw new Error('No entry for today');
       } catch (e) {
-        // Офлайн или ошибка сети — ищем сегодня в schedule кэша
+        // Офлайн — ищем в schedule кэша
         if (parsedCache?.schedule) {
           const entry = parsedCache.schedule.find(item => item.date === realTodayStr);
           if (entry) {
@@ -1818,11 +1816,10 @@
                 cachedDate: realTodayISO,
                 date: realTodayISO,
               }));
-              return { timings, hijriDay: entry.d, hijriMonth: parsedCache.hijriMonth || '—' };
+              return { timings, hijriDay: entry.d, hijriMonth: entry.hijriMonth || parsedCache.hijriMonth || '—' };
             }
           }
         }
-        // Совсем нет данных
         document.getElementById('error-banner').classList.add('show');
         return { timings: FALLBACK, hijriDay: '—', hijriMonth: '—' };
       }
@@ -2445,11 +2442,15 @@
       try { const saved = localStorage.getItem(STORAGE_KEY); appState = saved ? JSON.parse(saved) : { completed: {}, date: '' }; } catch { appState = { completed: {}, date: '' }; }
       
       const todayISO = getPrayerDayISO();
+      // Для сброса намазов используем календарный день, а не намаз-день
+      // Иначе до Фаджра getPrayerDayISO() возвращает вчера → сброс completed
+      const calendarISO = getCalendarISO();
 
-      // Если новый день — сбрасываем все намазы
-      if (appState.date !== todayISO) {
+      // Если новый календарный день — сбрасываем все намазы
+      if ((appState.calendarDate || appState.date) !== calendarISO) {
         appState.completed = {};
         appState.date = todayISO;
+        appState.calendarDate = calendarISO;
         localStorage.removeItem('zikr_state_v1');
       }
 
@@ -2503,14 +2504,18 @@
       } catch {}
       
       if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => {
-          navigator.serviceWorker.register('/sw.js').then(reg => {
-            reg.update();
-            navigator.serviceWorker.addEventListener('controllerchange', () => {
-              window.location.reload();
+        navigator.serviceWorker.register('/sw.js').then(reg => {
+          reg.update();
+          reg.addEventListener('updatefound', () => {
+            const newWorker = reg.installing;
+            newWorker.addEventListener('statechange', () => {
+              if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                // Новый SW установлен — перезагружаем без вопросов
+                window.location.reload();
+              }
             });
-          }).catch(console.error);
-        });
+          });
+        }).catch(console.error);
       }
     };
 
