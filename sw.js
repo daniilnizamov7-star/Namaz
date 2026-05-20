@@ -1,34 +1,40 @@
-const CACHE_NAME = 'osoznanie-v9';
-const ASSETS = ['/', '/index.html', '/manifest.json', '/ayahs.json', '/api/prayer-data.json'];
+const CACHE_NAME = 'osoznanie-v14';
+const ASSETS = ['/manifest.json', '/ayahs.json', '/api/prayer-data.json'];
 
 self.addEventListener('install', (e) => {
   e.waitUntil(
     caches.open(CACHE_NAME).then((cache) => cache.addAll(ASSETS))
   );
-  self.skipWaiting();
+  // НЕ делаем skipWaiting здесь — ждём команды от страницы
 });
 
 self.addEventListener('activate', (e) => {
   e.waitUntil(
-    caches.keys().then((keys) =>
-      Promise.all(keys.filter((k) => k !== CACHE_NAME).map((k) => caches.delete(k)))
-    ).then(() => {
-      // При активации нового SW — принудительно обновляем index.html у всех клиентов
-      return clients.matchAll({ type: 'window' }).then(clientList => {
-        clientList.forEach(client => client.navigate(client.url));
-      });
-    })
+    caches.keys()
+      .then((keys) => Promise.all(
+        keys.filter((k) => k !== CACHE_NAME).map((k) => caches.delete(k))
+      ))
+      .then(() => clients.claim())
   );
 });
 
+// Получаем команду от страницы — активируемся немедленно
+self.addEventListener('message', (e) => {
+  if (e.data?.type === 'SKIP_WAITING') {
+    self.skipWaiting();
+  }
+});
+
 self.addEventListener('fetch', (e) => {
-  // index.html — всегда сеть, кэш только офлайн
-  if (e.request.url.endsWith('/') || e.request.url.endsWith('/index.html')) {
+  const url = e.request.url;
+
+  // index.html — network-first
+  if (url.endsWith('/') || url.endsWith('/index.html')) {
     e.respondWith(
       fetch(e.request, { cache: 'no-store' })
         .then((res) => {
           const clone = res.clone();
-          caches.open(CACHE_NAME).then((cache) => cache.put(e.request, clone));
+          caches.open(CACHE_NAME).then((cache) => cache.put('/index.html', clone));
           return res;
         })
         .catch(() => caches.match('/index.html'))
@@ -37,15 +43,20 @@ self.addEventListener('fetch', (e) => {
   }
 
   // prayer-data.json — network-first
-  if (e.request.url.includes('prayer-data.json')) {
+  if (url.includes('prayer-data.json')) {
     e.respondWith(
       fetch(e.request, { cache: 'no-store' })
         .then((res) => {
           const clone = res.clone();
-          caches.open(CACHE_NAME).then((cache) => cache.put(e.request, clone));
+          caches.open(CACHE_NAME).then((cache) => {
+            cache.put(e.request, res.clone());
+            cache.put('/api/prayer-data.json', clone);
+          });
           return res;
         })
-        .catch(() => caches.match('/api/prayer-data.json'))
+        .catch(() =>
+          caches.match(e.request).then(r => r || caches.match('/api/prayer-data.json'))
+        )
     );
     return;
   }
