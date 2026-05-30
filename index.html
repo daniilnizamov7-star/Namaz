@@ -12,7 +12,7 @@
   <script data-goatcounter="https://namaz.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
   <link rel="icon" type="image/png" href="/icon-192.png">
   <link rel="apple-touch-icon" href="/icon-192.png" />
-  <title>Осознанность • Трекер</title>
+  <title>Намаз • Челябинск</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Amiri:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
@@ -577,6 +577,42 @@
   <div class="hijri-banner">
     <div class="hijri-date" id="hijri-date">—</div>
     <div class="hijri-month" id="hijri-month">По хиджре</div>
+  </div>
+
+  <div class="card timer-card">
+    <div class="status-label">Текущий период</div>
+    <div class="current-prayer">
+      <div class="name" id="current-name">Загрузка…</div>
+      <div class="time" id="current-time-info">—</div>
+    </div>
+    <div class="status-label">До следующего намаза</div>
+    <div class="countdown" id="countdown">--:--:--</div>
+    <div id="forbidden-banner" style="display:none; background:rgba(239,68,68,0.12); border:1px solid #ef4444; border-radius:0.75rem; padding:0.75rem 1rem; margin-top:0.75rem; font-size:0.85rem; line-height:1.6; color:#fca5a5;">
+      🚫 <strong style="color:#ef4444">Запретное время для намаза</strong><br>
+      <span id="forbidden-reason">—</span><br>
+      <span style="font-size:0.75rem; color:var(--muted)">По ханафитскому мазхабу намаз в это время не совершается</span>
+      <div style="margin-top:0.6rem">
+        <button onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display==='none'?'block':'none'; this.textContent=this.textContent.includes('▼')?'📚 Доказательство ▼':'📚 Доказательство ▲'" style="background:none;border:none;color:#ef4444;font-size:0.75rem;font-weight:600;cursor:pointer;padding:0">📚 Доказательство ▼</button>
+        <div style="display:none;margin-top:0.5rem;padding:0.75rem;background:rgba(0,0,0,0.2);border-radius:0.5rem;border-left:2px solid #ef4444">
+          <p style="font-style:italic;font-size:0.8rem;line-height:1.6;margin-bottom:0.4rem;color:var(--text)">"Пророк ﷺ запретил совершать намаз в три времени: когда восходит солнце, пока оно не поднимется; когда солнце в зените, пока оно не склонится; и когда солнце склоняется к закату, пока оно не зайдёт"</p>
+          <cite style="font-size:0.75rem;color:var(--muted)">📚 Муслим, 831 — от Укбы ибн Амира (да будет доволен им Аллах)</cite>
+        </div>
+      </div>
+    </div>
+    <button id="mark-done" class="btn">✅ Я совершил этот намаз</button>
+    <div id="niyyah-banner" style="display:none; margin-top:0.75rem; background:linear-gradient(135deg,rgba(16,185,129,0.12),rgba(16,185,129,0.05)); border:1px solid rgba(16,185,129,0.4); border-radius:0.75rem; padding:0.9rem 1rem; text-align:center;">
+      <div style="font-size:0.8rem;font-weight:700;color:var(--accent);margin-bottom:0.3rem" id="niyyah-title">🕌 Скоро намаз</div>
+      <div style="font-size:0.75rem;color:var(--muted);line-height:1.6;margin-bottom:0.5rem">Обнови намерение — ты делаешь это ради Аллаха</div>
+      <div style="font-size:0.85rem;color:var(--text);font-style:italic;line-height:1.6">"Наввайту ан усаллия фарда <span id="niyyah-prayer-name">—</span>"</div>
+      <div style="font-size:0.7rem;color:var(--muted);margin-top:0.3rem">Намерение — в сердце, не обязательно вслух</div>
+    </div>
+    <div id="zikr-card" class="zikr-card">
+      <div style="font-size:0.8rem; color:var(--muted); margin-bottom:0.5rem">Зикры после намаза</div>
+      <div class="zikr-text" id="zikr-phrase">Нажми кнопку</div>
+      <div class="zikr-counter" id="zikr-count">0</div>
+      <button id="zikr-btn" class="btn btn-zikr btn-zikr-tap" onclick="handleZikr()">Тап</button>
+      <button id="zikr-done-btn" class="btn btn-zikr btn-zikr-done" onclick="finishZikr()">✅ Я выполнил зикры</button>
+    </div>
   </div>
 
   <!-- Аят дня + счётчик дней -->
