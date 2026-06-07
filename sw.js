@@ -1,4 +1,4 @@
-const CACHE_NAME = 'osoznanie-v21';
+const CACHE_NAME = 'osoznanie-v22';
 const STATIC_ASSETS = ['/manifest.json', '/ayahs.json'];
 
 self.addEventListener('install', (e) => {
