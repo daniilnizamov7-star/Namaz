@@ -9,10 +9,9 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="Осознанность" />
   <link rel="manifest" href="/manifest.json" />
-  <script data-goatcounter="https://namaz.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
   <link rel="icon" type="image/png" href="/icon-192.png">
   <link rel="apple-touch-icon" href="/icon-192.png" />
-  <title>Намаз • Челябинск</title>
+  <title>Осознанность • Трекер</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Amiri:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
@@ -939,6 +938,7 @@
     <div style="margin-top:0.6rem;font-size:0.72rem;color:var(--muted2)" id="niyyah-progress-text"></div>
   </div>
 
+  <!-- Категории -->
   <div style="display:flex;gap:0.4rem;overflow-x:auto;padding:0 0 0.75rem;scrollbar-width:none;-webkit-overflow-scrolling:touch" id="niyyah-cats">
     <button class="niyyah-cat-btn active" onclick="filterNiyyah('all')">Все</button>
     <button class="niyyah-cat-btn" onclick="filterNiyyah('prayer')">🕌 Намаз</button>
@@ -2838,9 +2838,9 @@
     window.filterNiyyah = (cat) => {
       niyyahFilter = cat;
       document.querySelectorAll('.niyyah-cat-btn').forEach(b => b.classList.remove('active'));
+      const btns = document.querySelectorAll('.niyyah-cat-btn');
       const catMap = ['all','prayer','daily','work','family'];
       const idx = catMap.indexOf(cat);
-      const btns = document.querySelectorAll('.niyyah-cat-btn');
       if (btns[idx]) btns[idx].classList.add('active');
       renderNiyyahList();
     };
