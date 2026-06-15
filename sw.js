@@ -1,4 +1,4 @@
-const CACHE_NAME = 'osoznanie-v18';
+const CACHE_NAME = 'osoznanie-v19';
 const STATIC_ASSETS = ['/manifest.json', '/ayahs.json'];
 
 self.addEventListener('install', (e) => {
@@ -29,9 +29,16 @@ self.addEventListener('message', (e) => {
 });
 
 self.addEventListener('fetch', (e) => {
-  const url = e.request.url;
+  const url = new URL(e.request.url);
 
-  if (url.endsWith('/') || url.endsWith('/index.html')) {
+  // Запросы с ?v= — версионная проверка, всегда в сеть, не кэшировать
+  if (url.searchParams.has('v')) {
+    e.respondWith(fetch(e.request, { cache: 'no-store' }));
+    return;
+  }
+
+  // index.html — network-first
+  if (url.pathname === '/' || url.pathname === '/index.html') {
     e.respondWith(
       fetch(e.request, { cache: 'no-store' })
         .then(res => {
@@ -44,7 +51,8 @@ self.addEventListener('fetch', (e) => {
     return;
   }
 
-  if (url.includes('prayer-data.json')) {
+  // prayer-data.json — network-first
+  if (url.pathname.includes('prayer-data.json')) {
     e.respondWith(
       fetch(e.request, { cache: 'no-store' })
         .then(res => {
@@ -62,6 +70,7 @@ self.addEventListener('fetch', (e) => {
     return;
   }
 
+  // Остальное — cache-first
   e.respondWith(
     caches.match(e.request).then(cached => {
       if (cached) return cached;
